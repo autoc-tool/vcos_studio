@@ -1,0 +1,509 @@
+{{get_copyright()}}
+
+/*
+ * {{get_generation_time()}}
+ * {{get_project_name()}}
+ * {{get_vcos_version()}}
+ */
+{% set swc_name = get_swc_name() %}
+{% set appl_name = get_component_osapplication_name() %}
+/*
+ * DESCRIPTION
+ * Application header file for SWC {{swc_name}}
+ */
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "Rte_{{swc_name}}.h"
+
+{%- set prm_rports = get_cal_prm_rports_connected(swc_name) %}
+{%- if prm_rports %}
+
+/**********************************************************************************************************************
+ *
+ * APIs which are accessible from all runnable entities of the SW-C
+ *
+ **********************************************************************************************************************
+ * Calibration Parameters:
+ * =======================
+ *   Calibration Component Calibration Parameters:
+ *   ---------------------------------------------
+    {%- for port_info in prm_rports %}
+        {%- set base_type = port_info['arg']['datatype']['basetype'] %}
+        {%- if port_info['arg']['datatype']['native_category'] == 'NUMERICAL' %}
+ *   {{base_type}} Rte_Prm_{{port_info['name']}}(void)
+        {%- elif port_info['arg']['datatype']['native_category'] == 'ARRAY' %}
+        {%- set base_type = port_info['arg']['datatype'].get('arr_basetype', '') %}
+ *   {{base_type}} *Rte_Prm_{{port_info['name']}}(void)
+ *     Returnvalue: {{base_type}}* is of type {{port_info['arg']['datatype']['name']}}
+        {%- else %}
+ *   {{port_info['arg']['datatype']['name']}} *Rte_Prm_{{port_info['name']}}(void)
+        {%- endif %}
+    {%- endfor %}
+ *
+ *********************************************************************************************************************/
+{%- endif %}
+
+
+{#- Out of Runnable User Code #}
+{%- set user_codes = get_user_code_list() %}
+/******************USER CODE STARTS!************THIS COMMENT WILL BE SAVED!***************/
+{%- if "head_usercode" in user_codes.keys() and user_codes["head_usercode"] != {} and user_codes["head_usercode"] != [] %}
+{%- for value in user_codes["head_usercode"] %}
+{{value.strip('\n')}}
+{%- endfor %}
+{%- endif %}
+/******************USER CODE ENDS!**************THIS COMMENT WILL BE SAVED!***************/
+
+{# memmap sections #}
+#define {{swc_name.upper()}}_START_SEC_CONST_UNSPECIFIED
+#include "{{swc_name}}_MemMap.h"
+/******************USER CODE STARTS!************THIS COMMENT WILL BE SAVED!***************/
+{%- if "const_mem" in user_codes.keys() and user_codes["const_mem"] != {} and user_codes["const_mem"] != [] %}
+{%- for value in user_codes["const_mem"] %}
+{{value.strip('\n')}}
+{%- endfor %}
+{%- endif %}
+/******************USER CODE ENDS!**************THIS COMMENT WILL BE SAVED!***************/
+#define {{swc_name.upper()}}_STOP_SEC_CONST_UNSPECIFIED
+#include "{{swc_name}}_MemMap.h"
+
+#define {{swc_name.upper()}}_START_SEC_CALIB_CONST_UNSPECIFIED
+#include "{{swc_name}}_MemMap.h"
+/******************USER CODE STARTS!************THIS COMMENT WILL BE SAVED!***************/
+{%- if "calib_mem" in user_codes.keys() and user_codes["calib_mem"] != {} and user_codes["calib_mem"] != [] %}
+{%- for value in user_codes["calib_mem"] %}
+{{value.strip('\n')}}
+{%- endfor %}
+{%- endif %}
+/******************USER CODE ENDS!**************THIS COMMENT WILL BE SAVED!***************/
+#define {{swc_name.upper()}}_STOP_SEC_CALIB_CONST_UNSPECIFIED
+#include "{{swc_name}}_MemMap.h"
+
+#define {{swc_name.upper()}}_START_SEC_PRIVATE_{{appl_name.upper()}}_VAR_INIT_UNSPECIFIED
+#include "{{swc_name}}_MemMap.h"
+/******************USER CODE STARTS!************THIS COMMENT WILL BE SAVED!***************/
+{%- if "pri_ini_mem" in user_codes.keys() and user_codes["pri_ini_mem"] != {} and user_codes["pri_ini_mem"] != [] %}
+{%- for value in user_codes["pri_ini_mem"] %}
+{{value.strip('\n')}}
+{%- endfor %}
+{%- endif %}
+/******************USER CODE ENDS!**************THIS COMMENT WILL BE SAVED!***************/
+#define {{swc_name.upper()}}_STOP_SEC_PRIVATE_{{appl_name.upper()}}_VAR_INIT_UNSPECIFIED
+#include "{{swc_name}}_MemMap.h"
+
+#define {{swc_name.upper()}}_START_SEC_PRIVATE_{{appl_name.upper()}}_VAR_NO_INIT_UNSPECIFIED
+#include "{{swc_name}}_MemMap.h"
+/******************USER CODE STARTS!************THIS COMMENT WILL BE SAVED!***************/
+{%- if "pri_no_ini_mem" in user_codes.keys() and user_codes["pri_no_ini_mem"] != {} and user_codes["pri_no_ini_mem"] != [] %}
+{%- for value in user_codes["pri_no_ini_mem"] %}
+{{value.strip('\n')}}
+{%- endfor %}
+{%- endif %}
+/******************USER CODE ENDS!**************THIS COMMENT WILL BE SAVED!***************/
+#define {{swc_name.upper()}}_STOP_SEC_PRIVATE_{{appl_name.upper()}}_VAR_NO_INIT_UNSPECIFIED
+#define {{swc_name.upper()}}_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "{{swc_name}}_MemMap.h"
+
+{#- Runnable API prototypes #}
+{%- set runnables = get_runnable_entity_list() %}
+{% if runnables %}
+#define {{swc_name.upper()}}_START_SEC_CODE
+#include "{{swc_name}}_MemMap.h"
+/*
+ * Runnable entity prototypes
+ */
+{%- endif %}
+
+{%- set pim_vars, pim_vars_no_init_value, pim_apis = get_swc_pim_var_and_api() %}
+
+{%- for runnable in runnables %}
+    {%- if runnable["return_type"] == "" and runnable["trigger_event"] == "OperationInvokedEvent" or runnable["trigger_event"] == None %}
+    {%- else %}
+/**********************************************************************************************************************
+ *
+ * Runnable Entity Name: {{runnable["name"]}}
+ *
+ * ---------------------------------------------------------------------------------------------------------------------
+{%- set ext_triggered_apis = get_swc_external_triggered_api(runnable["name"]) -%}
+{%- if ext_triggered_apis %}
+*{# blank line #}
+*
+* Executed if at least one of the following trigger conditions occurred:
+    {%- for triggered_api in ext_triggered_apis %}
+*   - triggered by ExternalTriggerOccurredEvent of PortPrototype <{{triggered_api['port_prototype']}}> Trigger <{{triggered_api['data_element']}}>
+    {%- endfor %}
+*
+{%- endif %}
+
+{%- set int_triggered_apis = get_swc_standard_internal_triggered_api(runnable["name"]) -%}
+{%- if int_triggered_apis %}
+*{# blank line #}
+*
+* Executed if at least one of the following trigger conditions occurred:
+    {%- for triggered_api in int_triggered_apis %}
+    {%- set trigger_runnable, internal_trigger_point = triggered_api.split('/') %}
+*   - triggered by InternalTriggerOccurredEvent for InternalTriggeringPoint <{{internal_trigger_point}}> of runnable <{{trigger_runnable}}>
+    {%- endfor %}
+*
+{%- endif %}
+
+{%- set unpports = get_swc_sr_explicit_unconnected_render_pport_list(runnable["name"]) -%}
+{%- set pports = get_swc_sr_explicit_macro_render_pport_list(runnable["name"]) -%}
+{%- set explicit_pports = get_swc_sr_explicit_api_pport_list(runnable["name"]) %}
+{%- set implicit_pports = get_swc_sr_implicit_macro_render_pport_list(runnable["name"]) -%}
+{%- set queue_pports = get_swc_sr_queue_api_pport_list(runnable["name"]) %}
+{%- set int_trigger_apis = get_swc_standard_internal_trigger_api(runnable["name"]) %}
+{%- set ext_trigger_apis = get_swc_external_trigger_api(runnable["name"]) %}
+
+{%- set irv_exp_write_api_func = get_swc_irv_exp_write_api_func(runnable["name"]) %}
+{%- set irv_exp_write_api_macro = get_swc_irv_exp_write_api_macro(runnable["name"]) %}
+{%- set irv_exp_read_api_func = get_swc_irv_exp_read_api_func(runnable["name"]) %}
+{%- set irv_exp_read_api_macro = get_swc_irv_exp_read_api_macro(runnable["name"]) %}
+{%- set irv_imp_write_api_macro = get_swc_irv_imp_write_api_macro(runnable["name"]) %}
+{%- set irv_imp_read_api_macro = get_swc_irv_imp_read_api_macro(runnable["name"]) %}
+
+{%- if unpports or pports or explicit_pports or implicit_pports or queue_pports
+        or irv_exp_write_api_func or irv_exp_write_api_macro or irv_imp_write_api_macro %}
+*{# blank line #}
+*   ==================
+*   Output Interfaces:
+*   ==================
+    {%- if unpports or pports or explicit_pports %}
+*{# blank line #}
+*       --------------------------------
+*       Explicit S/R API
+*       --------------------------------
+        {%- if unpports %}
+            {%- for unpport in unpports %}
+                {%- set data_arg = get_sr_write_data_arg(unpport["datatype"]) %}
+*       Std_ReturnType Rte_Write_{{unpport['name']}}({{data_arg}})
+            {%- endfor %}
+        {%- endif %}
+        {%- if pports %}
+            {%- for pport in pports %}
+                {%- set data_arg = get_sr_write_data_arg(pport["arg"]["datatype"]) %}
+*       Std_ReturnType Rte_Write_{{pport["name"]}}({{data_arg}})
+            {%- endfor %}
+        {%- endif %}
+        {%- if explicit_pports %}
+            {%- for explicit_pport in explicit_pports %}
+                {%- set data_arg = get_sr_write_data_arg(explicit_pport["arg"]["datatype"]) %}
+*       Std_ReturnType Rte_Write_{{explicit_pport["name"]}}({{data_arg}});
+            {%- endfor %}
+        {%- endif %}
+    {%- endif %}
+
+    {%- if implicit_pports %}
+*{# blank line #}
+*       --------------------------------
+*       Implicit S/R API
+*       --------------------------------
+        {%- for implicit_pport in implicit_pports %}
+            {%- set data_arg = get_sr_write_data_arg(implicit_pport["arg"]["datatype"]) %}
+*       void Rte_IWrite_{{implicit_pport['name']}}({{data_arg}})
+            {%- if implicit_pport['arg']['datatype']['native_category'] == 'ARRAY' %}
+*       {{implicit_pport['arg']['datatype']['arr_basetype']}} *Rte_IWriteRef_{{implicit_pport['name']}}(void)
+            {%- else %}
+*       {{implicit_pport['arg']['datatype']['name']}} *Rte_IWriteRef_{{implicit_pport['name']}}(void)
+            {%- endif %}
+        {%- endfor %}
+    {%- endif %}
+
+    {%- if queue_pports %}
+*{# blank line #}
+*       --------------------------------
+*       Queue S/R API
+*       --------------------------------
+        {%- for queue_pport in queue_pports %}
+            {%- set data_arg = get_sr_write_data_arg(queue_pport["arg"]["datatype"]) %}
+*       Std_ReturnType Rte_Send_{{queue_pport['port_prototype']}}_{{queue_pport['data_element']}}({{data_arg}})
+        {%- endfor %}
+    {%- endif %}
+
+    {%- if irv_exp_write_api_func or irv_exp_write_api_macro %}
+*{# blank line #}
+*       --------------------------------
+*       Explicit IRV API
+*       --------------------------------
+        {%- for irv in irv_exp_write_api_func %}
+            {%- set data_arg = get_sr_write_data_arg(irv["data"]["datatype"], 'irv') %}
+*       void Rte_IrvWrite_{{irv["run_var"]}}({{data_arg}})
+        {%- endfor %}
+        {%- for irv in irv_exp_write_api_macro %}
+            {%- set data_arg = get_sr_write_data_arg(irv["data"]["datatype"], 'irv') %}
+*       void Rte_IrvWrite_{{irv["run_var"]}}({{data_arg}})
+        {%- endfor %}
+    {%- endif %}
+
+    {%- if irv_imp_write_api_macro %}
+*{# blank line #}
+*       --------------------------------
+*       Implicit IRV API
+*       --------------------------------
+        {%- for irv in irv_imp_write_api_macro %}
+            {%- set data_arg = get_sr_write_data_arg(irv["data"]["datatype"], 'irv') %}
+*       void Rte_IrvIWrite_{{irv["run_var"]}}({{data_arg}})
+        {%- endfor %}
+    {%- endif %}
+{%- endif %}
+
+{%- set unrports = get_swc_sr_explicit_unconnected_render_rport_list(runnable["name"]) -%}
+{%- set rports = get_swc_sr_explicit_macro_render_rport_list(runnable["name"]) -%}
+{%- set explicit_rports = get_swc_sr_explicit_api_rport_list(runnable["name"]) %}
+{%- set implicit_rports = get_swc_sr_implicit_macro_render_rport_list(runnable["name"]) -%}
+{%- set isupdated_rports = get_swc_sr_nonqueue_enable_update_rport_list(runnable["name"]) %}
+{%- set queue_rports = get_swc_sr_queue_api_rport_list(runnable["name"]) %}
+{%- if unrports or rports or explicit_rports or implicit_rports or isupdated_rports or queue_rports or
+        irv_exp_read_api_func or irv_exp_read_api_macro or irv_imp_read_api_macro %}
+*{# blank line #}
+*   =================
+*   Input Interfaces:
+*   =================
+    {%- if unrports or rports or explicit_rports%}
+*{# blank line #}
+*       --------------------------------
+*       Explicit S/R API
+*       --------------------------------
+        {%- if unrports %}
+            {%- for unrport in unrports %}
+                {%- if unrport['read_by_value'] %}
+*       {{unrport['arg']['datatype']['name']}} Rte_DRead_{{unrport['name']}}(void)
+                {%- else %}
+                    {%- set data_arg = get_sr_read_data_arg(unrport["arg"]["datatype"]) %}
+*       Std_ReturnType Rte_Read_{{unrport['name']}}({{data_arg}})
+                {%- endif %}
+            {%- endfor %}
+        {%- endif %}
+        {%- if rports %}
+            {%- for rport in rports %}
+                {%- if rport["read_by_value"] %}
+*       {{rport['arg']['datatype']['name']}} Rte_DRead_{{rport['name']}}(void)
+                {%- else %}
+                    {%- set data_arg = get_sr_read_data_arg(rport["arg"]["datatype"]) %}
+*       Std_ReturnType Rte_Read_{{rport["name"]}}({{data_arg}})
+                {%- endif %}
+            {%- endfor %}
+        {%- endif %}
+        {%- if explicit_rports %}
+            {%- for explicit_rport in explicit_rports %}
+                {%- if explicit_rport["read_by_value"] %}
+*       {{explicit_rport['arg']['datatype']['name']}} Rte_DRead_{{explicit_rport['name']}}(void)
+                {%- else %}
+                    {%- set data_arg = get_sr_read_data_arg(explicit_rport["arg"]["datatype"]) %}
+*       Std_ReturnType Rte_Read_{{explicit_rport["name"]}}({{data_arg}})
+                {%- endif %}
+            {%- endfor %}
+        {%- endif %}
+    {%- endif %}
+
+    {%- if implicit_rports %}
+*{# blank line #}
+*       --------------------------------
+*       Implicit S/R API
+*       --------------------------------
+        {%- for implicit_rport in implicit_rports %}
+            {%- set data_arg = get_sr_iread_prefix_arg(implicit_rport["arg"]["datatype"]) %}
+*       {{data_arg}}Rte_IRead_{{implicit_rport['name']}}(void)
+        {%- endfor %}
+    {%- endif %}
+
+    {%- if isupdated_rports %}
+*{# blank line #}
+*       --------------------------------
+*       isupdated S/R API
+*       --------------------------------
+        {%- for isupdated_rport in isupdated_rports %}
+*       boolean Rte_IsUpdated_{{isupdated_rport['name']}}(void)
+        {%- endfor %}
+    {%- endif %}
+
+    {%- if queue_rports %}
+*{# blank line #}
+*       --------------------------------
+*       Queue S/R API
+*       --------------------------------
+        {%- for queue_rport in queue_rports %}
+            {%- set data_arg = get_sr_read_data_arg(queue_rport["arg"]["datatype"]) %}
+*       Std_ReturnType Rte_Receive_{{queue_rport['port_prototype']}}_{{queue_rport['data_element']}}({{data_arg}})
+        {%- endfor %}
+    {%- endif %}
+
+    {%- if irv_exp_read_api_func or irv_exp_read_api_macro %}
+*{# blank line #}
+*       --------------------------------
+*       Explicit IRV API
+*       --------------------------------
+        {%- for irv in irv_exp_read_api_func %}
+            {%- set data_arg = get_sr_read_data_arg(irv["data"]["datatype"], 'irv') %}
+            {%- if irv["data"]["datatype"]["native_category"] == 'NUMERICAL' %}
+*       {{irv["data"]["datatype"]["name"]}} Rte_IrvRead_{{irv["run_var"]}}({{data_arg}})
+            {%- else %}
+*       void Rte_IrvRead_{{irv["run_var"]}}(({{data_arg}}))
+            {%- endif %}
+        {%- endfor %}
+        {%- for irv in irv_exp_read_api_macro %}
+            {%- set data_arg = get_sr_read_data_arg(irv["data"]["datatype"], 'irv') %}
+            {%- if irv["data"]["datatype"]["native_category"] == 'NUMERICAL' %}
+*       {{irv["data"]["datatype"]["name"]}} Rte_IrvRead_{{irv["run_var"]}}({{data_arg}})
+            {%- else %}
+*       void Rte_IrvRead_{{irv["run_var"]}}({{data_arg}})
+            {%- endif %}
+        {%- endfor %}
+    {%- endif %}
+
+    {%- if irv_imp_read_api_macro %}
+*{# blank line #}
+*       --------------------------------
+*       Implicit IRV API
+*       --------------------------------
+        {%- for irv in irv_imp_read_api_macro %}
+            {%- set data_arg = get_sr_iread_prefix_arg(irv["data"]["datatype"], 'irv') %}
+*       {{data_arg}}Rte_IrvIRead_{{irv["run_var"]}}(void)
+        {%- endfor %}
+    {%- endif %}
+{%- endif %}
+
+{%- set client_server_rports, client_server_pports = get_client_server_port_in_swc(runnable["name"]) -%}
+{%- set sync_rports = get_swc_sync_cs_multicore_rports(runnable["name"]) -%}
+{%- set async_rports = get_swc_async_cs_multicore_rports(runnable["name"]) %}
+{%- if client_server_rports or sync_rports or async_rports %}
+*{# blank line #}
+*   ==============
+*   Service Calls:
+*   ==============
+    {%- for client_server_rport in client_server_rports %}
+        {%- if judge_unconnected_cs_rport(client_server_rport) %}
+            {%- set operation = client_server_rport["operation"] %}
+            {%- set operation_args = get_args_str_list(operation["args"].values()) %}
+*       Std_ReturnType Rte_Call_{{client_server_rport["name"]}}({{"void" if operation_args | length == 0 else operation_args | join(", ")}});
+        {%- else %}
+            {%- set connected_port = client_server_rport["connected_ports"]["ports"][0] %}
+            {%- set port_def_args = connected_port["port_def_args"] %}
+            {%- set operation = client_server_rport["operation"] %}
+            {%- if port_def_args and connected_port["symbol"] %}
+                {%- if operation["return_type"] == "void" %}
+*       Std_ReturnType Rte_Call_{{client_server_rport["name"]}}({{get_args_str_list(operation["args"].values()) | join(", ")}})
+                {%- else %}
+*       Std_ReturnType Rte_Call_{{client_server_rport["name"]}}({{get_args_str_list(operation["args"].values()) | join(", ")}})
+                {%- endif %}
+            {%- elif connected_port["symbol"] %}
+                {%- if operation["return_type"] == "void" %}
+*       Std_ReturnType Rte_Call_{{client_server_rport["name"]}}({{get_args_str_list(operation["args"].values()) | join(", ")}})
+                {%- else %}
+*       Std_ReturnType Rte_Call_{{client_server_rport["name"]}}({{get_args_str_list(operation["args"].values()) | join(", ")}})
+                {%- endif %}
+            {%- endif %}
+        {%- endif %}
+    {%- endfor %}
+
+    {%- for rport in sync_rports %}
+        {%- set arg_list = get_args_str_list(rport["operation"]["args"].values()) %}
+*       Std_ReturnType Rte_Call_{{rport["name"]}}({{"void" if arg_list | length == 0 else arg_list | join(", ")}})
+    {%- endfor %}
+
+    {%- for rport in async_rports %}
+        {%- set arg_list = get_input_args_str_list(rport["operation"]["args"].values()) %}
+*       Std_ReturnType Rte_Call_{{rport["name"]}}({{"void" if arg_list | length == 0 else arg_list | join(", ")}})
+        {%- set arg_list = get_output_args_str_list(rport["operation"]["args"].values()) %}
+*       Std_ReturnType Rte_Result_{{rport["name"]}}({{"void" if arg_list | length == 0 else arg_list | join(", ")}})
+    {%- endfor %}
+{%- endif %}
+
+{%- if pim_apis %}
+*{# blank line #}
+*   ===================
+*   Per Instance Memory
+*   ===================
+    {%- for pim in pim_apis %}
+*       ({{pim["buff_type"]}} *) Rte_Pim_{{pim["name"]}}(void)
+    {%- endfor %}
+{%- endif %}
+
+{%- if int_trigger_apis %}
+*{# blank line #}
+*   ===================
+*   Internal Trigger Interfaces:
+*   ===================
+    {%- for swc_runnable_trigger, trigger_apis in int_trigger_apis.items() %}
+    {%- set swc, runnable, trigger = swc_runnable_trigger.split('/') %}
+*       void Rte_IrTrigger_{{runnable}}_{{trigger}}(void)
+    {%- endfor %}
+{%- endif %}
+
+{%- if ext_trigger_apis %}
+*{# blank line #}
+*   ===================
+*   External Trigger Interfaces:
+*   ===================
+    {%- for trigger_api in ext_trigger_apis %}
+*       void Rte_Trigger_{{trigger_api["name"]}}(void)
+    {%- endfor %}
+{%- endif %}
+**********************************************************************************************************************/
+    {%- endif %}
+
+    {%- if runnable["return_type"] == "" and runnable["trigger_event"] == "OperationInvokedEvent" or runnable["trigger_event"] == None %}
+    {%- elif runnable["args"] | length != 0 %}
+{{runnable["return_type"]}} {{runnable["name"]}}({{ get_args_str_list(runnable["args"].values()) | join(", ") }})
+{
+/******************USER CODE STARTS!************THIS COMMENT WILL BE SAVED!***************/
+{%- if "user_code" in runnable.keys() and runnable["user_code"] != {} and runnable["user_code"] != [] %}
+    {%- for value in runnable["user_code"] %}
+{{value.strip('\n')}}
+    {%- endfor %}
+{%- else %}
+    {%- if runnable["return_type"] == "Std_ReturnType" %}
+    return RTE_E_OK;
+    {%- endif %}
+{%- endif %}
+/******************USER CODE ENDS!**************THIS COMMENT WILL BE SAVED!***************/
+}
+    {%- elif runnable["args"] | length == 0 %}
+{{runnable["return_type"]}} {{runnable["name"]}}(void)
+{
+/******************USER CODE STARTS!************THIS COMMENT WILL BE SAVED!***************/
+{%- if "user_code" in runnable.keys() and runnable["user_code"] != {} and runnable["user_code"] != [] %}
+    {%- for value in runnable["user_code"] %}
+{{value.strip('\n')}}
+    {%- endfor %}
+{%- else %}
+    {%- if runnable["return_type"] == "Std_ReturnType" %}
+    return RTE_E_OK;
+    {%- endif %}
+{%- endif %}
+/******************USER CODE ENDS!**************THIS COMMENT WILL BE SAVED!***************/
+}
+    {%- endif %}
+{%- endfor %}
+
+#define {{swc_name.upper()}}_STOP_SEC_CODE
+#include "{{swc_name}}_MemMap.h"
+
+{#- Out of Runnable User Code #}
+/******************USER CODE STARTS!************THIS COMMENT WILL BE SAVED!***************/
+{%- if "tail_usercode" in user_codes.keys() and user_codes["tail_usercode"] != {} and user_codes["tail_usercode"] != [] %}
+{%- for value in user_codes["tail_usercode"] %}
+{{value.strip('\n')}}
+{%- endfor %}
+{%- endif %}
+/******************USER CODE ENDS!**************THIS COMMENT WILL BE SAVED!***************/
+{# Unmatched Runnable User Code #}
+/************REMOVED USER CODE AREA STARTS!*********THIS COMMENT WILL BE SAVED!***********/
+{%- if "unmatched_runnable" in user_codes.keys() and user_codes["unmatched_runnable"] != {} and user_codes["unmatched_runnable"] != [] %}
+#if 0
+{%- for value in user_codes["unmatched_runnable"] %}
+    {{value.strip('\n')}}
+{%- endfor %}
+#endif
+{%- endif %}
+/*************REMOVED USER CODE AREA ENDS!**********THIS COMMENT WILL BE SAVED!***********/
+
+#ifdef __cplusplus
+}
+#endif
+
+{# blank line at end of file #}

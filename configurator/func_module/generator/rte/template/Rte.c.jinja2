@@ -1,0 +1,928 @@
+{{get_copyright()}}
+
+/*!*********************************************************************************************************************
+ * @file        Rte.c
+ * @brief       RTE implementation file
+ * @details     Provides standardized APIs for the application layer and handles the communication mechanisms
+ * @date        {{get_generation_time_temp()}}
+ * @toolversion {{get_vcos_version_temp()}}
+ **********************************************************************************************************************/
+{%- import 'macros.jinja2' as macros %}
+#include "Os.h"
+#include "Rte.h"
+#include "Rte_Cbk.h"
+#include "Rte_Type.h"
+#include "Rte_Main.h"
+#include "Rte_Dlog.h"
+#include "core_cfg.h"
+#include "task_cfg.h"
+// #include "alarm_cfg.h"
+#include "event_cfg.h"
+#include "schedtable_cfg.h"
+#include "spinlock_cfg.h"
+#include "rte_memmap.h"
+{%- if need_include_com_h() %}
+#include "com.h"
+{%- endif %}
+#define RTE_MEM32ALIGN (sizeof(uint32) - 1U)
+{%- set gen_compu_method = get_gen_compu_method_flag() %}
+{%- set isr_simplified = get_rte_generation_isr_simplified() %}
+/*
+ * API for enable / disable interrupts global
+ */
+{%- if isr_simplified %}
+#define Rte_DisableAllInterrupts() osDisableGlobalKM()
+#define Rte_EnableAllInterrupts()  osEnableGlobalKM()
+#define Rte_DisableOSInterrupts()  osDisableLevelKM()
+#define Rte_EnableOSInterrupts()   osEnableLevelKM()
+{%- else %}
+#define Rte_DisableAllInterrupts() DisableAllInterrupts()
+#define Rte_EnableAllInterrupts()  EnableAllInterrupts()
+#define Rte_DisableOSInterrupts()  SuspendOSInterrupts()
+#define Rte_EnableOSInterrupts()   ResumeOSInterrupts()
+{%- endif %}
+
+#define Rte_DisableAllInterruptsOS() DisableAllInterrupts()
+#define Rte_EnableAllInterruptsOS()  EnableAllInterrupts()
+#define Rte_DisableOSInterruptsOS()  SuspendOSInterrupts()
+#define Rte_EnableOSInterruptsOS()   ResumeOSInterrupts()
+
+/*
+ * Rte Init State Variable
+ */
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+volatile VAR(uint8, RTE_MULTI_APP_BSS) Rte_StartTiming_InitState;  // RTE_STATE_UNINIT, all core deinit
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+{%- set task_access_app = get_os_task_accessing_application() %}
+{%- for core_id in core_id_list %}
+    {%- if core_id == "0" %}
+        {%- if task_access_app[core_id] %}
+#define RTE_START_SEC_{{task_access_app[core_id].upper()}}_BSS
+#include "rte_memmap.h"
+volatile VAR(uint8, RTE_{{task_access_app[core_id].upper()}}_BSS) Rte_InitState;  // RTE_STATE_UNINIT
+#define RTE_STOP_SEC_{{task_access_app[core_id].upper()}}_BSS
+#include "rte_memmap.h"
+        {%- else %}
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+volatile VAR(uint8, RTE_MULTI_APP_BSS) Rte_InitState;  // RTE_STATE_UNINIT
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+        {%- endif %}
+    {%- else %}
+        {%- if task_access_app[core_id] %}
+#define RTE_START_SEC_{{task_access_app[core_id].upper()}}_BSS
+#include "rte_memmap.h"
+volatile VAR(uint8, RTE_{{task_access_app[core_id].upper()}}_BSS) Rte_InitState_{{core_id}};  // RTE_STATE_UNINIT
+#define RTE_STOP_SEC_{{task_access_app[core_id].upper()}}_BSS
+#include "rte_memmap.h"
+        {%- else %}
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+volatile VAR(uint8, RTE_MULTI_APP_BSS) Rte_InitState_{{core_id}};  // RTE_STATE_UNINIT
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+        {%- endif %}
+    {%- endif %}
+{%- endfor %}
+
+{#- Constants #}
+{%- macro generate_const_member(obj, is_union=False) %}
+    {%- if is_union and obj is mapping -%}
+    {{"{"}}     {#- for union with complex data type #}
+    {%- endif -%}
+    {#- for array and struct #}
+    {%- if obj is mapping -%}
+        {%- for sub in obj.values() %}
+            {%- if sub is not mapping -%}
+                {%- if not loop.last -%}
+    {{sub}},
+                {%- else -%}
+    {{sub}}
+                {%- endif -%}
+            {%- else -%}
+                {%- if not loop.last -%}
+    {{"{"}}{{generate_const_member(sub)}}{{"}"}},
+                {%- else -%}
+    {{"{"}}{{generate_const_member(sub)}}{{"}"}}
+                {%- endif -%}
+            {%- endif %}
+        {%- endfor %}
+    {%- else -%}
+    {{obj}}     {#- for union with simple data type #}
+    {%- endif -%}
+    {%- if is_union and obj is mapping -%}
+    {{"}"}}     {#- for union with complex data type #}
+    {%- endif -%}
+{%- endmacro %}
+{%- set consts = get_all_sr_init_value_const_list() %}
+{%- if consts %}
+/*
+ * Constants
+ */
+#define RTE_START_SEC_CONST
+#include "rte_memmap.h"
+{%- endif %}
+{%- for const in consts %}
+CONST({{const["datatype"]}}, RTE_CONST) {{const["name"]}} = {
+    {{generate_const_member(const["value"], const["is_union"])}}
+};
+{%- endfor %}
+
+{%- if consts %}
+#define RTE_STOP_SEC_CONST
+#include "rte_memmap.h"
+{%- endif %}
+{#- Client info array for C/S MultiCore #}
+{%- set pports = get_all_cs_multicore_pports() %}
+{%- if pports | length > 0 %}
+#define RTE_START_SEC_CONST
+#include "rte_memmap.h"
+{%- endif %}
+{%- for pport in pports %}
+CONST(Rte_CS_DataType_{{pport["component"]}}_{{pport["name"]}}, RTE_CONST) Rte_CS_Data_{{pport["component"]}}_{{pport["name"]}}[{{pport["connected_ports"]["ports"] | length}}] =
+{
+{%- for rport in pport["connected_ports"]["ports"] %}
+    {%- if not rport["ioc"] %}
+    {0}{{ "," if not loop.last }}
+    {%- else %}
+        {%- set client_id = rport["client_id"] %}
+        {%- set the_same_task = rport['no_dup_task'][0].upper() %}
+    {
+        .Rte_CallCompleted_Client = &Rte_CS_Flag_{{pport["component"]}}_{{pport["name"]}}_{{client_id}}_CallCompleted_Client,
+        .Rte_CallCompleted_Server = &Rte_CS_Flag_{{pport["component"]}}_{{pport["name"]}}_{{client_id}}_CallCompleted_Server,
+        .Rte_Result = &Rte_CS_Result_{{pport["component"]}}_{{pport["name"]}}_{{client_id}},
+        {%- if rport["return_mode"] not in ["waiting", "sync"] %}
+        .waitingTask = INVALID_TASK,
+        {%- else %}
+            {%- if rport['no_dup_task']|length > 1 %}
+        .waitingTask = INVALID_TASK,
+            {%- else %}
+        .waitingTask = (TaskType)OS_TASK_{{the_same_task}}_ID,
+            {%- endif %}
+        {%- endif %}
+        {%- if rport["return_trigger_event"]["ret_trigger_flag"] %}
+            {%- if rport['no_dup_task']|length > 1 %}
+        .TriggerTask = INVALID_TASK,
+            {%- else %}
+        .TriggerTask = (TaskType)OS_TASK_{{the_same_task}}_ID,
+            {%- endif %}
+        .TriggerEvent = (EventMaskType){{rport["return_trigger_event"]["ret_event"].upper()}},
+        {%- else %}
+        .TriggerTask = INVALID_TASK,
+        .TriggerEvent = 0,
+        {%- endif %}
+        {%- for arg in pport["operation"]["args"].values() %}
+        .{{arg["name"]}} = {{"(" + arg["base_type"] + " *) " if arg["category"] == "ARRAY"}}&Rte_CS_Arg_{{pport["component"]}}_{{pport["name"]}}_{{client_id}}_{{arg["name"]}}{{ "," if not loop.last }}
+        {%- endfor %}
+    }{{ "," if not loop.last }}
+    {%- endif %}
+{%- endfor %}
+};
+{%- endfor %}
+{%- if pports | length > 0 %}
+#define RTE_STOP_SEC_CONST
+#include "rte_memmap.h"
+{%- endif %}
+
+{%- set param_consts = get_cal_prm_consts() %}
+{%- if param_consts %}
+
+/**********************************************************************************************************************
+ * Calibration Parameters (SW-C local and calibration component calibration parameters)
+ *********************************************************************************************************************/
+    {{- macros.CAL_PARAM_CONSTS_MEMMAP(true)}}
+    {%- for const_name, port_info in param_consts.items() %}
+        {{- macros.CAL_PARAM_CONST(ind="", const_name=const_name, port_arg=port_info['arg'], is_extern=false)}}
+    {%- endfor %}
+    {{- macros.CAL_PARAM_CONSTS_MEMMAP(false)}}
+{%- endif %}
+
+{#- ---------------------------------------------------------------- #}
+{#- sr ioc queue vars #}
+{#- ---------------------------------------------------------------- #}
+
+{# n:1 ioc #}
+{%- set appl_dequeues = get_all_sr_queue_ioc_Nto1_dequeue_dict_by_appl() %}
+{%- if appl_dequeues %}
+/*
+ * RTE internal IOC replacement for S/R N:1 IOC Queue
+ */
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+    {%- for queues in appl_dequeues.values() %}
+        {%- set queues_inter_osa_same_core = queues["inter_osa_same_core"] %}
+        {%- set queues_inter_core = queues["inter_core"] %}
+        {%- for queue in queues_inter_osa_same_core %}
+VAR(uint8, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}_tail;
+VAR(uint8, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}_Overflow0;
+        {%- endfor %}
+        {%- for queue in queues_inter_core %}
+VAR(uint8, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}_tail;
+VAR(uint8, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}_Overflow0;
+        {%- endfor %}
+    {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+    {%- for queues in appl_dequeues.values() %}
+        {%- set queues_inter_osa_same_core = queues["inter_osa_same_core"] %}
+        {%- set queues_inter_core = queues["inter_core"] %}
+        {%- for queue in queues_inter_osa_same_core %}
+VAR({{queue['datatype']['name']}}, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+        {%- endfor %}
+        {%- for queue in queues_inter_core %}
+VAR({{queue['datatype']['name']}}, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+        {%- endfor %}
+    {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+{%- endif %}
+
+{#- ---------------------------------------------------------------- #}
+{#- cs queue vars #}
+{#- ---------------------------------------------------------------- #}
+
+{#- 1:n #}
+{%- set cs_ioc_enqueues_tail_private = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_tail', mem_filter='PRIVATE', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_overflow0_private = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_overflow0', mem_filter='PRIVATE', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_queue_private = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q', mem_filter='PRIVATE', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_tail_shared_osa = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_tail', mem_filter='SHARED_OSA', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_overflow0_shared_osa = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_overflow0', mem_filter='SHARED_OSA', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_queue_shared_osa = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q', mem_filter='SHARED_OSA', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_tail_shared_core = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_tail', mem_filter='SHARED_CORE', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_overflow0_shared_core = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_overflow0', mem_filter='SHARED_CORE', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_queue_shared_core = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q', mem_filter='SHARED_CORE', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_tail_global = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_tail', mem_filter='GLOBAL', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_overflow0_global = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_overflow0', mem_filter='GLOBAL', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_queue_global = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q', mem_filter='GLOBAL', is_result_combined=True) %}
+/*
+ * RTE internal IOC replacement for C/S 1:N IOC
+ */
+{#- cs 1:n enqueue vars: tail, overflow0, queue #}
+    {#- cs 1:n enqueue: private #}
+{%- set appl_name_list = (cs_ioc_enqueues_tail_private.keys() | list) + (cs_ioc_enqueues_overflow0_private.keys() | list)%}
+{%- for appl_name in appl_name_list | unique | sort %}
+{%- set queues_tail = cs_ioc_enqueues_tail_private[appl_name] %}
+{%- set queues_overflow0 = cs_ioc_enqueues_overflow0_private[appl_name] %}
+    {%- if queues_tail or queues_overflow0 %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+    {%- for queue_tail in queues_tail %}
+VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_BSS) Rte_ioc_{{queue_tail['name']}}_tail;
+    {%- endfor %}
+    {%- for queue_overflow0 in queues_overflow0 %}
+VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_BSS) Rte_ioc_{{queue_overflow0['name']}}_Overflow0;
+    {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+{# blank line #}
+{%- for appl_name, queues in cs_ioc_enqueues_queue_private.items() %}
+    {%- if queues %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+        {%- for queue in queues %}
+VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+        {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+{# blank line #}
+    {#- cs 1:n enqueue: shared osa #}
+{%- set appl_name_list = (cs_ioc_enqueues_tail_shared_osa.keys() | list) + (cs_ioc_enqueues_overflow0_shared_osa.keys() | list)%}
+{%- for appl_name in appl_name_list | unique | sort %}
+{%- set queues_tail = cs_ioc_enqueues_tail_shared_osa[appl_name] %}
+{%- set queues_overflow0 = cs_ioc_enqueues_overflow0_shared_osa[appl_name] %}
+    {%- if queues_tail or queues_overflow0 %}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+    {%- for queue_tail in queues_tail %}
+VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_BSS) Rte_ioc_{{queue_tail['name']}}_tail;
+    {%- endfor %}
+    {%- for queue_overflow0 in queues_overflow0 %}
+VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_BSS) Rte_ioc_{{queue_overflow0['name']}}_Overflow0;
+    {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+{# blank line #}
+{%- for appl_name, queues in cs_ioc_enqueues_queue_shared_osa.items() %}
+    {%- if queues %}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+        {%- for queue in queues %}
+VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+        {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+{# blank line #}
+    {#- cs 1:n enqueue: shared core #}
+{%- set appl_name_list = (cs_ioc_enqueues_tail_shared_core.keys() | list) + (cs_ioc_enqueues_overflow0_shared_core.keys() | list)%}
+{%- for appl_name in appl_name_list | unique | sort %}
+{%- set queues_tail = cs_ioc_enqueues_tail_shared_core[appl_name] %}
+{%- set queues_overflow0 = cs_ioc_enqueues_overflow0_shared_core[appl_name] %}
+    {%- if queues_tail or queues_overflow0 %}
+        {%- set core_id = get_appl_core_id(appl_name) %}
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+        {%- for queue_tail in queues_tail %}
+VAR(uint8, RTE_MULTI_APP_BSS) Rte_ioc_{{queue_tail['name']}}_tail;
+        {%- endfor %}
+        {%- for queue_overflow0 in queues_overflow0 %}
+VAR(uint8, RTE_MULTI_APP_BSS) Rte_ioc_{{queue_overflow0['name']}}_Overflow0;
+        {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+{# blank line #}
+{%- for appl_name, queues in cs_ioc_enqueues_queue_shared_core.items() %}
+    {%- if queues %}
+        {%- set core_id = get_appl_core_id(appl_name) %}
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+        {%- for queue in queues %}
+VAR(uint8, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+        {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+{# blank line #}
+    {#- cs 1:n enqueue: global #}
+{%- if cs_ioc_enqueues_tail_global or cs_ioc_enqueues_overflow0_global %}
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+    {%- for appl_name, queues in cs_ioc_enqueues_tail_global.items() %}
+        {%- for queue in queues %}
+VAR(uint8, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}_tail;
+        {%- endfor %}
+    {%- endfor %}
+    {%- for appl_name, queues in cs_ioc_enqueues_overflow0_global.items() %}
+        {%- for queue in queues %}
+VAR(uint8, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}_Overflow0;
+        {%- endfor %}
+    {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+{%- endif %}
+{# blank line #}
+{%- if cs_ioc_enqueues_queue_global %}
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+    {%- for appl_name, queues in cs_ioc_enqueues_queue_global.items() %}
+        {%- for queue in queues %}
+VAR(uint8, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+        {%- endfor %}
+    {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+{%- endif %}
+
+{%- set mode_switch_pport_used_explicit = get_mode_switch_pport_use_explicit_order_in_swc_list() %}
+{%- if mode_switch_pport_used_explicit %}
+#define RTE_START_SEC_CODE
+#include "rte_memmap.h"
+/**
+ * Helper functions for mode management
+ */
+    {%- for swc_mode_group_pair, mode_decl in mode_switch_pport_used_explicit.items() %}
+FUNC(uint8, RTE_CODE) Rte_GetInternalModeIndex_{{swc_mode_group_pair[0]}}_{{swc_mode_group_pair[1]}}(uint8 mode);
+FUNC(uint8, RTE_CODE) Rte_GetInternalModeIndex_{{swc_mode_group_pair[0]}}_{{swc_mode_group_pair[1]}}(uint8 mode)
+{
+    uint8 ret;
+    switch (mode)
+    {
+        {%- for mode, mode_value_map in mode_decl["mode_declarations"].items() %}
+        case {{mode_value_map[1]}}U:
+            ret = {{mode_value_map[0]}}U;
+            break;
+        {%- endfor %}
+        default:
+            ret = {{mode_decl["mode_group_len"]}}U;
+            break;
+    }
+    return ret;
+}
+    {%- endfor %}
+#define RTE_STOP_SEC_CODE
+#include "rte_memmap.h"
+{%- endif %}
+/**
+ * Activate the BSW Async task and set alarm, set Rte_InitState to RTE_STATE_SCHM_INIT
+ */
+#define RTE_START_SEC_CODE
+#include "rte_memmap.h"
+FUNC(void,RTE_CODE) SchM_Init(void)
+{
+#if (RTE_DLOG_ENABLED == STD_ON)
+    Std_ReturnType ret;
+#endif
+    {%- for core_id, task_list in core_to_task_dict.items() %}
+    {%- if loop.first %}
+    CoreIdType id = GetCoreID();
+    {%- endif %}
+    if (id == OS_CORE_ID_{{core_id}}) {
+        /* activate the tasks */
+#if (RTE_DLOG_ENABLED == STD_ON)
+    {%- for task in task_list %}
+        {%- set task_name = task["name"] %}
+        {%- if task["is_bsw_task"] %}
+        {%- if not task["is_basic"] or not task["is_schedule_table_task"] %}
+        ret = ActivateTask((TaskType)OS_TASK_{{task_name.upper()}}_ID);
+        {%- endif %}
+        if (ret != E_OK)
+        {
+            Rte_LogOs(SCHM_INIT_SERVICE_ID, RTE_DLOG_EMPTY_ID, OSServiceId_ActivateTask, OS_TASK_{{task_name.upper()}}_ID, ret);
+        }
+        {%- endif %}
+    {%- endfor %}
+#else
+    {%- for task in task_list %}
+        {%- set task_name = task["name"] %}
+        {%- if task["is_bsw_task"] %}
+        {%- if not task["is_basic"] or not task["is_schedule_table_task"] %}
+        (void)ActivateTask((TaskType)OS_TASK_{{task_name.upper()}}_ID);
+        {%- endif %}
+        {%- endif %}
+    {%- endfor %}
+#endif
+        /* activate the alarms used for TimingEvents */
+    {%- if core_id in core_to_alarm_dict %}
+#if (RTE_DLOG_ENABLED == STD_ON)
+    {%- for alarm in core_to_alarm_dict[core_id] %}
+        {%- if alarm["is_bsw_alarm"] %}
+        ret = SetRelAlarm((AlarmType)OS_ALARM_{{alarm["name"].upper()}}_ID, {{alarm["alarm_time"]}}, {{alarm["cycle_time"]}});
+        if (ret != E_OK)
+        {
+            Rte_LogOs(SCHM_INIT_SERVICE_ID, RTE_DLOG_EMPTY_ID, OSServiceId_SetRelAlarm, OS_ALARM_{{alarm["name"]}}_ID, ret);
+        }
+        {%- endif %}
+    {%- endfor %}
+#else
+    {%- for alarm in core_to_alarm_dict[core_id] %}
+        {%- if alarm["is_bsw_alarm"] %}
+        //(void)SetRelAlarm((AlarmType)OS_ALARM_{{alarm["name"].upper()}}_ID, {{alarm["alarm_time"]}}, {{alarm["cycle_time"]}});
+        {%- endif %}
+    {%- endfor %}
+#endif
+    {%- endif %}
+
+        /* activate the schedule tables */
+#if (RTE_DLOG_ENABLED == STD_ON)
+    {%- for task in task_list %}
+        {%- set task_name = task["name"] %}
+        {%- if task["is_schedule_table_task"] and task["has_unique_sch_tbl"] %}
+        {%- set init_sch_tbl_name, main_sch_tbl_name = get_schedule_table_name(task_name) %}
+        {%- if is_init_schedule_table(task_name) %}
+        ret = NextScheduleTableFromStop((ScheduleTableType)OS_SCHEDTABLE_{{init_sch_tbl_name}}_ID, (ScheduleTableType)OS_SCHEDTABLE_{{main_sch_tbl_name}}_ID);
+        if (ret != E_OK)
+        {
+            Rte_LogOs(SCHM_INIT_SERVICE_ID, RTE_DLOG_EMPTY_ID, OSServiceId_NextScheduleTable, OS_SCHEDTABLE_{{main_sch_tbl_name}}_ID, ret);
+        }
+        ret = StartScheduleTableRel((ScheduleTableType)OS_SCHEDTABLE_{{init_sch_tbl_name}}_ID, 1);
+        if (ret != E_OK)
+        {
+            Rte_LogOs(SCHM_INIT_SERVICE_ID, RTE_DLOG_EMPTY_ID, OSServiceId_StartScheduleTableRel, OS_SCHEDTABLE_{{init_sch_tbl_name}}_ID, ret);
+        }
+        {%- else %}
+        ret = StartScheduleTableRel((ScheduleTableType)OS_SCHEDTABLE_{{main_sch_tbl_name}}_ID, 1);
+        if (ret != E_OK)
+        {
+            Rte_LogOs(SCHM_INIT_SERVICE_ID, RTE_DLOG_EMPTY_ID, OSServiceId_StartScheduleTableRel, OS_SCHEDTABLE_{{main_sch_tbl_name}}_ID, ret);
+        }
+        {%- endif %}
+        {%- endif %}
+    {%- endfor %}
+#else
+    {%- for task in task_list %}
+        {%- set task_name = task["name"] %}
+        {%- if task["is_schedule_table_task"] and task["has_unique_sch_tbl"] %}
+        {%- set init_sch_tbl_name, main_sch_tbl_name = get_schedule_table_name(task_name) %}
+        {%- if is_init_schedule_table(task_name) %}
+        (void)NextScheduleTableFromStop((ScheduleTableType)OS_SCHEDTABLE_{{init_sch_tbl_name}}_ID, (ScheduleTableType)OS_SCHEDTABLE_{{main_sch_tbl_name}}_ID);
+        (void)StartScheduleTableRel((ScheduleTableType)OS_SCHEDTABLE_{{init_sch_tbl_name}}_ID, 1);
+        {%- else %}
+        (void)StartScheduleTableRel((ScheduleTableType)OS_SCHEDTABLE_{{main_sch_tbl_name}}_ID, 1);
+        {%- endif %}
+        {%- endif %}
+    {%- endfor %}
+#endif
+
+        {%- if core_id == "0" %}
+        Rte_InitState = RTE_STATE_SCHM_INIT;
+        {%- else %}
+        Rte_InitState_{{core_id}} = RTE_STATE_SCHM_INIT;
+        {%- endif %}
+    }
+    {%- endfor %}
+}
+
+/**
+ * Activate the Appl task and set alarm, set Rte_InitState to RTE_STATE_INIT
+ *
+ * @return Std_ReturnType
+ *
+ * @retval E_OK
+ */
+FUNC(Std_ReturnType,RTE_CODE) Rte_Start(void)
+{
+#if (RTE_DLOG_ENABLED == STD_ON)
+    Std_ReturnType ret;
+#endif
+    {%- for core_id in core_id_list %}
+    {%- if loop.first %}
+    CoreIdType id = GetCoreID();
+    {%- endif %}
+    if (id == OS_CORE_ID_{{core_id}}) {
+        /* activate the tasks */
+#if (RTE_DLOG_ENABLED == STD_ON)
+    {%- for task in core_to_task_dict[core_id] %}
+        {%- if not task["is_bsw_task"] %}
+        {%- if not task["is_basic"] or not task["is_schedule_table_task"] %}
+        ret = ActivateTask((TaskType)OS_TASK_{{task["name"].upper()}}_ID);
+        if (ret != E_OK)
+        {
+            Rte_LogOs(RTE_START_SERVICE_ID, RTE_DLOG_EMPTY_ID, OSServiceId_ActivateTask, OS_TASK_{{task["name"].upper()}}_ID, ret);
+        }
+        {%- endif %}
+        {%- endif %}
+    {%- endfor %}
+#else
+    {%- for task in core_to_task_dict[core_id] %}
+        {%- if not task["is_bsw_task"] %}
+        {%- if not task["is_basic"] or not task["is_schedule_table_task"] %}
+        (void)ActivateTask((TaskType)OS_TASK_{{task["name"].upper()}}_ID);
+        {%- endif %}
+        {%- endif %}
+    {%- endfor %}
+#endif
+        /* activate the alarms used for TimingEvents */
+    {%- if core_id in core_to_alarm_dict %}
+#if (RTE_DLOG_ENABLED == STD_ON)
+    {%- for alarm in core_to_alarm_dict[core_id] %}
+        {%- if not alarm["is_bsw_alarm"] %}
+        ret = SetRelAlarm((AlarmType)OS_ALARM_{{alarm["name"]}}_ID, {{alarm["alarm_time"]}}, {{alarm["cycle_time"]}});
+        if (ret != E_OK)
+        {
+            Rte_LogOs(RTE_START_SERVICE_ID, RTE_DLOG_EMPTY_ID, OSServiceId_SetRelAlarm, OS_ALARM_{{alarm["name"]}}_ID, ret);
+        }
+        {%- endif %}
+    {%- endfor %}
+#else
+    {%- for alarm in core_to_alarm_dict[core_id] %}
+        {%- if not alarm["is_bsw_alarm"] %}
+        //(void)SetRelAlarm((AlarmType)OS_ALARM_{{alarm["name"].upper()}}_ID, {{alarm["alarm_time"]}}, {{alarm["cycle_time"]}});
+        {%- endif %}
+    {%- endfor %}
+#endif
+    {%- endif %}
+    {%- if core_id == "0" %}
+        Rte_StartTiming_InitState = RTE_STATE_INIT;
+        Rte_InitState = RTE_STATE_INIT;
+    {%- else %}
+        Rte_InitState_{{core_id}} = RTE_STATE_INIT;
+    {%- endif %}
+    }
+    {%- endfor %}
+    return RTE_E_OK;
+}
+
+/**
+ * Unset alarm, set Rte_StartTiming_InitState to RTE_STATE_UNINIT,
+ * Set Rte_InitState to RTE_STATE_SCHM_INIT
+ *
+ * @return Std_ReturnType
+ *
+ * @retval RTE_E_OK
+ */
+FUNC(Std_ReturnType,RTE_CODE) Rte_Stop(void)
+{
+#if (RTE_DLOG_ENABLED == STD_ON)
+    Std_ReturnType ret;
+#endif
+    {%- for core_id, alarm_list in core_to_alarm_dict.items() %}
+    {%- if loop.first %}
+    CoreIdType id = GetCoreID();
+    {%- endif %}
+    if (id == OS_CORE_ID_{{core_id}}) {
+        Rte_StartTiming_InitState = RTE_STATE_UNINIT;
+        /* deactivate alarms */
+#if (RTE_DLOG_ENABLED == STD_ON)
+    {%- for alarm in alarm_list %}
+    {%- if not alarm["is_bsw_alarm"] %}
+        ret = CancelAlarm((AlarmType)OS_ALARM_{{alarm["name"]}}_ID);
+        if (ret != E_OK)
+        {
+            Rte_LogOs(RTE_STOP_SERVICE_ID, RTE_DLOG_EMPTY_ID, OSServiceId_CancelAlarm, OS_ALARM_{{alarm["name"]}}_ID, ret);
+        }
+    {%- endif %}
+    {%- endfor %}
+#else
+    {%- for alarm in alarm_list %}
+    {%- if not alarm["is_bsw_alarm"] %}
+        //(void)CancelAlarm((AlarmType)Os_Alarm_{{alarm["name"]}}_ID);
+    {%- endif %}
+    {%- endfor %}
+#endif
+    {%- if core_id == "0" %}
+        Rte_InitState = RTE_STATE_SCHM_INIT;
+    {%- else %}
+        Rte_InitState_{{core_id}} = RTE_STATE_SCHM_INIT;
+    {%- endif %}
+    }
+    {%- endfor %}
+    return RTE_E_OK;
+}
+
+/**
+ * Unset alarm, set Rte_InitState to RTE_STATE_UNINIT
+ */
+FUNC(void,RTE_CODE) SchM_Deinit(void)
+{
+#if (RTE_DLOG_ENABLED == STD_ON)
+    Std_ReturnType ret;
+#endif
+    {%- for core_id in core_to_task_dict %}
+    {%- if loop.first %}
+    CoreIdType id = GetCoreID();
+    {%- endif %}
+    if (id == OS_CORE_ID_{{core_id}}) {
+        Rte_StartTiming_InitState = RTE_STATE_UNINIT;
+        /* deactivate alarms */
+    {%- set alarm_list = core_to_alarm_dict.get(core_id, []) %}
+#if (RTE_DLOG_ENABLED == STD_ON)
+    {%- for alarm in alarm_list %}
+    {%- if alarm["is_bsw_alarm"] %}
+        ret = CancelAlarm((AlarmType)OS_ALARM_{{alarm["name"]}}_ID);
+        if (ret != E_OK)
+        {
+            Rte_LogOs(SCHM_DEINIT_SERVICE_ID, RTE_DLOG_EMPTY_ID, OSServiceId_CancelAlarm, OS_ALARM_{{alarm["name"]}}_ID, ret);
+        }
+    {%- endif %}
+    {%- endfor %}
+#else
+    {%- for alarm in alarm_list %}
+    {%- if alarm["is_bsw_alarm"] %}
+        //(void)CancelAlarm((AlarmType)Os_Alarm_{{alarm["name"]}}_ID);
+    {%- endif %}
+    {%- endfor %}
+#endif
+
+        /* deactivate the schedule tables */
+#if (RTE_DLOG_ENABLED == STD_ON)
+    {%- for task in core_to_task_dict[core_id] %}
+        {%- set task_name = task["name"] %}
+        {%- if task["is_schedule_table_task"] and task["has_unique_sch_tbl"] %}
+        {%- set init_sch_tbl_name, main_sch_tbl_name = get_schedule_table_name(task_name) %}
+        {%- if is_init_schedule_table(task_name) %}
+        ret = StopScheduleTable((ScheduleTableType)OS_SCHEDTABLE_{{init_sch_tbl_name}}_ID);
+        if (ret != E_OK)
+        {
+            Rte_LogOs(SCHM_DEINIT_SERVICE_ID, RTE_DLOG_EMPTY_ID, OSServiceId_StopScheduleTable, OS_SCHEDTABLE_{{init_sch_tbl_name}}_ID, ret);
+        }
+        ret = StopScheduleTable((ScheduleTableType)OS_SCHEDTABLE_{{main_sch_tbl_name}}_ID);
+        if (ret != E_OK)
+        {
+            Rte_LogOs(SCHM_DEINIT_SERVICE_ID, RTE_DLOG_EMPTY_ID, OSServiceId_StopScheduleTable, OS_SCHEDTABLE_{{main_sch_tbl_name}}_ID, ret);
+        }
+        {%- else %}
+        ret = StopScheduleTable((ScheduleTableType)OS_SCHEDTABLE_{{main_sch_tbl_name}}_ID);
+        if (ret != E_OK)
+        {
+            Rte_LogOs(SCHM_DEINIT_SERVICE_ID, RTE_DLOG_EMPTY_ID, OSServiceId_StopScheduleTable, OS_SCHEDTABLE_{{main_sch_tbl_name}}_ID, ret);
+        }
+        {%- endif %}
+        {%- endif %}
+    {%- endfor %}
+#else
+    {%- for task in core_to_task_dict[core_id] %}
+        {%- set task_name = task["name"] %}
+        {%- if task["is_schedule_table_task"] and task["has_unique_sch_tbl"] %}
+        {%- set init_sch_tbl_name, main_sch_tbl_name = get_schedule_table_name(task_name) %}
+        {%- if is_init_schedule_table(task_name) %}
+        (void)StopScheduleTable((ScheduleTableType)OS_SCHEDTABLE_{{init_sch_tbl_name}}_ID);
+        (void)StopScheduleTable((ScheduleTableType)OS_SCHEDTABLE_{{main_sch_tbl_name}}_ID);
+        {%- else %}
+        (void)StopScheduleTable((ScheduleTableType)OS_SCHEDTABLE_{{main_sch_tbl_name}}_ID);
+        {%- endif %}
+        {%- endif %}
+    {%- endfor %}
+#endif
+
+    {%- if core_id == "0" %}
+        Rte_InitState = RTE_STATE_UNINIT;
+    {%- else %}
+        Rte_InitState_{{core_id}} = RTE_STATE_UNINIT;
+    {%- endif %}
+    }
+    {%- endfor %}
+}
+
+FUNC(void,RTE_CODE) Rte_InitMemory(void)
+{
+    CoreIdType id = GetCoreID();
+    {%- for core_id in core_id_list %}
+    if (id == OS_CORE_ID_{{core_id}}) {
+        {%- if core_id == "0" %}
+        Rte_InitState = RTE_STATE_UNINIT;
+        Rte_StartTiming_InitState = RTE_STATE_UNINIT;
+        {%- else %}
+        Rte_InitState_{{core_id}} = RTE_STATE_UNINIT;
+        {%- endif %}
+        {%- for appl_name in core_to_appl_dict[core_id] %}
+        Rte_InitMemory_{{appl_name}}();
+        {%- endfor %}
+    }
+    {%- endfor %}
+}
+
+
+{%- macro dlog_in_rte_com_cbk(signal_name, signal_info, rte_comcbk_api_id) %}
+#if (RTE_DLOG_ENABLED == STD_ON)
+    if (ret != E_OK)
+    {
+{%- if signal_info["datatype"]["native_category"] == "STRUCTURE" %}
+        Rte_LogCom(RTE_COMCBK_SN_SERVICE_ID, {{rte_comcbk_api_id}}, RTE_COM_RECEIVESIGNALGROUP_ID, ComConf_ComSignalGroup_{{signal_name}}_Rx, ret);
+{%- else %}
+        Rte_LogCom(RTE_COMCBK_SN_SERVICE_ID, {{rte_comcbk_api_id}}, RTE_COM_RECEIVESIGNAL_ID, ComConf_ComSignal_{{signal_name}}_Rx, ret);
+{%- endif %}
+    }
+#endif
+{%- endmacro %}
+
+{%- macro com_cbk_set_flag_and_evt(signal_info, rte_comcbk_api_id, has_ret) %}
+{%- for flag in signal_info["data_mapping_flag"]["is_updated"] %}
+    {{flag["parent_struct_name"]}}.{{flag["name"]}} = 1U;
+{%- endfor %}
+{%- for flag in signal_info["data_mapping_flag"]["is_received"] %}
+    {{flag["parent_struct_name"]}}.{{flag["name"]}} = 1U;
+{%- endfor %}
+{%- for flag in signal_info["data_mapping_flag"]["is_timeout"] %}
+    {{flag["parent_struct_name"]}}.{{flag["name"]}} = 0U;
+{%- endfor %}
+
+{%- if signal_info["trigger_event"] %}
+#if (RTE_DLOG_ENABLED == STD_ON)
+    /* scheduled trigger for runnables */
+    {%- if not has_ret %}
+    uint8 ret;
+    {%- endif %}
+    {%- for evt in signal_info["trigger_event"] %}
+    ret = SetEvent((TaskType) {{evt["task_id"].upper()}}, (EventMaskType){{evt["event_mask"].upper()}});
+    if (ret != E_OK)
+    {
+        Rte_LogOs(RTE_COMCBK_SN_SERVICE_ID, {{rte_comcbk_api_id}}, OSServiceId_SetEvent, {{evt["task_id"]}}, ret);
+    }
+    {%- endfor %}
+#else
+    {%- for evt in signal_info["trigger_event"] %}
+    (void) SetEvent((TaskType) {{evt["task_id"].upper()}}, (EventMaskType){{evt["event_mask"].upper()}});
+    {%- endfor %}
+#endif
+{%- endif %}
+{%- endmacro %}
+
+{%- macro com_cbk_rx_tout_func(signal_name, signal_info) %}
+{%- if signal_info["data_mapping_flag"]["is_timeout"] %}
+FUNC(void, RTE_CODE) Rte_COMCbkRxTOut_{{signal_name}}_Rx(void)
+{
+    {%- for flag in signal_info["data_mapping_flag"]["is_timeout"] %}
+    {{flag["parent_struct_name"]}}.{{flag["name"]}} = 1U;
+    {%- endfor %}
+}
+{##}
+{%- endif %}
+{%- endmacro %}
+
+/**
+ * COM-Callbacks for DataReceivedEvent triggered runnables, inter-ECU client/server communication, for queued com. and for Rx timeout / Rx inv. flag (reset)
+ */
+{%- set com_cbk_dict_same_core, com_cbk_dict_inter_core = get_rte_com_cbk_dict() %}
+{#- com cbk for same core #}
+{%- for signal_name, signal_info in com_cbk_dict_same_core.items() %}
+    {%- set rte_comcbk_api_id = "Rte_COMCbk_" + signal_name + "_Rx_ID" %}
+    {%- set datatype = signal_info["datatype"] %}
+    {%- set datatype_category = datatype["native_category"] %}
+    {#- buff does not exist for intra osa #}
+    {%- set buff = signal_info["data_mapping_buff"] %}
+FUNC(void,RTE_CODE) Rte_COMCbk_{{signal_name}}_Rx(void)
+{
+    if ({{signal_info["rte_init_state"]}} != RTE_STATE_INIT)
+    {
+        return;
+    }
+    {%- if buff %}
+    Std_ReturnType ret;
+        {%- if signal_info["data_mapping_lock"] == "OSISR" %}
+    Rte_DisableOSInterrupts();
+        {%- endif %}
+
+        {%- if datatype_category == "NUMERICAL" %}
+    ret = com_receive_signal(ComConf_ComSignal_{{signal_name}}_Rx, &{{buff["name"]}});
+            {%- if gen_compu_method %}
+    {{-macros.gen_rx_num_sig_dm_compu_method_cbk("    ", buff["name"], buff["name"], datatype['basetype'], signal_info['compu_method'], 'false')}}
+            {%- endif %}
+        {%- elif datatype_category == "ARRAY" %}
+    ret = com_receive_signal(ComConf_ComSignal_{{signal_name}}_Rx, *(&{{buff["name"]}}));
+        {%- elif datatype_category == "STRUCTURE" %}
+    ret = com_receive_signal_group(ComConf_ComSignalGroup_{{signal_name}}_Rx);
+            {%- set type_mappings = signal_info["type_mappings"].get(signal_name)%}
+            {%- for type_mapping in type_mappings %}
+    ret |= com_receive_signal(ComConf_ComGroupSignal_{{type_mapping["i_signal"]}}_Rx, &({{buff["name"]}}.{{type_mapping["implementation_record_element"]}}));
+                {%- if gen_compu_method %}
+    {{-macros.gen_rx_signal_group_dm_compu_method_cbk("    ", buff["name"], buff["name"], type_mapping["implementation_record_element"], type_mapping["datatype"], type_mapping["compu_method"])}}
+                {%- endif %}
+            {%- endfor %}
+        {%- endif %}
+        {%- if signal_info["data_mapping_status"] %}
+    {{signal_info["data_mapping_status"]["name"]}} = ret;
+        {%- endif %}
+
+        {%- if signal_info["data_mapping_lock"] == "OSISR" %}
+    Rte_EnableOSInterrupts();
+        {%- endif %}
+{##}
+    {{-dlog_in_rte_com_cbk(signal_name, signal_info, rte_comcbk_api_id)}}
+    {%- endif %}
+{##}
+{{-com_cbk_set_flag_and_evt(signal_info, rte_comcbk_api_id, buff)}}
+}
+{##}
+{{-com_cbk_rx_tout_func(signal_name, signal_info)}}
+{%- endfor %}
+
+{#- com cbk for inter core #}
+{%- for signal_name, signal_info in com_cbk_dict_inter_core.items() %}
+    {%- set rte_comcbk_api_id = "Rte_COMCbk_" + signal_name + "_Rx_ID" %}
+    {%- set datatype = signal_info["datatype"] %}
+    {%- set datatype_category = datatype["native_category"] %}
+    {#- buff exist for inter core #}
+    {%- set buff = signal_info["data_mapping_buff"] %}
+FUNC(void,RTE_CODE) Rte_COMCbk_{{signal_name}}_Rx(void)
+{
+    if ({{signal_info["rte_init_state"]}} != RTE_STATE_INIT)
+    {
+        return;
+    }
+    Std_ReturnType ret;
+    {{datatype["name"]}} tempBuff;
+    {%- if datatype_category == "NUMERICAL" %}
+    ret = com_receive_signal(ComConf_ComSignal_{{signal_name}}_Rx, &tempBuff);
+    {%- elif datatype_category == "ARRAY" %}
+    ret = com_receive_signal(ComConf_ComSignal_{{signal_name}}_Rx, *(&tempBuff));
+    {%- elif datatype_category == "STRUCTURE" %}
+    ret = com_receive_signal_group(ComConf_ComSignalGroup_{{signal_name}}_Rx);
+        {%- set type_mappings = signal_info["type_mappings"].get(signal_name)%}
+        {%- for type_mapping in type_mappings %}
+    ret |= com_receive_signal(ComConf_ComGroupSignal_{{type_mapping["i_signal"]}}_Rx, &(tempBuff.{{type_mapping["implementation_record_element"]}}));
+        {%- endfor %}
+    {%- endif %}
+{##}
+    {{-dlog_in_rte_com_cbk(signal_name, signal_info, rte_comcbk_api_id)}}
+
+    (void) GetSpinlock{{signal_info["data_mapping_spinlock_api_postfix"]}}((SpinlockIdType) {{signal_info["data_mapping_lock_id"]}});
+    {%- if datatype_category == "NUMERICAL" %}
+        {%- if gen_compu_method %}
+    {{-macros.gen_rx_num_sig_dm_compu_method_cbk("    ", buff["name"], "tempBuff", datatype['basetype'], signal_info['compu_method'], 'true')}}
+        {%- else %}
+    {{buff["name"]}} = tempBuff;
+        {%- endif %}
+    {%- elif datatype_category == "ARRAY" %}
+    Rte_MemCpy(*(&{{buff["name"]}}), *(&tempBuff), sizeof(tempBuff));
+    {%- else %}
+        {%- if gen_compu_method %}
+            {%- for type_mapping in type_mappings %}
+    {{-macros.gen_rx_signal_group_dm_compu_method_cbk("    ", buff["name"], "tempBuff", type_mapping["implementation_record_element"], type_mapping["datatype"], type_mapping["compu_method"])}}
+            {%- endfor %}
+        {%- else %}
+    Rte_MemCpy(&{{buff["name"]}}, &tempBuff, sizeof(tempBuff));
+        {%- endif %}
+    {%- endif %}
+    {%- if signal_info["data_mapping_status"] %}
+    {{signal_info["data_mapping_status"]["name"]}} = ret;
+    {%- endif %}
+
+    (void) ReleaseSpinlock{{signal_info["data_mapping_spinlock_api_postfix"]}}((SpinlockIdType) {{signal_info["data_mapping_lock_id"]}});
+{##}
+{{-com_cbk_set_flag_and_evt(signal_info, rte_comcbk_api_id, True)}}
+}
+{##}
+{{-com_cbk_rx_tout_func(signal_name, signal_info)}}
+{%- endfor %}
+
+
+{# blank line #}
+#define RTE_STOP_SEC_CODE
+#include "rte_memmap.h"
+{# blank line #}

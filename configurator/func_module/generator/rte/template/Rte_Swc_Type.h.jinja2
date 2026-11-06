@@ -1,0 +1,84 @@
+{{get_copyright()}}
+
+{% set swc_name = get_swc_name() %}
+/*!*********************************************************************************************************************
+ * @file        Rte_{{swc_name}}_Type.h
+ * @brief       Application types header file for SWC (Software Component)
+ * @details     This header file contains the definitions of the data types and
+ *              constants that are used across the Software Component (SWC) for
+ *              the project
+ * @date        {{get_generation_time_temp()}}
+ * @toolversion {{get_vcos_version_temp()}}
+ **********************************************************************************************************************/
+
+{%- import 'macros.jinja2' as macros %}
+#ifndef RTE_{{swc_name|upper}}_TYPE_H_
+#define RTE_{{swc_name|upper}}_TYPE_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "Rte_Type.h"
+
+{%- set adt_constraints = get_swc_adt_constraint_list() %}
+{%- if adt_constraints %}
+/*
+ * Data Constraint of ADT
+ */
+    {%- for constr in adt_constraints %}
+#define {{constr['adt_name']}}_LowerLimit ({{constr['min_shown']}})
+#define {{constr['adt_name']}}_UpperLimit ({{constr['max_shown']}})
+    {%- endfor %}
+{%- endif %}
+
+{%- set adt_compu_methods = get_swc_adt_compu_method_list() %}
+{%- if adt_compu_methods %}
+/*
+ * compu-method of adt text table/bit field text table
+ */
+{{-macros.define_compu_method(adt_compu_methods)}}
+{%- endif %}
+
+{%- set idt_compu_methods = get_swc_idt_compu_method_list() %}
+{%- if idt_compu_methods %}
+/*
+ * compu-method of idt text table/bit field text table
+ */
+{{-macros.define_compu_method(idt_compu_methods)}}
+{%- endif %}
+
+{# Definitions for Mode Management #}
+{%- set mode_group_list = get_mode_group_list_in_swc() %}
+{%- if mode_group_list|length %}
+/*
+ * Definitions for Mode Management
+ */
+{% endif -%}
+{% for mode_group in mode_group_list -%}
+{% set mode_group_name = mode_group["name"] -%}
+{% set mode_declarations = mode_group["mode_declarations"] -%}
+{% set on_tansition_value = mode_group["on_tansition_value"] -%}
+
+# ifndef RTE_MODETYPE_{{mode_group_name.upper()}}
+#  define RTE_MODETYPE_{{mode_group_name.upper()}}
+typedef uint8 Rte_ModeType_{{mode_group_name}};
+# endif
+{% for name, value in mode_declarations.items() -%}
+# define RTE_MODE_{{swc_name}}_{{mode_group_name}}_{{name}} ({{value[1]}}U)
+# ifndef RTE_MODE_{{mode_group_name}}_{{name}}
+#  define RTE_MODE_{{mode_group_name}}_{{name}} ({{value[1]}}U)
+# endif
+{% endfor -%}
+# define RTE_TRANSITION_{{swc_name}}_{{mode_group_name}} ({{on_tansition_value}}U)
+# ifndef RTE_TRANSITION_{{mode_group_name}}
+#  define RTE_TRANSITION_{{mode_group_name}} ({{on_tansition_value}}U)
+# endif
+{% endfor -%}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* RTE_{{swc_name|upper}}_H_ */
+{# blank line at end of file #}

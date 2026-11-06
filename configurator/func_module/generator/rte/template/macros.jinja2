@@ -1,0 +1,147 @@
+{%- macro define_compu_method(compu_methods) %}
+{%- for cm in compu_methods %}
+    {%- for cm_text, cm_value in cm.items() %}
+#  ifndef {{cm_text}}
+#   define {{cm_text}} ({{cm_value}}U)
+#  endif
+    {%- endfor %}
+{%- endfor %}
+{%- endmacro %}
+
+{# generate rx signal signal group compute method in proxy #}
+{%- macro gen_rx_signal_group_dm_compu_method_cbk(ind, assigned, assign, element, data_sig_type, sig_cm_info) %}
+    {%- if sig_cm_info.get('category', None) == 'LINEAR' %}
+{{ind}}{{assigned}}.{{element}} = ({{data_sig_type}})((float64)({{assign}}.{{element}}) * {{sig_cm_info['value']['coeff_final']}} + ({{sig_cm_info['value']['offset_final']}}));
+    {%- elif sig_cm_info.get('category', None) in ['SCALE_LINEAR', 'SCALE_LINEAR_AND_TEXTTABLE'] %}
+{{ind}}switch ((sint64)({{assign}}.{{element}}))
+{{ind}}{
+        {%- for sub in sig_cm_info['value'] %}
+            {%- if sub['lower_limit'] == sub['upper_limit'] %}
+{{ind}}    case ({{sub['lower_limit']}}):
+{{ind}}        {{assigned}}.{{element}} = ({{data_sig_type}}){{sub['lower_limit']}};
+{{ind}}        break;
+            {%- else %}
+{{ind}}    default:
+{{ind}}        {{assigned}}.{{element}} = ({{data_sig_type}})((float64)({{assign}}.{{element}}) * {{sub['coeff_final']}} + ({{sub['offset_final']}}));
+{{ind}}        break;
+{{ind}}}
+            {%- endif %}
+        {%- endfor %}
+    {%- endif %}
+{%- endmacro %}
+
+{# generate numerical signal compute method #}
+{%- macro gen_rx_num_sig_dm_compu_method_cbk(ind, assigned, assign, data_sig_type, sig_cm_info, gen_origin) %}
+    {%- if sig_cm_info.get('category', None) == 'LINEAR' %}
+{{ind}}{{assigned}} = ({{data_sig_type}})((float64)({{assign}}) * {{sig_cm_info['value']['coeff_final']}} + ({{sig_cm_info['value']['offset_final']}}));
+    {%- elif sig_cm_info.get('category', None) in ['SCALE_LINEAR', 'SCALE_LINEAR_AND_TEXTTABLE'] %}
+{{ind}}switch ((sint64)({{assign}}))
+{{ind}}{
+        {%- for sub in sig_cm_info['value'] %}
+            {%- if sub['lower_limit'] == sub['upper_limit'] %}
+{{ind}}    case ({{sub['lower_limit']}}):
+{{ind}}        {{assigned}} = ({{data_sig_type}}){{sub['lower_limit']}};
+{{ind}}        break;
+            {%- else %}
+{{ind}}    default:
+{{ind}}        {{assigned}} = ({{data_sig_type}})((float64)({{assign}}) * {{sub['coeff_final']}} + ({{sub['offset_final']}}));
+{{ind}}        break;
+{{ind}}}
+            {%- endif %}
+        {%- endfor %}
+    {%- else %}
+        {%- if gen_origin == 'true' %}
+{{ind}}{{assigned}} = {{assign}};
+        {%- endif %}
+    {%- endif %}
+{%- endmacro %}
+
+{# generate tx signal signal group compute method in proxy #}
+{%- macro gen_tx_signal_group_dm_compu_method_proxy(ind, assigned, assign, element, data_sig_type, sig_cm_info) %}
+    {%- if sig_cm_info.get('category', None) == 'LINEAR' %}
+{{ind}}{{data_sig_type}} Local_{{assigned}}_{{element}};
+{{ind}}Local_{{assigned}}_{{element}} = ({{data_sig_type}})((float64)({{assign}}.{{element}}) * {{sig_cm_info['value']['coeff_final']}} + ({{sig_cm_info['value']['offset_final']}}));
+    {%- elif sig_cm_info.get('category', None) in ['SCALE_LINEAR', 'SCALE_LINEAR_AND_TEXTTABLE'] %}
+{{ind}}{{data_sig_type}} Local_{{assigned}}_{{element}};
+{{ind}}switch ((sint64)({{assign}}.{{element}}))
+{{ind}}{
+        {%- for sub in sig_cm_info['value'] %}
+            {%- if sub['lower_limit'] == sub['upper_limit'] %}
+{{ind}}    case ({{sub['lower_limit']}}):
+{{ind}}        Local_{{assigned}}_{{element}} = ({{data_sig_type}}){{sub['lower_limit']}};
+{{ind}}        break;
+            {%- else %}
+{{ind}}    default:
+{{ind}}        Local_{{assigned}}_{{element}} = ({{data_sig_type}})((float64)({{assign}}.{{element}}) * {{sub['coeff_final']}} + ({{sub['offset_final']}}));
+{{ind}}        break;
+{{ind}}}
+            {%- endif %}
+        {%- endfor %}
+    {%- endif %}
+{%- endmacro %}
+
+{# generate tx numerical signal compute method #}
+{%- macro gen_tx_num_sig_dm_compu_method_proxy(ind, assigned, assign, data_sig_type, sig_cm_info, gen_origin) %}
+    {%- if sig_cm_info.get('category', None) == 'LINEAR' %}
+{{ind}}{{data_sig_type}} Local_{{assigned}};
+{{ind}}Local_{{assigned}} = ({{data_sig_type}})((float64)({{assign}}) * {{sig_cm_info['value']['coeff_final']}} + ({{sig_cm_info['value']['offset_final']}}));
+    {%- elif sig_cm_info.get('category', None) in ['SCALE_LINEAR', 'SCALE_LINEAR_AND_TEXTTABLE'] %}
+{{ind}}{{data_sig_type}} Local_{{assigned}};
+{{ind}}switch ((sint64)({{assign}}))
+{{ind}}{
+        {%- for sub in sig_cm_info['value'] %}
+            {%- if sub['lower_limit'] == sub['upper_limit'] %}
+{{ind}}    case ({{sub['lower_limit']}}):
+{{ind}}        Local_{{assigned}} = ({{data_sig_type}}){{sub['lower_limit']}};
+{{ind}}        break;
+            {%- else %}
+{{ind}}    default:
+{{ind}}        Local_{{assigned}} = ({{data_sig_type}})((float64)({{assign}}) * {{sub['coeff_final']}} + ({{sub['offset_final']}}));
+{{ind}}        break;
+{{ind}}}
+            {%- endif %}
+        {%- endfor %}
+    {%- else %}
+        {%- if gen_origin == 'true' %}
+{{ind}}{{assigned}} = {{assign}};
+        {%- endif %}
+    {%- endif %}
+{%- endmacro %}
+
+{%- macro CAL_PARAM_CONST(ind, const_name, port_arg, is_extern) %}
+    {%- if is_extern %}
+{{ind}}extern CONST({{port_arg['datatype']['name']}}, RTE_CALIB_CONST) {{const_name}};
+    {%- else %}
+        {%- set init_value, is_zero, is_bool = get_sr_var_init_value(port_arg['datatype'], port_arg["init_value"]) %}
+{{ind}}CONST({{port_arg['datatype']['name']}}, RTE_CALIB_CONST) {{const_name}} = {{init_value}};
+    {%- endif %}
+{%- endmacro %}
+
+{%- macro CAL_PARAM_CONSTS_MEMMAP(is_start) %}
+    {%- if is_start %}
+#define RTE_START_SEC_CALIB_CONST
+    {%- else %}
+#define RTE_STOP_SEC_CALIB_CONST
+    {%- endif %}
+#include "rte_memmap.h"
+{%- endmacro %}
+
+{%- macro RTE_PRM_INTERFACE_MACRO(port) %}
+    {%- if port['arg']['datatype']['native_category'] == 'NUMERICAL' %}
+#  define Rte_Prm_{{port['name']}}() ({{port['cal_prm_const']}})
+    {%- elif port['arg']['datatype']['native_category'] == 'ARRAY' %}
+        {%- set array_dim = port['arg']['datatype']['array_dim'] %}
+        {%- set array_idx = '[0]' * array_dim %}
+        {%- set p2const_prefix = '' %}
+        {%- if array_dim > 1 %}
+            {%- set p2const_prefix = '(const ' + port['arg']['datatype'].get('arr_basetype', 'void') + ' *)' %}
+        {%- endif %}
+#  ifndef RTE_PTR2ARRAYTYPE_PASSING
+#   define Rte_Prm_{{port['name']}}() ({{p2const_prefix}}&({{port['cal_prm_const']}}{{array_idx}}))
+#  else
+#   define Rte_Prm_{{port['name']}}() (&{{port['cal_prm_const']}})
+#  endif
+    {%- else %}
+#  define Rte_Prm_{{port['name']}}() (&{{port['cal_prm_const']}})
+    {%- endif %}
+{%- endmacro %}

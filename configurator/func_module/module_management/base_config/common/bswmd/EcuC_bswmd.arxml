@@ -1,0 +1,2011 @@
+<?xml version="1.0" ?>
+<AUTOSAR xmlns="http://autosar.org/schema/r4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://autosar.org/schema/r4.0 AUTOSAR_00046.xsd">
+  <ADMIN-DATA>
+    <DOC-REVISIONS>
+      <DOC-REVISION>
+        <REVISION-LABEL>4.4.0</REVISION-LABEL>
+        <ISSUED-BY>AUTOSAR</ISSUED-BY>
+      </DOC-REVISION>
+    </DOC-REVISIONS>
+  </ADMIN-DATA>
+  <AR-PACKAGES>
+    <AR-PACKAGE UUID="ECUC:AUTOSAR">
+      <SHORT-NAME>AUTOSAR</SHORT-NAME>
+      <AR-PACKAGES>
+        <AR-PACKAGE UUID="ECUC:ECUCDEFS">
+          <SHORT-NAME>EcucDefs</SHORT-NAME>
+          <ELEMENTS>
+            <ECUC-MODULE-DEF UUID="ECUC:f72efedf-ee71-4a1b-b4d6-b77adfbf4cf2">
+              <SHORT-NAME>EcuC</SHORT-NAME>
+              <DESC>
+                <L-2 L="EN">Virtual module to collect ECU Configuration specific / global configuration information.</L-2>
+              </DESC>
+              <ADMIN-DATA>
+                <DOC-REVISIONS>
+                  <DOC-REVISION>
+                    <REVISION-LABEL>4.4.0</REVISION-LABEL>
+                    <ISSUED-BY>AUTOSAR</ISSUED-BY>
+                  </DOC-REVISION>
+                </DOC-REVISIONS>
+              </ADMIN-DATA>
+              <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00008</RELATED-TRACE-ITEM-REF>
+              <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+              <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+              <POST-BUILD-VARIANT-SUPPORT>true</POST-BUILD-VARIANT-SUPPORT>
+              <SUPPORTED-CONFIG-VARIANTS>
+                <SUPPORTED-CONFIG-VARIANT>VARIANT-POST-BUILD</SUPPORTED-CONFIG-VARIANT>
+                <SUPPORTED-CONFIG-VARIANT>VARIANT-PRE-COMPILE</SUPPORTED-CONFIG-VARIANT>
+              </SUPPORTED-CONFIG-VARIANTS>
+              <CONTAINERS>
+                <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:37cb0ecf-a6ac-4b05-aaf8-d97ec61f1ae8">
+                  <SHORT-NAME>EcucConfigSet</SHORT-NAME>
+                  <DESC>
+                    <L-2 L="EN">This container contains the configuration parameters and sub containers of the global PduCollection.</L-2>
+                  </DESC>
+                  <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00061</RELATED-TRACE-ITEM-REF>
+                  <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                  <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                  <SUB-CONTAINERS>
+                    <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:cece0b62-6981-43fb-a5b7-d573fdfb2344">
+                      <SHORT-NAME>EcucPduCollection</SHORT-NAME>
+                      <DESC>
+                        <L-2 L="EN">Collection of all Pdu objects flowing through the Com-Stack.</L-2>
+                      </DESC>
+                      <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00002</RELATED-TRACE-ITEM-REF>
+                      <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                      <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                      <PARAMETERS>
+                        <ECUC-ENUMERATION-PARAM-DEF UUID="ECUC:58955203-89bd-4dcf-b3d4-c5e83c87080b">
+                          <SHORT-NAME>PduIdTypeEnum</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">The PduIdType is used within the entire AUTOSAR Com Stack except for bus drivers. The size of this global type depends on the maximum number of PDUs used within one software module. If no software module deals with more PDUs that 256, this type can be set to uint8. If at least one software module handles more than 256 PDUs, this type must be set to uint16. See AUTOSAR_SWS_CommunicationStackTypes for more details.</L-2>
+                          </DESC>
+                          <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00041</RELATED-TRACE-ITEM-REF>
+                          <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                          <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                          <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                          <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                          <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                          <LITERALS>
+                            <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:331a8418-77d1-db36-f360-72b0ae0c73b6">
+                              <SHORT-NAME>UINT16</SHORT-NAME>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            </ECUC-ENUMERATION-LITERAL-DEF>
+                            <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:74f5ad84-30ee-dd82-07d3-02065af14706">
+                              <SHORT-NAME>UINT8</SHORT-NAME>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            </ECUC-ENUMERATION-LITERAL-DEF>
+                          </LITERALS>
+                        </ECUC-ENUMERATION-PARAM-DEF>
+                        <ECUC-ENUMERATION-PARAM-DEF UUID="ECUC:3ffce745-6c26-4c88-a57f-cd785b21e467">
+                          <SHORT-NAME>PduLengthTypeEnum</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">The PduLengthType is used within the entire AUTOSAR Com Stack except for bus drivers. The size of this global type depends on the maximum length of PDUs to be sent by an ECU. If no segmentation is used the length depends on the maximum payload size of a frame of the underlying communication system (for FlexRay maximum size is 255 bytes, therefore uint8). If segmentation is used it depends on the maximum length of a  segmented N-SDU (in general uint16 is used). See AUTOSAR_SWS_CommunicationStackTypes for more details.</L-2>
+                          </DESC>
+                          <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00042</RELATED-TRACE-ITEM-REF>
+                          <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                          <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                          <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                          <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                          <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                          <LITERALS>
+                            <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:1a82195a-5a3a-d9ef-e50b-7a40cca75012">
+                              <SHORT-NAME>UINT16</SHORT-NAME>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            </ECUC-ENUMERATION-LITERAL-DEF>
+                            <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:71d1c418-a527-86b0-4d9d-21c19a6fd501">
+                              <SHORT-NAME>UINT32</SHORT-NAME>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            </ECUC-ENUMERATION-LITERAL-DEF>
+                            <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:5c5d42c6-1357-dc3b-f97e-0996798c2362">
+                              <SHORT-NAME>UINT8</SHORT-NAME>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            </ECUC-ENUMERATION-LITERAL-DEF>
+                          </LITERALS>
+                        </ECUC-ENUMERATION-PARAM-DEF>
+                      </PARAMETERS>
+                      <SUB-CONTAINERS>
+                        <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:03261d0a-fb6a-4d11-a678-56f0d13d2795">
+                          <SHORT-NAME>MetaDataType</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">Meta data serves to transport information through the AUTOSAR layers. It is transported by the PduInfoType structure via a separate pointer to a byte array alongside the length of and a pointer to the payload of the PDU. This container defines the content of the meta data.</L-2>
+                          </DESC>
+                          <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00073</RELATED-TRACE-ITEM-REF>
+                          <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                          <UPPER-MULTIPLICITY-INFINITE>true</UPPER-MULTIPLICITY-INFINITE>
+                          <MULTIPLICITY-CONFIG-CLASSES>
+                            <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                            </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                            <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                            </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                          </MULTIPLICITY-CONFIG-CLASSES>
+                          <POST-BUILD-VARIANT-MULTIPLICITY>false</POST-BUILD-VARIANT-MULTIPLICITY>
+                          <SUB-CONTAINERS>
+                            <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:1d41effa-e300-40ad-93ad-d0c2f40573dc">
+                              <SHORT-NAME>MetaDataItem</SHORT-NAME>
+                              <DESC>
+                                <L-2 L="EN">The content of meta data in a Pdu consists of an ordered list of meta data items.</L-2>
+                              </DESC>
+                              <INTRODUCTION>
+                                <P>
+                                  <L-1 L="EN">This container represents a meta data item that is contained in meta data of a Pdu.</L-1>
+                                </P>
+                              </INTRODUCTION>
+                              <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00074</RELATED-TRACE-ITEM-REF>
+                              <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                              <UPPER-MULTIPLICITY-INFINITE>true</UPPER-MULTIPLICITY-INFINITE>
+                              <MULTIPLICITY-CONFIG-CLASSES>
+                                <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                                </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                                </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              </MULTIPLICITY-CONFIG-CLASSES>
+                              <POST-BUILD-VARIANT-MULTIPLICITY>false</POST-BUILD-VARIANT-MULTIPLICITY>
+                              <REQUIRES-INDEX>true</REQUIRES-INDEX>
+                              <PARAMETERS>
+                                <ECUC-ENUMERATION-PARAM-DEF UUID="ECUC:e455132d-9166-4d5e-9dfc-56d895fe87c9">
+                                  <SHORT-NAME>MetaDataItemType</SHORT-NAME>
+                                  <DESC>
+                                    <L-2 L="EN">This parameter defines the type of a meta data item.</L-2>
+                                  </DESC>
+                                  <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00076</RELATED-TRACE-ITEM-REF>
+                                  <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                                  <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                                  <SCOPE>LOCAL</SCOPE>
+                                  <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                                  <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                                  <VALUE-CONFIG-CLASSES>
+                                    <ECUC-VALUE-CONFIGURATION-CLASS>
+                                      <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                      <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                                    </ECUC-VALUE-CONFIGURATION-CLASS>
+                                    <ECUC-VALUE-CONFIGURATION-CLASS>
+                                      <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                      <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                                    </ECUC-VALUE-CONFIGURATION-CLASS>
+                                  </VALUE-CONFIG-CLASSES>
+                                  <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                                  <LITERALS>
+                                    <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:935d4601-0cbc-8cf4-381e-ea20eb428f7a">
+                                      <SHORT-NAME>ADDRESS_EXTENSION_8</SHORT-NAME>
+                                      <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                                    </ECUC-ENUMERATION-LITERAL-DEF>
+                                    <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:4a123eeb-c754-8b3a-1f16-e7afd42a37b6">
+                                      <SHORT-NAME>CAN_ID_32</SHORT-NAME>
+                                      <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                                    </ECUC-ENUMERATION-LITERAL-DEF>
+                                    <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:a90dbef4-392e-8a9e-1ddf-2ff9c696620e">
+                                      <SHORT-NAME>ETHERNET_MAC_64</SHORT-NAME>
+                                      <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                                    </ECUC-ENUMERATION-LITERAL-DEF>
+                                    <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:6d9442ff-658e-82ab-284e-821916845612">
+                                      <SHORT-NAME>LIN_NAD_8</SHORT-NAME>
+                                      <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                                    </ECUC-ENUMERATION-LITERAL-DEF>
+                                    <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:3fa08da8-206b-8d51-1ac4-6eeb34061f58">
+                                      <SHORT-NAME>PRIORITY_8</SHORT-NAME>
+                                      <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                                    </ECUC-ENUMERATION-LITERAL-DEF>
+                                    <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:aec152c4-86f9-843c-26c1-e9b9916cf4a6">
+                                      <SHORT-NAME>SOCKET_CONNECTION_ID_16</SHORT-NAME>
+                                      <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                                    </ECUC-ENUMERATION-LITERAL-DEF>
+                                    <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:ca1d8af3-4a3b-8d39-4288-73a6b24c3905">
+                                      <SHORT-NAME>SOURCE_ADDRESS_16</SHORT-NAME>
+                                      <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                                    </ECUC-ENUMERATION-LITERAL-DEF>
+                                    <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:25559ce3-6dee-8c34-1e82-5f403d6991b0">
+                                      <SHORT-NAME>TARGET_ADDRESS_16</SHORT-NAME>
+                                      <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                                    </ECUC-ENUMERATION-LITERAL-DEF>
+                                  </LITERALS>
+                                </ECUC-ENUMERATION-PARAM-DEF>
+                                <ECUC-INTEGER-PARAM-DEF UUID="ECUC:60a1fc78-cb1e-4deb-9fa6-b896616a947f">
+                                  <SHORT-NAME>MetaDataItemLength</SHORT-NAME>
+                                  <DESC>
+                                    <L-2 L="EN">This parameter defines the length of a meta data item in bytes.</L-2>
+                                  </DESC>
+                                  <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00075</RELATED-TRACE-ITEM-REF>
+                                  <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                                  <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                                  <SCOPE>LOCAL</SCOPE>
+                                  <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                                  <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                                  <VALUE-CONFIG-CLASSES>
+                                    <ECUC-VALUE-CONFIGURATION-CLASS>
+                                      <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                      <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                                    </ECUC-VALUE-CONFIGURATION-CLASS>
+                                    <ECUC-VALUE-CONFIGURATION-CLASS>
+                                      <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                      <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                                    </ECUC-VALUE-CONFIGURATION-CLASS>
+                                  </VALUE-CONFIG-CLASSES>
+                                  <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                                  <MAX>64</MAX>
+                                  <MIN>1</MIN>
+                                </ECUC-INTEGER-PARAM-DEF>
+                              </PARAMETERS>
+                            </ECUC-PARAM-CONF-CONTAINER-DEF>
+                          </SUB-CONTAINERS>
+                        </ECUC-PARAM-CONF-CONTAINER-DEF>
+                        <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:422a7abf-add2-418a-81a6-af5cdeae1930">
+                          <SHORT-NAME>Pdu</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">One Pdu flowing through the COM-Stack.</L-2>
+                          </DESC>
+                          <INTRODUCTION>
+                            <P>
+                              <L-1 L="EN">This Pdu is used by all Com-Stack modules to agree on referencing the same Pdu.</L-1>
+                            </P>
+                          </INTRODUCTION>
+                          <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00001</RELATED-TRACE-ITEM-REF>
+                          <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                          <UPPER-MULTIPLICITY-INFINITE>true</UPPER-MULTIPLICITY-INFINITE>
+                          <MULTIPLICITY-CONFIG-CLASSES>
+                            <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>POST-BUILD</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                            </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                            <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                            </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                          </MULTIPLICITY-CONFIG-CLASSES>
+                          <POST-BUILD-VARIANT-MULTIPLICITY>true</POST-BUILD-VARIANT-MULTIPLICITY>
+                          <PARAMETERS>
+                            <ECUC-BOOLEAN-PARAM-DEF UUID="ECUC:52670d39-4d5a-4425-a1e0-03e0764d596d">
+                              <SHORT-NAME>DynamicLength</SHORT-NAME>
+                              <DESC>
+                                <L-2 L="EN">This parameter defines whether the Pdu has dynamic length (true) or not (false). Please note that the usage of this attribute is restricted by [constr_3448].</L-2>
+                              </DESC>
+                              <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00078</RELATED-TRACE-ITEM-REF>
+                              <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                              <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                              <MULTIPLICITY-CONFIG-CLASSES>
+                                <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>POST-BUILD</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                                </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                                </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              </MULTIPLICITY-CONFIG-CLASSES>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                              <POST-BUILD-VARIANT-MULTIPLICITY>true</POST-BUILD-VARIANT-MULTIPLICITY>
+                              <POST-BUILD-VARIANT-VALUE>true</POST-BUILD-VARIANT-VALUE>
+                              <VALUE-CONFIG-CLASSES>
+                                <ECUC-VALUE-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>POST-BUILD</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                                </ECUC-VALUE-CONFIGURATION-CLASS>
+                                <ECUC-VALUE-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                                </ECUC-VALUE-CONFIGURATION-CLASS>
+                              </VALUE-CONFIG-CLASSES>
+                              <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                            </ECUC-BOOLEAN-PARAM-DEF>
+                            <ECUC-BOOLEAN-PARAM-DEF UUID="ECUC:5f51de6e-5995-4e90-b083-1d5b7a90848c">
+                              <SHORT-NAME>J1939Requestable</SHORT-NAME>
+                              <DESC>
+                                <L-2 L="EN">Pdu can be triggered by the J1939 request message.</L-2>
+                              </DESC>
+                              <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00072</RELATED-TRACE-ITEM-REF>
+                              <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                              <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                              <MULTIPLICITY-CONFIG-CLASSES>
+                                <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>POST-BUILD</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                                </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                                </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              </MULTIPLICITY-CONFIG-CLASSES>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                              <POST-BUILD-VARIANT-MULTIPLICITY>true</POST-BUILD-VARIANT-MULTIPLICITY>
+                              <POST-BUILD-VARIANT-VALUE>true</POST-BUILD-VARIANT-VALUE>
+                              <VALUE-CONFIG-CLASSES>
+                                <ECUC-VALUE-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>POST-BUILD</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                                </ECUC-VALUE-CONFIGURATION-CLASS>
+                                <ECUC-VALUE-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                                </ECUC-VALUE-CONFIGURATION-CLASS>
+                              </VALUE-CONFIG-CLASSES>
+                              <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                            </ECUC-BOOLEAN-PARAM-DEF>
+                            <ECUC-INTEGER-PARAM-DEF UUID="ECUC:3996a201-ffdf-43d1-a5e8-f88592a78a35">
+                              <SHORT-NAME>PduLength</SHORT-NAME>
+                              <DESC>
+                                <L-2 L="EN">Length of the Pdu in bytes.  It should be noted that in former AUTOSAR releases (Rel 2.1, Rel 3.0, Rel 3.1, Rel 4.0 Rev. 1) this parameter was defined in bits.</L-2>
+                              </DESC>
+                              <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00003</RELATED-TRACE-ITEM-REF>
+                              <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                              <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                              <POST-BUILD-VARIANT-VALUE>true</POST-BUILD-VARIANT-VALUE>
+                              <VALUE-CONFIG-CLASSES>
+                                <ECUC-VALUE-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>POST-BUILD</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                                </ECUC-VALUE-CONFIGURATION-CLASS>
+                                <ECUC-VALUE-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                                </ECUC-VALUE-CONFIGURATION-CLASS>
+                              </VALUE-CONFIG-CLASSES>
+                              <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                              <MAX>4294967295</MAX>
+                              <MIN>0</MIN>
+                            </ECUC-INTEGER-PARAM-DEF>
+                          </PARAMETERS>
+                          <REFERENCES>
+                            <ECUC-FOREIGN-REFERENCE-DEF UUID="ECUC:c540d959-e145-47c1-b8d4-7bba46200f34">
+                              <SHORT-NAME>SysTPduToFrameTriggeringRef</SHORT-NAME>
+                              <DESC>
+                                <L-2 L="EN">Reference to the FrameTriggering from the SystemTemplate which this Pdu belongs to.</L-2>
+                              </DESC>
+                              <INTRODUCTION>
+                                <P>
+                                  <L-1 L="EN">SysTPduToFrameTriggeringRef shall be used for UserDefinedPdus, NmPdus and NPdus which are not going through the Pdu Router. This reference shall not be used if SysTPduToPduTriggeringRef exists.</L-1>
+                                </P>
+                              </INTRODUCTION>
+                              <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00052</RELATED-TRACE-ITEM-REF>
+                              <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                              <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                              <MULTIPLICITY-CONFIG-CLASSES>
+                                <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>POST-BUILD</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                                </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                                </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              </MULTIPLICITY-CONFIG-CLASSES>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                              <POST-BUILD-VARIANT-MULTIPLICITY>true</POST-BUILD-VARIANT-MULTIPLICITY>
+                              <POST-BUILD-VARIANT-VALUE>true</POST-BUILD-VARIANT-VALUE>
+                              <VALUE-CONFIG-CLASSES>
+                                <ECUC-VALUE-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>POST-BUILD</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                                </ECUC-VALUE-CONFIGURATION-CLASS>
+                                <ECUC-VALUE-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                                </ECUC-VALUE-CONFIGURATION-CLASS>
+                              </VALUE-CONFIG-CLASSES>
+                              <DESTINATION-TYPE>FRAME-TRIGGERING</DESTINATION-TYPE>
+                            </ECUC-FOREIGN-REFERENCE-DEF>
+                            <ECUC-FOREIGN-REFERENCE-DEF UUID="ECUC:8ae470f5-d0b3-40ad-b681-a858fc793be3">
+                              <SHORT-NAME>SysTPduToPduTriggeringRef</SHORT-NAME>
+                              <DESC>
+                                <L-2 L="EN">Reference to the PduTriggering from the SystemTemplate which this Pdu represents.</L-2>
+                              </DESC>
+                              <INTRODUCTION>
+                                <P>
+                                  <L-1 L="EN">SysTPduToPduTriggeringRef shall be used for all Pdus except UserDefinedPdus, NmPdus and NPdus which are not going through the Pdu Router. For these Pdus, SysTPduToFrameTriggeringRef shall be used.</L-1>
+                                </P>
+                              </INTRODUCTION>
+                              <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00054</RELATED-TRACE-ITEM-REF>
+                              <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                              <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                              <MULTIPLICITY-CONFIG-CLASSES>
+                                <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>POST-BUILD</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                                </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                                </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              </MULTIPLICITY-CONFIG-CLASSES>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                              <POST-BUILD-VARIANT-MULTIPLICITY>true</POST-BUILD-VARIANT-MULTIPLICITY>
+                              <POST-BUILD-VARIANT-VALUE>true</POST-BUILD-VARIANT-VALUE>
+                              <VALUE-CONFIG-CLASSES>
+                                <ECUC-VALUE-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>POST-BUILD</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                                </ECUC-VALUE-CONFIGURATION-CLASS>
+                                <ECUC-VALUE-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                                </ECUC-VALUE-CONFIGURATION-CLASS>
+                              </VALUE-CONFIG-CLASSES>
+                              <DESTINATION-TYPE>PDU-TRIGGERING</DESTINATION-TYPE>
+                            </ECUC-FOREIGN-REFERENCE-DEF>
+                            <ECUC-REFERENCE-DEF UUID="ECUC:d99ff055-271b-4801-8368-10f5cf18976a">
+                              <SHORT-NAME>MetaDataTypeRef</SHORT-NAME>
+                              <DESC>
+                                <L-2 L="EN">Reference to meta data that is transported in the Pdu through the AUTOSAR layers.</L-2>
+                              </DESC>
+                              <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00077</RELATED-TRACE-ITEM-REF>
+                              <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                              <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                              <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                              <VALUE-CONFIG-CLASSES>
+                                <ECUC-VALUE-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                                </ECUC-VALUE-CONFIGURATION-CLASS>
+                                <ECUC-VALUE-CONFIGURATION-CLASS>
+                                  <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                                  <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                                </ECUC-VALUE-CONFIGURATION-CLASS>
+                              </VALUE-CONFIG-CLASSES>
+                              <DESTINATION-REF DEST="ECUC-PARAM-CONF-CONTAINER-DEF">/AUTOSAR/EcucDefs/EcuC/EcucConfigSet/EcucPduCollection/MetaDataType</DESTINATION-REF>
+                            </ECUC-REFERENCE-DEF>
+                          </REFERENCES>
+                        </ECUC-PARAM-CONF-CONTAINER-DEF>
+                      </SUB-CONTAINERS>
+                    </ECUC-PARAM-CONF-CONTAINER-DEF>
+                  </SUB-CONTAINERS>
+                </ECUC-PARAM-CONF-CONTAINER-DEF>
+                <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:4494efcd-a0fa-42f6-9f5d-25817cdc0188">
+                  <SHORT-NAME>EcucHardware</SHORT-NAME>
+                  <DESC>
+                    <L-2 L="EN">Hardware definition of this Ecu.</L-2>
+                  </DESC>
+                  <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00056</RELATED-TRACE-ITEM-REF>
+                  <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                  <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                  <SUB-CONTAINERS>
+                    <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:e12b8e86-0925-4854-b1a6-adee8a2cf090">
+                      <SHORT-NAME>EcucCoreDefinition</SHORT-NAME>
+                      <DESC>
+                        <L-2 L="EN">Definition of one Core on this Ecu.</L-2>
+                      </DESC>
+                      <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00057</RELATED-TRACE-ITEM-REF>
+                      <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                      <UPPER-MULTIPLICITY-INFINITE>true</UPPER-MULTIPLICITY-INFINITE>
+                      <PARAMETERS>
+                        <ECUC-INTEGER-PARAM-DEF UUID="ECUC:9127a2e5-b908-4f76-b741-655836d78c67">
+                          <SHORT-NAME>EcucCoreId</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">ID of the core.</L-2>
+                          </DESC>
+                          <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00058</RELATED-TRACE-ITEM-REF>
+                          <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                          <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                          <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                          <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                          <VALUE-CONFIG-CLASSES>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                          </VALUE-CONFIG-CLASSES>
+                          <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                          <MAX>65535</MAX>
+                          <MIN>0</MIN>
+                        </ECUC-INTEGER-PARAM-DEF>
+                      </PARAMETERS>
+                      <REFERENCES>
+                        <ECUC-REFERENCE-DEF UUID="ECUC:7ad013ef-fbcb-4c2a-aef2-be260c5016b4">
+                          <SHORT-NAME>EcucCoreHwRef</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">Optional reference to the HwElement of HwCategory ProcessingUnit that represents this Core in the ECU Resource Template.</L-2>
+                          </DESC>
+                          <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00059</RELATED-TRACE-ITEM-REF>
+                          <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                          <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                          <MULTIPLICITY-CONFIG-CLASSES>
+                            <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                            </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                            <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                            </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                          </MULTIPLICITY-CONFIG-CLASSES>
+                          <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                          <POST-BUILD-VARIANT-MULTIPLICITY>false</POST-BUILD-VARIANT-MULTIPLICITY>
+                          <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                          <VALUE-CONFIG-CLASSES>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                          </VALUE-CONFIG-CLASSES>
+                          <DESTINATION-REF DEST="ECUC-PARAM-CONF-CONTAINER-DEF">/AUTOSAR/EcucDefs/Os/OsPublishedInformation/OsDerivativeInformation/OsPhysicalCore</DESTINATION-REF>
+                        </ECUC-REFERENCE-DEF>
+                      </REFERENCES>
+                    </ECUC-PARAM-CONF-CONTAINER-DEF>
+                  </SUB-CONTAINERS>
+                </ECUC-PARAM-CONF-CONTAINER-DEF>
+                <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:ed28c0d5-4e0c-4826-89fa-449203a3ce8e">
+                  <SHORT-NAME>EcucPartitionCollection</SHORT-NAME>
+                  <DESC>
+                    <L-2 L="EN">Collection of Partitions defined for this ECU.</L-2>
+                  </DESC>
+                  <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00007</RELATED-TRACE-ITEM-REF>
+                  <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                  <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                  <SUB-CONTAINERS>
+                    <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:c11de67e-41cd-4da2-8cfc-01c5e34209be">
+                      <SHORT-NAME>EcucPartition</SHORT-NAME>
+                      <DESC>
+                        <L-2 L="EN">Definition of one Partition on this ECU.</L-2>
+                      </DESC>
+                      <!-- <ADMIN-DATA>
+                        <SDGS>
+                          <SDG GID="VCOS:CfgUnrealized">
+                            <SD GID="VCOS:CfgLock">true</SD>
+                          </SDG>
+                        </SDGS>
+                      </ADMIN-DATA> -->
+                      <INTRODUCTION>
+                        <P>
+                          <L-1 L="EN">One Partition will be implemented using one Os-Application.</L-1>
+                        </P>
+                      </INTRODUCTION>
+                      <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00005</RELATED-TRACE-ITEM-REF>
+                      <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                      <UPPER-MULTIPLICITY-INFINITE>true</UPPER-MULTIPLICITY-INFINITE>
+                      <MULTIPLICITY-CONFIG-CLASSES>
+                        <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                        </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                        <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                        </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                      </MULTIPLICITY-CONFIG-CLASSES>
+                      <POST-BUILD-VARIANT-MULTIPLICITY>false</POST-BUILD-VARIANT-MULTIPLICITY>
+                      <PARAMETERS>
+                        <ECUC-ENUMERATION-PARAM-DEF UUID="ECUC:e455132d-9176-4d5e-9dfc-56d895fe88c9">
+                          <SHORT-NAME>ASIL</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">This parameter defines the ASIL of a meta data item.</L-2>
+                          </DESC>
+                          <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00099</RELATED-TRACE-ITEM-REF>
+                          <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                          <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                          <SCOPE>LOCAL</SCOPE>
+                          <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                          <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                          <VALUE-CONFIG-CLASSES>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                          </VALUE-CONFIG-CLASSES>
+                          <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                          <LITERALS>
+                            <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:935d4602-0cbc-8cf4-381e-ea20eb428f7a">
+                              <SHORT-NAME>QM</SHORT-NAME>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            </ECUC-ENUMERATION-LITERAL-DEF>
+                            <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:4a124eeb-c754-8b3a-1f16-e7afd42a37b6">
+                              <SHORT-NAME>A</SHORT-NAME>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            </ECUC-ENUMERATION-LITERAL-DEF>
+                            <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:a90dbef6-392e-8a9e-1ddf-2ff9c696620e">
+                              <SHORT-NAME>B</SHORT-NAME>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            </ECUC-ENUMERATION-LITERAL-DEF>
+                            <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:6d9447ff-658e-82ab-284e-821916845612">
+                              <SHORT-NAME>C</SHORT-NAME>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            </ECUC-ENUMERATION-LITERAL-DEF>
+                            <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:3fa08da6-206b-8d51-1ac4-6eeb34061f58">
+                              <SHORT-NAME>D</SHORT-NAME>
+                              <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            </ECUC-ENUMERATION-LITERAL-DEF>
+                          </LITERALS>
+                        </ECUC-ENUMERATION-PARAM-DEF>
+                        <ECUC-BOOLEAN-PARAM-DEF UUID="ECUC:72f87183-bf87-4f64-a990-38b29817aa2c">
+                          <SHORT-NAME>EcucPartitionBswModuleExecution</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">Denotes that this partition will execute BSW Modules. BSW Modules can only be executed in such partitions.</L-2>
+                          </DESC>
+                          <ADMIN-DATA>
+                            <SDGS>
+                              <SDG GID="VCOS:CfgUnrealized">
+                                <SD GID="VCOS:CfgLock">true</SD>
+                                <SD GID="VCOS:CfgValue">false</SD>
+                              </SDG>
+                            </SDGS>
+                          </ADMIN-DATA>
+                          <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00037</RELATED-TRACE-ITEM-REF>
+                          <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                          <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                          <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                          <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                          <VALUE-CONFIG-CLASSES>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                          </VALUE-CONFIG-CLASSES>
+                          <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                        </ECUC-BOOLEAN-PARAM-DEF>
+                        <ECUC-BOOLEAN-PARAM-DEF UUID="ECUC:1248216f-2cb5-4a86-9bb1-210ea8a1de75">
+                          <SHORT-NAME>EcucPartitionQmBswModuleExecution</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">Denotes that this partition will execute QM BSW.</L-2>
+                          </DESC>
+                          <ADMIN-DATA>
+                            <SDGS>
+                              <SDG GID="VCOS:CfgUnrealized">
+                                <SD GID="VCOS:CfgLock">true</SD>
+                                <SD GID="VCOS:CfgValue">false</SD>
+                              </SDG>
+                            </SDGS>
+                          </ADMIN-DATA>
+                          <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00069</RELATED-TRACE-ITEM-REF>
+                          <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                          <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                          <SCOPE>ECU</SCOPE>
+                          <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                          <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                          <VALUE-CONFIG-CLASSES>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                          </VALUE-CONFIG-CLASSES>
+                          <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                          <DEFAULT-VALUE>true</DEFAULT-VALUE>
+                        </ECUC-BOOLEAN-PARAM-DEF>
+                        <ECUC-BOOLEAN-PARAM-DEF UUID="ECUC:4fbca4af-d17a-463a-9b70-fad218ab42a9">
+                          <SHORT-NAME>PartitionCanBeRestarted</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">Specifies the requirement whether the Partition can be restarted. If set to true all software executing in this partition shall be capable of handling a restart.</L-2>
+                          </DESC>
+                          <ADMIN-DATA>
+                            <SDGS>
+                              <SDG GID="VCOS:CfgUnrealized">
+                                <SD GID="VCOS:CfgLock">true</SD>
+                                <SD GID="VCOS:CfgValue">false</SD>
+                              </SDG>
+                            </SDGS>
+                          </ADMIN-DATA>
+                          <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00006</RELATED-TRACE-ITEM-REF>
+                          <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                          <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                          <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                          <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                          <VALUE-CONFIG-CLASSES>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                          </VALUE-CONFIG-CLASSES>
+                          <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                          <DEFAULT-VALUE>false</DEFAULT-VALUE>
+                        </ECUC-BOOLEAN-PARAM-DEF>
+                      </PARAMETERS>
+                      <REFERENCES>
+                        <ECUC-FOREIGN-REFERENCE-DEF UUID="ECUC:1772e02e-3cd8-4f8f-b959-5ec38aafef41">
+                          <SHORT-NAME>EcucPartitionBswModuleDistinguishedPartition</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">This maps the abstract partition of the Bsw Module to a concrete Partition existing in the ECU.</L-2>
+                          </DESC>
+                          <ADMIN-DATA>
+                            <SDGS>
+                              <SDG GID="VCOS:CfgUnrealized">
+                                <SD GID="VCOS:CfgLock">true</SD>
+                              </SDG>
+                            </SDGS>
+                          </ADMIN-DATA>
+                          <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00068</RELATED-TRACE-ITEM-REF>
+                          <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                          <UPPER-MULTIPLICITY-INFINITE>true</UPPER-MULTIPLICITY-INFINITE>
+                          <MULTIPLICITY-CONFIG-CLASSES>
+                            <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                            </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                            <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                            </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                          </MULTIPLICITY-CONFIG-CLASSES>
+                          <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                          <POST-BUILD-VARIANT-MULTIPLICITY>false</POST-BUILD-VARIANT-MULTIPLICITY>
+                          <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                          <VALUE-CONFIG-CLASSES>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                          </VALUE-CONFIG-CLASSES>
+                          <DESTINATION-TYPE>BSW-DISTINGUISHED-PARTITION</DESTINATION-TYPE>
+                        </ECUC-FOREIGN-REFERENCE-DEF>
+                        <ECUC-INSTANCE-REFERENCE-DEF UUID="ECUC:fcd3eca6-d43f-42f7-86a1-80043415256b">
+                          <SHORT-NAME>EcucPartitionSoftwareComponentInstanceRef</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">References the SW Component instances from the Ecu Extract that shall be executed in this partition.</L-2>
+                          </DESC>
+                          <ADMIN-DATA>
+                            <SDGS>
+                              <SDG GID="VCOS:CfgUnrealized">
+                                <SD GID="VCOS:CfgLock">true</SD>
+                              </SDG>
+                            </SDGS>
+                          </ADMIN-DATA>
+                          <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00036</RELATED-TRACE-ITEM-REF>
+                          <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                          <UPPER-MULTIPLICITY-INFINITE>true</UPPER-MULTIPLICITY-INFINITE>
+                          <MULTIPLICITY-CONFIG-CLASSES>
+                            <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                            </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                            <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                            </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                          </MULTIPLICITY-CONFIG-CLASSES>
+                          <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                          <POST-BUILD-VARIANT-MULTIPLICITY>false</POST-BUILD-VARIANT-MULTIPLICITY>
+                          <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                          <VALUE-CONFIG-CLASSES>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                            <ECUC-VALUE-CONFIGURATION-CLASS>
+                              <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                              <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                            </ECUC-VALUE-CONFIGURATION-CLASS>
+                          </VALUE-CONFIG-CLASSES>
+                          <DESTINATION-CONTEXT>ROOT-SW-COMPOSITION-PROTOTYPE</DESTINATION-CONTEXT>
+                          <DESTINATION-TYPE>SW-COMPONENT-PROTOTYPE</DESTINATION-TYPE>
+                        </ECUC-INSTANCE-REFERENCE-DEF>
+                      </REFERENCES>
+                    </ECUC-PARAM-CONF-CONTAINER-DEF>
+                  </SUB-CONTAINERS>
+                </ECUC-PARAM-CONF-CONTAINER-DEF>
+                <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:154a283d-82e3-45cd-a7a1-f3264adee18b">
+                  <SHORT-NAME>EcucPostBuildVariants</SHORT-NAME>
+                  <DESC>
+                    <L-2 L="EN">Collection of toplevel PostBuildSelectable variants. The PredefinedVariants linked inside this container will determine how many PostBuildSelectableVariants exist. If this container exist the name pattern for initialization of BSW modules will be &lt;Mip&gt;_Config_&lt;PredefinedVariant.shortName&gt;. If this container does not exist the name pattern for initialization of BSW modlues will be &lt;Mip&gt;_Config.</L-2>
+                  </DESC>
+                  <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00070</RELATED-TRACE-ITEM-REF>
+                  <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                  <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                  <REFERENCES>
+                    <ECUC-FOREIGN-REFERENCE-DEF UUID="ECUC:6e75f9c8-e66b-4ca6-8d0b-c14951c14811">
+                      <SHORT-NAME>EcucPostBuildVariantRef</SHORT-NAME>
+                      <DESC>
+                        <L-2 L="EN">Reference to a PredefinedVariant that defines one toplevel postBuild configuration set (covering all post-build capable BSW modules). PredefinedVariants that are referenced here shall contain only PostBuildVariantCriterionValueSets.</L-2>
+                      </DESC>
+                      <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00071</RELATED-TRACE-ITEM-REF>
+                      <!-- TODO The EcucPostBuildVariantRef is not used and set to non-essential configuration items. -->
+                      <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                      <UPPER-MULTIPLICITY-INFINITE>true</UPPER-MULTIPLICITY-INFINITE>
+                      <MULTIPLICITY-CONFIG-CLASSES>
+                        <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                        </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                        <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                        </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                      </MULTIPLICITY-CONFIG-CLASSES>
+                      <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                      <POST-BUILD-VARIANT-MULTIPLICITY>false</POST-BUILD-VARIANT-MULTIPLICITY>
+                      <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                      <VALUE-CONFIG-CLASSES>
+                        <ECUC-VALUE-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                        </ECUC-VALUE-CONFIGURATION-CLASS>
+                        <ECUC-VALUE-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                        </ECUC-VALUE-CONFIGURATION-CLASS>
+                      </VALUE-CONFIG-CLASSES>
+                      <DESTINATION-TYPE>PREDEFINED-VARIANT</DESTINATION-TYPE>
+                    </ECUC-FOREIGN-REFERENCE-DEF>
+                  </REFERENCES>
+                </ECUC-PARAM-CONF-CONTAINER-DEF>
+                <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:2b261d84-fed7-4fd0-b94b-2cac2e4fb5fe">
+                  <SHORT-NAME>EcucUnitGroupAssignment</SHORT-NAME>
+                  <DESC>
+                    <L-2 L="EN">Collection of UnitGroup references to support the generation of ASAM MCD file.</L-2>
+                  </DESC>
+                  <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00063</RELATED-TRACE-ITEM-REF>
+                  <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                  <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                  <REFERENCES>
+                    <ECUC-FOREIGN-REFERENCE-DEF UUID="ECUC:bdb68486-b9c6-47e4-baac-ff65e646115f">
+                      <SHORT-NAME>EcucUnitGroupRef</SHORT-NAME>
+                      <DESC>
+                        <L-2 L="EN">Optional reference to the UnitGroup to support the generation of ASAM MCD file. These UnitGroups are selecting a set of  units for a specific country.</L-2>
+                      </DESC>
+                      <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00062</RELATED-TRACE-ITEM-REF>
+                      <!-- TODO The EcucUnitGroupRef is not used and set to non-essential configuration items. -->
+                      <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                      <UPPER-MULTIPLICITY-INFINITE>true</UPPER-MULTIPLICITY-INFINITE>
+                      <MULTIPLICITY-CONFIG-CLASSES>
+                        <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                        </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                        <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                        </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                      </MULTIPLICITY-CONFIG-CLASSES>
+                      <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                      <POST-BUILD-VARIANT-MULTIPLICITY>false</POST-BUILD-VARIANT-MULTIPLICITY>
+                      <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                      <VALUE-CONFIG-CLASSES>
+                        <ECUC-VALUE-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                        </ECUC-VALUE-CONFIGURATION-CLASS>
+                        <ECUC-VALUE-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                        </ECUC-VALUE-CONFIGURATION-CLASS>
+                      </VALUE-CONFIG-CLASSES>
+                      <DESTINATION-TYPE>UNIT-GROUP</DESTINATION-TYPE>
+                    </ECUC-FOREIGN-REFERENCE-DEF>
+                  </REFERENCES>
+                </ECUC-PARAM-CONF-CONTAINER-DEF>
+                <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:973d00a5-5e98-4b38-8b7b-ddd518d40317">
+                  <SHORT-NAME>EcucVariationResolver</SHORT-NAME>
+                  <DESC>
+                    <L-2 L="EN">Collection of PredefinedVariant elements containing definition of values for SwSystemconst which shall be applied when resolving the variability during ECU Configuration.</L-2>
+                  </DESC>
+                  <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00009</RELATED-TRACE-ITEM-REF>
+                  <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                  <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                  <REFERENCES>
+                    <ECUC-FOREIGN-REFERENCE-DEF UUID="ECUC:84013509-59a1-46d4-ba0d-5bcfb76b941f">
+                      <SHORT-NAME>PredefinedVariantRef</SHORT-NAME>
+                      <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_EcuC_00010</RELATED-TRACE-ITEM-REF>
+                      <!-- TODO The PredefinedVariantRef is not used and set to non-essential configuration items. -->
+                      <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                      <UPPER-MULTIPLICITY-INFINITE>true</UPPER-MULTIPLICITY-INFINITE>
+                      <MULTIPLICITY-CONFIG-CLASSES>
+                        <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                        </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                        <ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                        </ECUC-MULTIPLICITY-CONFIGURATION-CLASS>
+                      </MULTIPLICITY-CONFIG-CLASSES>
+                      <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                      <POST-BUILD-VARIANT-MULTIPLICITY>false</POST-BUILD-VARIANT-MULTIPLICITY>
+                      <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                      <VALUE-CONFIG-CLASSES>
+                        <ECUC-VALUE-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-POST-BUILD</CONFIG-VARIANT>
+                        </ECUC-VALUE-CONFIGURATION-CLASS>
+                        <ECUC-VALUE-CONFIGURATION-CLASS>
+                          <CONFIG-CLASS>PRE-COMPILE</CONFIG-CLASS>
+                          <CONFIG-VARIANT>VARIANT-PRE-COMPILE</CONFIG-VARIANT>
+                        </ECUC-VALUE-CONFIGURATION-CLASS>
+                      </VALUE-CONFIG-CLASSES>
+                      <DESTINATION-TYPE>PREDEFINED-VARIANT</DESTINATION-TYPE>
+                    </ECUC-FOREIGN-REFERENCE-DEF>
+                  </REFERENCES>
+                </ECUC-PARAM-CONF-CONTAINER-DEF>
+              </CONTAINERS>
+            </ECUC-MODULE-DEF>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE>
+          <SHORT-NAME>EcucDestinationUriDefSets</SHORT-NAME>
+          <ELEMENTS>
+            <ECUC-DESTINATION-URI-DEF-SET>
+              <SHORT-NAME>RteRipsUriDefSet</SHORT-NAME>
+              <DESTINATION-URI-DEFS>
+                <ECUC-DESTINATION-URI-DEF>
+                  <SHORT-NAME>RteRipsInvocationHandler</SHORT-NAME>
+                  <DESTINATION-URI-POLICY>
+                    <CONTAINERS>
+                      <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:34a06182-a4e4-4f79-b61d-3c3d2785a14a">
+                        <SHORT-NAME>RteRipsInvocationHandlerFnc</SHORT-NAME>
+                        <DESC>
+                          <L-2 L="EN">This container describes an invocation handler function implemented by an RTE Implementation Plug-In to handle the invocation of server runnables and triggered runnables via a transformer.</L-2>
+                          <L-2 L="EN">Tags: atp.Status=draft</L-2>
+                        </DESC>
+                        <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_Rte_79007</RELATED-TRACE-ITEM-REF>
+                        <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                        <UPPER-MULTIPLICITY-INFINITE>true</UPPER-MULTIPLICITY-INFINITE>
+                        <PARAMETERS>
+                          <ECUC-FUNCTION-NAME-DEF UUID="ECUC:de1cd0f2-18ae-49d1-bd49-2f907d1e6a22">
+                            <SHORT-NAME>RteRipsInvocationHandlerFncSymbol</SHORT-NAME>
+                            <DESC>
+                              <L-2 L="EN">C-Symbol of the Rte_Rips_FillFlushRoutine function.</L-2>
+                              <L-2 L="EN">Tags: atp.Status=draft</L-2>
+                            </DESC>
+                            <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_Rte_79008</RELATED-TRACE-ITEM-REF>
+                            <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                            <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                            <SCOPE>LOCAL</SCOPE>
+                            <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                            <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                            <ECUC-FUNCTION-NAME-DEF-VARIANTS>
+                              <ECUC-FUNCTION-NAME-DEF-CONDITIONAL/>
+                            </ECUC-FUNCTION-NAME-DEF-VARIANTS>
+                          </ECUC-FUNCTION-NAME-DEF>
+                        </PARAMETERS>
+                      </ECUC-PARAM-CONF-CONTAINER-DEF>
+                    </CONTAINERS>
+                    <DESTINATION-URI-NESTING-CONTRACT>TARGET-CONTAINER</DESTINATION-URI-NESTING-CONTRACT>
+                  </DESTINATION-URI-POLICY>
+                </ECUC-DESTINATION-URI-DEF>
+                <ECUC-DESTINATION-URI-DEF>
+                  <SHORT-NAME>RteRipsPlugin</SHORT-NAME>
+                  <DESTINATION-URI-POLICY>
+                    <CONTAINERS>
+                      <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:b6b8f564-5772-4d48-8070-096066463e73">
+                        <SHORT-NAME>RteRipsPluginProps</SHORT-NAME>
+                        <DESC>
+                          <L-2 L="EN">This container defines the identity of the Rte Implementation Plug-in and provides the RTE relevant parameters of the Rte Implementation Plug-in.</L-2>
+                          <L-2 L="EN">Tags: atp.Status=draft</L-2>
+                        </DESC>
+                        <INTRODUCTION>
+                          <P>
+                            <L-1 L="EN">The shortName of the container defines the name of the Rte Implementation Plug-in used for the API infixes.</L-1>
+                          </P>
+                        </INTRODUCTION>
+                        <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_Rte_79000</RELATED-TRACE-ITEM-REF>
+                        <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                        <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                        <PARAMETERS>
+                          <ECUC-BOOLEAN-PARAM-DEF UUID="ECUC:cf86cf97-8cda-40c8-b23e-8d57afcc1b1a">
+                            <SHORT-NAME>RtePluginSupportsIReadIWrite</SHORT-NAME>
+                            <DESC>
+                              <L-2 L="EN">Denotes if or if not the plug-in supports the Rte_Rips_IRead/IWrite macros for primitive data.</L-2>
+                              <L-2 L="EN">Tags: atp.Status=draft</L-2>
+                            </DESC>
+                            <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_Rte_79002</RELATED-TRACE-ITEM-REF>
+                            <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                            <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                            <SCOPE>LOCAL</SCOPE>
+                            <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                            <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                            <DEFAULT-VALUE>false</DEFAULT-VALUE>
+                          </ECUC-BOOLEAN-PARAM-DEF>
+                          <ECUC-ENUMERATION-PARAM-DEF UUID="ECUC:36dd9691-7575-449b-91c5-9cc966eb3f77">
+                            <SHORT-NAME>RteRipsGlobalCopyInstantiationPolicy</SHORT-NAME>
+                            <DESC>
+                              <L-2 L="EN">Globally enables or disables the support for Rte Implementation Plug-Ins (RIPS)</L-2>
+                              <L-2 L="EN">Tags: atp.Status=draft</L-2>
+                            </DESC>
+                            <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_Rte_79001</RELATED-TRACE-ITEM-REF>
+                            <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                            <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                            <SCOPE>LOCAL</SCOPE>
+                            <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                            <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                            <DEFAULT-VALUE>RTE_RIPS_INSTANTIATION_BY_RTE</DEFAULT-VALUE>
+                            <LITERALS>
+                              <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:0c11e729-cd9e-84ea-4c6c-7821d4e46513">
+                                <SHORT-NAME>RTE_RIPS_INSTANTIATION_BY_PLUGIN</SHORT-NAME>
+                                <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                              </ECUC-ENUMERATION-LITERAL-DEF>
+                              <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:3bafee16-2876-8b5d-3c19-3bf2f1cfcb2c">
+                                <SHORT-NAME>RTE_RIPS_INSTANTIATION_BY_RTE</SHORT-NAME>
+                                <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                              </ECUC-ENUMERATION-LITERAL-DEF>
+                            </LITERALS>
+                          </ECUC-ENUMERATION-PARAM-DEF>
+                        </PARAMETERS>
+                      </ECUC-PARAM-CONF-CONTAINER-DEF>
+                    </CONTAINERS>
+                    <DESTINATION-URI-NESTING-CONTRACT>TARGET-CONTAINER</DESTINATION-URI-NESTING-CONTRACT>
+                  </DESTINATION-URI-POLICY>
+                </ECUC-DESTINATION-URI-DEF>
+                <ECUC-DESTINATION-URI-DEF>
+                  <SHORT-NAME>RteRipsPluginFillFlushRoutine</SHORT-NAME>
+                  <DESTINATION-URI-POLICY>
+                    <CONTAINERS>
+                      <ECUC-PARAM-CONF-CONTAINER-DEF UUID="ECUC:82bac640-768a-4f73-b758-5aa570fb2f23">
+                        <SHORT-NAME>RteRipsPluginFillFlushRoutineFnc</SHORT-NAME>
+                        <DESC>
+                          <L-2 L="EN">This container describes a Fill-Flush Routine function implemented by a RTE Implementation Plug-In to handle the buffering for implicit communication.</L-2>
+                          <L-2 L="EN">Tags: atp.Status=draft</L-2>
+                        </DESC>
+                        <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_Rte_79003</RELATED-TRACE-ITEM-REF>
+                        <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                        <UPPER-MULTIPLICITY-INFINITE>true</UPPER-MULTIPLICITY-INFINITE>
+                        <PARAMETERS>
+                          <ECUC-ENUMERATION-PARAM-DEF UUID="ECUC:a603e53b-750c-44d9-9a4e-1dde1cfcf212">
+                            <SHORT-NAME>RteRipsModeDisablingHandling</SHORT-NAME>
+                            <DESC>
+                              <L-2 L="EN">This parameter configures whether mode disabling dependencies are considered for the invocation of Rte_Rips_FillFlushRoutines.</L-2>
+                              <L-2 L="EN">Tags: atp.Status=draft</L-2>
+                            </DESC>
+                            <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_Rte_79004</RELATED-TRACE-ITEM-REF>
+                            <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                            <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                            <SCOPE>LOCAL</SCOPE>
+                            <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                            <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                            <LITERALS>
+                              <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:37effb69-0aba-908f-4a2a-70f8b557b791">
+                                <SHORT-NAME>RTE_RIPS_CONSIDER_MODE_DISABLINGS</SHORT-NAME>
+                                <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                              </ECUC-ENUMERATION-LITERAL-DEF>
+                              <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:b85b3d32-4206-90c4-365c-2bde3dea8e96">
+                                <SHORT-NAME>RTE_RIPS_IGNORE_MODE_DISABLINGS</SHORT-NAME>
+                                <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                              </ECUC-ENUMERATION-LITERAL-DEF>
+                            </LITERALS>
+                          </ECUC-ENUMERATION-PARAM-DEF>
+                          <ECUC-ENUMERATION-PARAM-DEF UUID="ECUC:fc058c69-870b-4a9d-bf00-7983619badff">
+                            <SHORT-NAME>RteRipsOsSchedulePoint</SHORT-NAME>
+                            <DESC>
+                              <L-2 L="EN">Introduce a schedule point by explicitly calling Os Schedule service after the execution of the Rte_Rips_FillFlushRoutine.</L-2>
+                              <L-2 L="EN">Tags: atp.Status=draft</L-2>
+                            </DESC>
+                            <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_Rte_79006</RELATED-TRACE-ITEM-REF>
+                            <LOWER-MULTIPLICITY>0</LOWER-MULTIPLICITY>
+                            <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                            <SCOPE>LOCAL</SCOPE>
+                            <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            <POST-BUILD-VARIANT-MULTIPLICITY>false</POST-BUILD-VARIANT-MULTIPLICITY>
+                            <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                            <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                            <LITERALS>
+                              <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:2cf33dfa-534a-85d8-4494-db37834e1850">
+                                <SHORT-NAME>NONE</SHORT-NAME>
+                                <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                              </ECUC-ENUMERATION-LITERAL-DEF>
+                              <ECUC-ENUMERATION-LITERAL-DEF UUID="ECUC:7f949930-ea43-84fa-696c-347e24aefd2b">
+                                <SHORT-NAME>UNCONDITIONAL</SHORT-NAME>
+                                <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                              </ECUC-ENUMERATION-LITERAL-DEF>
+                            </LITERALS>
+                          </ECUC-ENUMERATION-PARAM-DEF>
+                          <ECUC-FUNCTION-NAME-DEF UUID="ECUC:67622bde-c28a-4493-9594-97906b9b7f88">
+                            <SHORT-NAME>RteRipsPluginFillFlushRoutineFncSymbol</SHORT-NAME>
+                            <DESC>
+                              <L-2 L="EN">C-Symbol of the Rte_Rips_FillFlushRoutine function.</L-2>
+                              <L-2 L="EN">Tags: atp.Status=draft</L-2>
+                            </DESC>
+                            <RELATED-TRACE-ITEM-REF BASE="ArTrace" DEST="TRACEABLE">ECUC_Rte_79005</RELATED-TRACE-ITEM-REF>
+                            <LOWER-MULTIPLICITY>1</LOWER-MULTIPLICITY>
+                            <UPPER-MULTIPLICITY>1</UPPER-MULTIPLICITY>
+                            <SCOPE>LOCAL</SCOPE>
+                            <ORIGIN>AUTOSAR_ECUC</ORIGIN>
+                            <POST-BUILD-VARIANT-VALUE>false</POST-BUILD-VARIANT-VALUE>
+                            <SYMBOLIC-NAME-VALUE>false</SYMBOLIC-NAME-VALUE>
+                            <ECUC-FUNCTION-NAME-DEF-VARIANTS>
+                              <ECUC-FUNCTION-NAME-DEF-CONDITIONAL/>
+                            </ECUC-FUNCTION-NAME-DEF-VARIANTS>
+                          </ECUC-FUNCTION-NAME-DEF>
+                        </PARAMETERS>
+                      </ECUC-PARAM-CONF-CONTAINER-DEF>
+                    </CONTAINERS>
+                    <DESTINATION-URI-NESTING-CONTRACT>TARGET-CONTAINER</DESTINATION-URI-NESTING-CONTRACT>
+                  </DESTINATION-URI-POLICY>
+                </ECUC-DESTINATION-URI-DEF>
+              </DESTINATION-URI-DEFS>
+            </ECUC-DESTINATION-URI-DEF-SET>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE>
+          <SHORT-NAME>LifeCycleInfoSets</SHORT-NAME>
+          <ELEMENTS>
+            <LIFE-CYCLE-INFO-SET>
+              <SHORT-NAME>AUTOSARParameterDefinition</SHORT-NAME>
+              <LIFE-CYCLE-INFOS>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Adc/AdcConfigSet/AdcHwUnit/AdcGroup/AdcGroupEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Adc/AdcGeneral/AdcEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Adc/AdcGeneral/AdcKernelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiConstant</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiConstant/ArtiConstantString</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiExpression</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiExpression/ArtiExpressionString</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiHook</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiHook/ArtiHookClass</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiHook/ArtiHookEventName</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiHook/ArtiHookInstance</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiHook/ArtiHookEventParameterTypeRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiHook/ArtiHookInstanceParameterTypeRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiObjectClassParameter</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiObjectClassParameter/ArtiParameterTypeMapRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiObjectInstanceParameter</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiObjectInstanceParameter/ArtiConstantRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiObjectInstanceParameter/ArtiExpressionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiObjectInstanceParameter/ArtiHookRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiParameterTypeMap</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiParameterTypeMap/ArtiParameterTypeMapPair</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiParameterTypeMap/ArtiParameterTypeMapPair/ArtiParameterTypeMapPairInput</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Arti/ArtiParameterTypeMap/ArtiParameterTypeMapPair/ArtiParameterTypeMapPairOutput</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiGeneric/ArtiGenericComponentClass</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiGeneric/ArtiGenericComponentClass/ArtiGenericComponentClassName</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiGeneric/ArtiGenericComponentClass/ArtiGenericComponentClassParameter</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiGeneric/ArtiGenericComponentClass/ArtiGenericComponentClassParameter/ArtiGenericComponentClassParameterName</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiGeneric/ArtiGenericComponentClass/ArtiGenericComponentClassParameter/ArtiParameterTypeMapRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiGeneric/ArtiGenericComponentInstance</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiGeneric/ArtiGenericComponentInstance/ArtiGenericComponentInstanceName</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiGeneric/ArtiGenericComponentInstance/ArtiGenericComponentClassRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiGeneric/ArtiGenericComponentInstance/ArtiGenericComponentInstanceParameter</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiGeneric/ArtiGenericComponentInstance/ArtiGenericComponentInstanceParameter/ArtiConstantRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiGeneric/ArtiGenericComponentInstance/ArtiGenericComponentInstanceParameter/ArtiExpressionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiGeneric/ArtiGenericComponentInstance/ArtiGenericComponentInstanceParameter/ArtiGenericComponentClassParameterRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiGeneric/ArtiGenericComponentInstance/ArtiGenericComponentInstanceParameter/ArtiHookRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiHardware/ArtiHwCoreClass</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiHardware/ArtiHwCoreClass/ArtiCurrentApplicationClassRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiHardware/ArtiHwCoreClass/ArtiCurrentTaskClassRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiHardware/ArtiHwCoreClass/ArtiLastErrorClassRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiHardware/ArtiHwCoreInstance</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiHardware/ArtiHwCoreInstance/ArtiCurrentApplicationInstanceRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiHardware/ArtiHwCoreInstance/ArtiCurrentTaskInstanceRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiHardware/ArtiHwCoreInstance/ArtiEcucCoreRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiHardware/ArtiHwCoreInstance/ArtiLastErrorInstanceRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiOs/ArtiOsClass</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiOs/ArtiOsClass/ArtiOsAppModeClassRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiOs/ArtiOsInstance</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiOs/ArtiOsInstance/ArtiOsAppModeEcucRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiOs/ArtiOsInstance/ArtiOsAppModeInstanceRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiOs/ArtiOsInstance/ArtiOsEcucRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiOs/ArtiOsInstance/ArtiOsTaskHookRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiOs/ArtiOsTaskClass</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiOs/ArtiOsTaskInstance</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiOs/ArtiOsTaskInstance/ArtiGenericComponentInstanceRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/ArtiOs/ArtiOsTaskInstance/ArtiOsTaskEcucRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Can/CanConfigSet/CanController/CanControllerEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Can/CanConfigSet/CanController/CanTTController/CanTTControllerEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Can/CanGeneral/CanEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/CanTSyn/CanTSynGlobalTimeDomain/CanTSynGlobalTimeSecureTmacLength</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/CanTSyn/CanTSynGlobalTimeDomain/CanTSynGlobalTimeMaster/CanTSynTxTmacCalculated</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/CanTSyn/CanTSynGlobalTimeDomain/CanTSynGlobalTimeSlave/CanTSynGlobalTimeMinMsgGap</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/CanTSyn/CanTSynGlobalTimeDomain/CanTSynGlobalTimeSlave/CanTSynRxTmacValidated</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/CanTrcv/CanTrcvConfigSet/CanTrcvChannel/CanTrcvChannelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/CanTrcv/CanTrcvGeneral/CanTrcvEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/CorTst/CorTstBackgroundConfigSet/CorTstBackgroundEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/CorTst/CorTstForegroundConfigSet/CorTstForegroundEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/CorTst/CorTstGeneral/CorTstEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Crypto/CryptoDriverObjects/CryptoDriverObject/CryptoDriverObjectEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Crypto/CryptoGeneral/CryptoEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Dem/DemGeneral/DemFreezeFrameRecordClass/DemFreezeFrameRecordTrigger</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Dio/DioConfig/DioPort/DioPortEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Dio/DioConfig/DioPort/DioChannel/DioChannelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Dio/DioConfig/DioPort/DioChannelGroup/DioChannelGroupEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Dio/DioGeneral/DioEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Eep/EepGeneral/EepEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Eth/EthConfigSet/EthCtrlConfig/EthCtrlEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Eth/EthGeneral/EthEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/EthSwt/EthSwtConfig/EthSwtConfigEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/EthSwt/EthSwtGeneral/EthSwtEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/EthTSyn/EthTSynGlobalTimeDomain/EthTSynGlobalTimeSecureTmacLength</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/EthTSyn/EthTSynGlobalTimeDomain/EthTSynPortConfig/EthTSynGlobalTimeMinMsgGap</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/EthTSyn/EthTSynGlobalTimeDomain/EthTSynPortConfig/EthTSynPortRole/EthTSynGlobalTimeMaster/EthTSynTxTmacCalculated</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/EthTSyn/EthTSynGlobalTimeDomain/EthTSynPortConfig/EthTSynPortRole/EthTSynGlobalTimeSlave/EthTSynRxTmacValidated</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/EthTrcv/EthTrcvConfigSet/EthTrcvConfig/EthTrcvConfigEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/EthTrcv/EthTrcvGeneral/EthTrcvEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Fls/FlsGeneral/FlsEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/FlsTst/FlsTstGeneral/FlsTstEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Fr/FrGeneral/FrEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Fr/FrMultipleConfiguration/FrController/FrCtrlEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/FrTSyn/FrTSynGlobalTimeDomain/FrTSynGlobalTimeSecureTmacLength</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/FrTSyn/FrTSynGlobalTimeDomain/FrTSynUseExtendedMsgFormat</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/FrTSyn/FrTSynGlobalTimeDomain/FrTSynGlobalTimeMaster/FrTSynTxTmacCalculated</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/FrTSyn/FrTSynGlobalTimeDomain/FrTSynGlobalTimeSlave/FrTSynGlobalTimeMinMsgGap</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/FrTSyn/FrTSynGlobalTimeDomain/FrTSynGlobalTimeSlave/FrTSynGlobalTimeTmacTimeout</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/FrTSyn/FrTSynGlobalTimeDomain/FrTSynGlobalTimeSlave/FrTSynRxTmacValidated</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/FrTrcv/FrTrcvChannel/FrTrcvChannelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/FrTrcv/FrTrcvGeneral/FrTrcvEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Gpt/GptChannelConfigSet/GptChannelConfiguration/GptChannelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Gpt/GptDriverConfiguration/GptEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Gpt/GptDriverConfiguration/GptKernelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Icu/IcuConfigSet/IcuChannel/IcuChannelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Icu/IcuGeneral/IcuEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Icu/IcuGeneral/IcuKernelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/IpduM/IpduMConfig/IpduMContainedRxPdu/IpduMContainedPduOffset</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/IpduM/IpduMConfig/IpduMContainedRxPdu/IpduMPduUpdateBitPosition</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/IpduM/IpduMConfig/IpduMContainedRxPdu/IpduMContainedPduOffset</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/IpduM/IpduMConfig/IpduMContainedRxPdu/IpduMPduUpdateBitPosition</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-ENUMERATION-LITERAL-DEF">/AUTOSAR/EcucDefs/IpduM/IpduMConfig/IpduMContainerRxPdu/IpduMContainerHeaderSize/IPDUM_HEADERTYPE_NONE</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-ENUMERATION-LITERAL-DEF">/AUTOSAR/EcucDefs/IpduM/IpduMConfig/IpduMContainerRxPdu/IpduMContainerHeaderSize/IPDUM_HEADERTYPE_NONE</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/IpduM/IpduMConfig/IpduMContainerTxPdu/IpduMUnusedAreasDefault</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Lin/LinGeneral/LinEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Lin/LinGlobalConfig/LinChannel/LinChannelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/LinTrcv/LinTrcvChannel/LinTrcvChannelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/LinTrcv/LinTrcvGeneral/LinTrcvEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Mcu/McuGeneralConfiguration/McuEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Ocu/OcuConfigSet/OcuChannel/OcuChannelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Ocu/OcuGeneral/OcuEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Ocu/OcuGeneral/OcuKernelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Port/PortConfigSet/PortContainer/PortPin/PortPinEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Port/PortGeneral/PortEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Pwm/PwmChannelConfigSet/PwmChannel/PwmChannelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Pwm/PwmGeneral/PwmEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Pwm/PwmGeneral/PwmKernelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/RamTst/RamTstCommon/RamTstEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/RamTst/RamTstCommon/RamTstConfigParams/RamTstAlgParams/RamTstBlockParamsEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Rte/RteSwComponentInstance/RteEventToTaskMapping/RteRipsFillRoutineRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Rte/RteSwComponentInstance/RteEventToTaskMapping/RteRipsFlushRoutineRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Rte/RteBswModuleInstance/RteBswExclusiveAreaImpl/RteBswExclusiveAreaResponsibleRipsPluginRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Rte/RteSwComponentInstance/RteModeMachineInstanceConfig/RteModeMachineInstanceResponsibleRipsPluginRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Rte/RteDistributedSharedModeQueue/RteDSMQResponsibleRipsPluginRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Rte/RteRips</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Rte/RteRips/RteRipsSupport</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Rte/RteRips/RteRipsPluginConfigurationRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Rte/RteSwComponentInstance/RteEventToTaskMapping/RteRipsFillRoutineRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Rte/RteSwComponentInstance/RteEventToTaskMapping/RteRipsFlushRoutineRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Rte/RteSwComponentInstance/RteEventToTaskMapping/RteRipsInvocationHandlerRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Rte/RteSwComponentInstance/RteExclusiveAreaImplementation/RteExclusiveAreaResponsibleRipsPluginRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Rte/RteSwComponentInstance/RteModeMachineInstanceConfig/RteModeMachineInstanceResponsibleRipsPluginRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/SoAd/SoAdConfig/SoAdSocketConnectionGroup/SoAdSocketProtocol/SoAdSocketTcp/SoAdSocketTcpTlsConnectionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Spi/SpiDriver/SpiExternalDevice/SpiDeviceEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Spi/SpiGeneral/SpiEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Spi/SpiGeneral/SpiKernelEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsMaxConnections</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCsmRandomGenerateJobRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCertificateIdentity</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCertificateIdentity/TcpIpTlsServerNameIdentification</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteDefinition</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteDefinition/TcpIpTlsCiphersuiteId</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteDefinition/TcpIpTlsCiphersuiteName</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteDefinition/TcpIpTlsCiphersuitePriority</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteDefinition/TcpIpTlsUseAEADCipher</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteDefinition/TcpIpTlsUsePresharedKeys</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteDefinition/TcpIpTlsUseSecurityExtensionForceMacThenHash</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteDefinition/TcpIpTlsVersion</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker/TcpIpTlsCipherAEADCipherKeyLength</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker/TcpIpTlsCipherEncryptKeyLength</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker/TcpIpTlsCipherMacKeyLength</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker/TcpIpTlsCipherCsmDecryptJobRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker/TcpIpTlsCipherCsmDecryptKeyRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker/TcpIpTlsCipherCsmEncryptJobRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker/TcpIpTlsCipherCsmEncryptKeyRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker/TcpIpTlsCipherCsmMacGenerateJobRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker/TcpIpTlsCipherCsmMacGenerateKeyRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker/TcpIpTlsCipherCsmMacVerifyJobRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker/TcpIpTlsCipherCsmMacVerifyKeyRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker/TcpIpTlsCiphersuiteDefinitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsCiphersuiteWorker/TcpIpTlsConnectionHandshakeRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmPRFSupportType</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmHashVerifyJobRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmKeyExchangeCalcPubValJobRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmKeyExchangeCalcSecretJobRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmKeyExchangeDecryptJobRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmKeyExchangeDecryptKeyRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmKeyExchangeEncryptJobRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmKeyExchangeEncryptKeyRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmKeyExchangeKeyRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmKeyExchangeSignatureGenerateJobRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmKeyExchangeSignatureGenerateKeyRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmKeyExchangeSignatureVerifyJobRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmKeyExchangeSignatureVerifyKeyRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmMasterSecretKeyRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmPrfMacJobRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsHandshake/TcpIpTlsCsmPrfMacKeyRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsPskIdentity</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsPskIdentity/TcpIpTlsPresharedKeyIdentity</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsPskIdentity/TcpIpTlsPresharedKeyIdentityHint</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsPskIdentity/TcpIpTlsPskGetClientKeyIdentityFunc</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsPskIdentity/TcpIpTlsPskGetKeyIdentyHintFunc</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsPskIdentity/TcpIpTlsPskGetServerKeyIdentityFunc</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsCiphersuites/TcpIpTlsPskIdentity/TcpIpTlsPresharedKeyCsmKeyRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnection</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnection/TcpIpTlsConnectionGetTimeFunc</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnection/TcpIpTlsConnectionId</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnection/TcpIpTlsConnectionType</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnection/TcpIpTlsMaxFragmentLength</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnection/TcpIpTlsPortAssignment</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnection/TcpIpTlsUseClientAuthenticationRequest</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnection/TcpIpTlsUseSecurityExtensionRecordSizeLimit</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnection/TcpIpTlsCertificateIdentityRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnection/TcpIpTlsConnectionCiphersuiteWorkerRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnection/TcpIpTlsConnectionGroupRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnection/TcpIpTlsConnectionPskIdentityRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnection/TcpIpTlsIpAddressAssignment</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/TcpIp/TcpIpConfig/TcpIpTlsConfig/TcpIpTlsConnectionGroup</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/WEth/WEthConfigSet/WEthCtrlConfig/WEthCtrlEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/WEth/WEthGeneral/WEthEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/WEthTrcv/WEthTrcvConfigSet/WEthTrcvConfig/WEthTrcvConfigEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/WEthTrcv/WEthTrcvGeneral/WEthTrcvEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+                <LIFE-CYCLE-INFO>
+                  <LC-OBJECT-REF DEST="ECUC-DEFINITION-ELEMENT">/AUTOSAR/EcucDefs/Wdg/WdgGeneral/WdgEcucPartitionRef</LC-OBJECT-REF>
+                  <LC-STATE-REF DEST="LIFE-CYCLE-STATE">/AUTOSAR/GenDef/LifeCycleStateDefinitionGroups/AutosarLifeCycleStates/draft</LC-STATE-REF>
+                </LIFE-CYCLE-INFO>
+              </LIFE-CYCLE-INFOS>
+            </LIFE-CYCLE-INFO-SET>
+          </ELEMENTS>
+        </AR-PACKAGE>
+      </AR-PACKAGES>
+    </AR-PACKAGE>
+  </AR-PACKAGES>
+</AUTOSAR>

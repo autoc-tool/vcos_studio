@@ -1,0 +1,909 @@
+{{get_copyright()}}
+
+{%- set swc_name = get_swc_name() %}
+{%- set swc_type = get_swc_type() %}
+{%- set gen_file_swc_type = get_gen_file_swc_type() %}
+/*!*********************************************************************************************************************
+ * @file        Rte_{{swc_name}}.h
+ * @brief       Application header file for SWC (Software Component)
+ * @details     Defines the RTE API and any associated data structures that
+ *              are required by the SWC to use the RTE implementation
+ * @date        {{get_generation_time_temp()}}
+ * @toolversion {{get_vcos_version_temp()}}
+ **********************************************************************************************************************/
+{%- import 'macros.jinja2' as macros %}
+
+#ifndef RTE_{{swc_name|upper}}_H_
+#define RTE_{{swc_name|upper}}_H_
+
+{% if swc_type in gen_file_swc_type%}
+#ifndef RTE_CORE
+# ifdef RTE_APPLICATION_HEADER_FILE
+#  error Multiple application header files included.
+# endif
+# define RTE_APPLICATION_HEADER_FILE
+#endif
+{%- endif %}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "Rte_Type.h"
+#include "Rte_{{swc_name}}_Type.h"
+
+{%- if rte_swc_header_need_include_os_header() %}
+#include "Os.h"
+{%- endif %}
+{%- if rte_swc_need_include_com() %}
+#include "com.h"
+{%- endif %}
+
+{#- SR non-zero init value template #}
+{%- macro sr_init_value_non_zero(appl_prefix, appl_name_or_core_id, appl_postfix, buffer) %}
+    {%- set datatype = buffer['arg']['datatype'] %}
+    {%- if datatype['native_category'] == 'NUMERICAL' %}
+        {%- set init_value = buffer["arg"].get("init_value", {}).get("value", {}) %}
+        {%- set basetype = datatype["basetype"] %}
+        {%- if basetype[0] == "b" and (init_value.get("value", "FALSE") == "TRUE" or init_value.get("value", "FALSE") == "True" or init_value.get("value", "FALSE") == "1")%}                    {#- boolean #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- elif basetype[0] == "u" and init_value.get("value", "0U") not in ["0U", "0ULL"] %}        {#- unsigned #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- elif basetype[0] == "s" and init_value.get("value", "0") != "0" %}          {#- signed #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- elif basetype[0] == "f" and init_value.get("value", "0.0F") not in ["0.0", "0.0F"] %}    {#- float #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- endif %}
+    {%- else %}
+        {%- set init_value_complex = buffer["arg"].get("init_value", {}).get("value", {}).get("value", {}) %}
+        {%- set all_zero = all_complex_data_init_values_zero(init_value_complex) %}
+        {%- if not all_zero %}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- endif %}
+    {%- endif %}
+{%- endmacro %}
+
+{#- SR zero init value template #}
+{%- macro sr_init_value_zero(appl_prefix, appl_name_or_core_id, appl_postfix, buffer) %}
+    {%- set datatype = buffer['arg']['datatype'] %}
+    {%- if datatype['native_category'] == 'NUMERICAL' %}
+        {%- set init_value = buffer["arg"].get("init_value", {}).get("value", {}) %}
+        {%- set basetype = datatype["basetype"] %}
+        {%- if basetype[0] == "b" and not (init_value.get("value", "FALSE") == "TRUE" or init_value.get("value", "FALSE") == "True" or init_value.get("value", "FALSE") == "1")%}                    {#- boolean #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- elif basetype[0] == "u" and init_value.get("value", "0U") in ["0U", "0ULL"] %}             {#- unsigned #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- elif basetype[0] == "s" and init_value.get("value", "0") == "0" %}                          {#- signed #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- elif basetype[0] == "f" and init_value.get("value", "0.0F") in ["0.0", "0.0F"] %}           {#- float #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- endif %}
+    {%- else %}
+        {%- set init_value_complex = buffer["arg"].get("init_value", {}).get("value", {}).get("value", {}) %}
+        {%- set all_zero = all_complex_data_init_values_zero(init_value_complex) %}
+        {%- if all_zero %}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- endif %}
+    {%- endif %}
+{%- endmacro %}
+
+{%- set unpports = get_swc_sr_explicit_unconnected_render_pport_list() -%}
+{%- set unrports = get_swc_sr_explicit_unconnected_render_rport_list() -%}
+{%- set variables = get_swc_sr_explicit_variable_dict_by_appl() %}
+{%- set pports = get_swc_sr_explicit_macro_render_pport_list() -%}
+{%- set rports = get_swc_sr_explicit_macro_render_rport_list() -%}
+{%- set appl_name = get_component_osapplication_name() %}
+
+{#- Rte buffers for S/R Explicit macro implementation #}
+{%- if variables %}
+#ifndef RTE_CORE
+/*
+ * extern declaration of RTE buffers for optimized macro implementation
+ */
+    {%- set ns = namespace(counter1=0, counter2=0) %}
+    {%- for memmap_infix, appl_variables in variables.items() %}
+#define RTE_START_SEC_{{memmap_infix.upper()}}
+#include "rte_memmap.h"
+        {%- for buffer in appl_variables.values() %}
+            {%- if (buffer.get("buff_struct_type", None)) and (buffer.get("buff_struct_name", None)) and buffer['is_zero_init'] and memmap_infix == 'PRIVATE_' ~ appl_name ~ '_DATA' %}
+            {%- set ns.counter1 = ns.counter1 + 1 %}
+                {%- if ns.counter1 == 1 %}
+extern VAR({{buffer["buff_struct_type"]}}, RTE_{{appl_name.upper()}}_PRIVATE_DATA) {{buffer["buff_struct_name"]}};
+                {%- endif %}
+            {%- elif (buffer.get("buff_struct_type", None)) and (buffer.get("buff_struct_name", None)) and not buffer['is_zero_init'] and memmap_infix == 'PRIVATE_' ~ appl_name ~ '_DATA' %}
+            {%- set ns.counter2 = ns.counter2 + 1 %}
+                {%- if ns.counter2 == 1 %}
+extern VAR({{buffer["buff_struct_type"]}}, RTE_{{appl_name.upper()}}_PRIVATE_DATA) {{buffer["buff_struct_name"]}};
+                {%- endif %}
+            {%- else %}
+extern VAR({{buffer["datatype"]}}, RTE_{{memmap_infix.upper()}}) {{buffer["variable"]}};
+            {%- endif %}
+        {%- endfor %}
+#define RTE_STOP_SEC_{{memmap_infix.upper()}}
+#include "rte_memmap.h"
+    {%- endfor %}
+#endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+{%- set isupdated_rports = get_swc_sr_nonqueue_intra_osa_update_flag_rport_list() %}
+{%- set appl_name = get_component_osapplication_name() %}
+{%- if isupdated_rports %}
+#ifndef RTE_CORE
+/*
+ * extern declaration of Update flags for S/R Receiver with enableUpdate == True
+ */
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+    {%- for rport in isupdated_rports %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_RxUpdate_{{rport['component']}}_{{rport['name']}};
+    {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+#endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+{# Rte_Write macro implementation #}
+{%- if pports or unpports or rports or unrports %}
+# ifndef RTE_CORE
+{%- endif %}
+{%- if pports %}
+/*
+ * Rte_Write_<p>_<d> (explicit S/R communication with isQueued = false)
+ */
+{%- endif %}
+{%- for pport in unpports %}
+#define Rte_Write_{{pport['name']}} Rte_Write_{{swc_name}}_{{pport['name']}}
+#define Rte_Write_{{swc_name}}_{{pport['name']}}(data) (((void) data), ((Std_ReturnType)RTE_E_OK))
+{%- endfor %}
+{%- for pport in pports %}
+#define Rte_Write_{{pport["name"]}} Rte_Write_{{swc_name}}_{{pport["name"]}}
+#define Rte_Write_{{swc_name}}_{{pport["name"]}}(data) \
+    {%- if pport['arg']['datatype']["native_category"] == "NUMERICAL" %}
+        {%- if pport.get('buff_struct_name', None) %}
+    ({{pport['buff_struct_name']}}.{{pport["variable"]}} = (data), ((Std_ReturnType)RTE_E_OK))
+        {%- else %}
+    ({{pport["variable"]}} = (data), ((Std_ReturnType)RTE_E_OK))
+        {%- endif %}
+    {%- elif pport['arg']['datatype']["native_category"] in ["STRUCTURE", "UNION"] %}
+    ({{pport["variable"]}} = *(data), ((Std_ReturnType)RTE_E_OK))
+    {%- else %}
+    (Rte_MemCpy(&{{pport["variable"]}}, data, sizeof({{pport['datatype']}})), ((Std_ReturnType)RTE_E_OK))
+    {%- endif %}
+{%- endfor %}
+{# Rte_Read/Rte_DRead macro implementation #}
+{%- if rports %}
+/*
+ * Rte_Read_<p>_<d> (explicit S/R communication with isQueued = false)
+ */
+{%- endif %}
+{%- for rport in unrports %}
+    {%- if rport['read_by_value'] %}
+#define Rte_DRead_{{rport['name']}} Rte_DRead_{{swc_name}}_{{rport['name']}}
+#define Rte_DRead_{{swc_name}}_{{rport['name']}}() ({{rport['arg']['init_value']['value']['value']}})
+    {%- else %}
+#define Rte_Read_{{rport['name']}} Rte_Read_{{swc_name}}_{{rport['name']}}
+        {%- if rport["arg"]["datatype"]["native_category"] == "NUMERICAL" %}
+#define Rte_Read_{{swc_name}}_{{rport['name']}}(data) (*(data) = {{rport['arg']['init_value']['value']['value']}}, ((Std_ReturnType)RTE_E_UNCONNECTED))
+        {%- elif rport["arg"]["datatype"]["native_category"] in ["STRUCTURE", "UNION"] %}
+#define Rte_Read_{{swc_name}}_{{rport['name']}}(data) (*(data) = {{rport['arg']['init_value']['name']}}, ((Std_ReturnType)RTE_E_UNCONNECTED))
+        {%- else %}
+#define Rte_Read_{{swc_name}}_{{rport['name']}}(data) (Rte_MemCpy(data, &({{rport['arg']['init_value']['name']}}), sizeof({{rport['arg']['datatype']['name']}})), ((Std_ReturnType)RTE_E_UNCONNECTED))
+        {%- endif %}
+    {%- endif %}
+{%- endfor %}
+{%- for rport in rports %}
+{%- if rport["read_by_value"] %}
+#define Rte_DRead_{{rport["name"]}} Rte_DRead_{{swc_name}}_{{rport["name"]}}
+#define Rte_DRead_{{swc_name}}_{{rport["name"]}}() \
+    {%- if rport.get('buff_struct_name', None) %}
+    ({{rport['buff_struct_name']}}.{{rport["variable"]}})
+    {%- else %}
+    ({{rport["variable"]}})
+    {%- endif %}
+{%- else %}
+#define Rte_Read_{{rport["name"]}} Rte_Read_{{swc_name}}_{{rport["name"]}}
+#define Rte_Read_{{swc_name}}_{{rport["name"]}}(data) \
+    {%- if rport.get("dm_macro_api", false) %}
+    (com_receive_signal(ComConf_ComSignal_{{rport["mapping_to_signals"][0]}}_Rx, (data)))
+    {%- else %}
+        {%- if rport['arg']['datatype']["native_category"] == "NUMERICAL" %}
+            {%- if rport.get('buff_struct_name', None) %}
+    (*(data) = {{rport['buff_struct_name']}}.{{rport["variable"]}}, ((Std_ReturnType)RTE_E_OK))
+            {%- else %}
+    (*(data) = {{rport["variable"]}}, ((Std_ReturnType)RTE_E_OK))
+            {%- endif %}
+        {%- elif rport['arg']['datatype']["native_category"] in ["STRUCTURE", "UNION"] %}
+    (*(data) = {{rport["variable"]}}, ((Std_ReturnType)RTE_E_OK))
+        {%- else %}
+    (Rte_MemCpy(data, &{{rport["variable"]}}, sizeof({{rport['datatype']}})), ((Std_ReturnType)RTE_E_OK))
+        {%- endif %}
+    {%- endif %}
+{%- endif %}
+{%- endfor %}
+
+{%- if pports or unpports or rports or unrports %}
+# endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+{#- Rte_Send/Rte_Receive macro implementation of unconnected port #}
+{%- set queue_unpports = get_swc_sr_queue_unconnected_pport_list() %}
+{%- set queue_unrports = get_swc_sr_queue_unconnected_rport_list() %}
+{%- if queue_unpports or queue_unrports %}
+# ifndef RTE_CORE
+    {%- for pport in queue_unpports %}
+#define Rte_Send_{{pport['port_prototype']}}_{{pport['data_element']}} Rte_Send_{{swc_name}}_{{pport['port_prototype']}}_{{pport['data_element']}}
+#define Rte_Send_{{swc_name}}_{{pport['port_prototype']}}_{{pport['data_element']}}(data) (((void) data), ((Std_ReturnType) RTE_E_OK))
+    {%- endfor %}
+    {%- for rport in queue_unrports %}
+#define Rte_Receive_{{rport['port_prototype']}}_{{rport['data_element']}} Rte_Receive_{{swc_name}}_{{rport['port_prototype']}}_{{rport['data_element']}}
+#define Rte_Receive_{{swc_name}}_{{rport['port_prototype']}}_{{rport['data_element']}}(data) (((void) data), ((Std_ReturnType) RTE_E_UNCONNECTED))
+    {%- endfor %}
+# endif /* !defined(RTE_CORE) */
+{%- endif %} {# {%- if queue_unpports or queue_unrports %} #}
+
+{#- Rte copy buffers for S/R Implicit #}
+{%- set appl_name = get_component_osapplication_name() %}
+{%- set buffers = get_swc_sr_implicit_copy_buffer_list() %}
+{%- if buffers %}
+# ifndef RTE_CORE
+/*
+ * Rte Copy Buffers for implicit S/R
+*/
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+    {%- for task in buffers %}
+extern VAR(Rte_ts_{{task}}, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_{{task}};
+    {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+# endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+{%- set pports = get_swc_sr_implicit_macro_render_pport_list() -%}
+{%- set rports = get_swc_sr_implicit_macro_render_rport_list() -%}
+{%- set intra_osa_imp_sr_opt_ports = get_swc_sr_implicit_intra_osa_opt_ports(pports+rports) -%}
+{# Buffer extern for intra-osa implicit S/R Non-Queue #}
+{%- if intra_osa_imp_sr_opt_ports %}
+# ifndef RTE_CORE
+/*
+ * Buffer extern for intra-osa implicit S/R Non-Queue
+*/
+{# non-zero init value#}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+{%- set ns = namespace(counter=0) %}
+{%- for buffer in intra_osa_imp_sr_opt_ports %}
+    {%- set ns.counter = ns.counter + 1 %}
+    {%- set zero_init = buffer['arg']['init_value']['is_zero_init'] %}
+    {%- if buffer.get('buff_struct_type', None) and buffer.get('buff_struct_name', None) and not zero_init %}
+        {%- if ns.counter == 1 %}
+extern VAR({{buffer['buff_struct_type']}}, RTE_{{appl_name.upper()}}_PRIVATE_DATA) {{buffer['buff_struct_name']}};
+        {%- endif %}
+    {%- else %}
+    {{-sr_init_value_non_zero("RTE_", appl_name.upper(), "PRIVATE_DATA", buffer)}}
+    {%- endif %}
+{%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+{# zero init value #}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+{%- set ns = namespace(counter=0) %}
+{%- for buffer in intra_osa_imp_sr_opt_ports %}
+    {%- set ns.counter = ns.counter + 1 %}
+    {%- set zero_init = buffer['arg']['init_value']['is_zero_init'] %}
+    {%- if buffer.get('buff_struct_type', None) and buffer.get('buff_struct_name', None) and zero_init %}
+        {%- if ns.counter == 1 %}
+extern VAR({{buffer['buff_struct_type']}}, RTE_{{appl_name.upper()}}_PRIVATE_DATA) {{buffer['buff_struct_name']}};
+        {%- endif %}
+    {%- else %}
+    {{-sr_init_value_zero("RTE_", appl_name.upper(), "PRIVATE_DATA", buffer)}}
+    {%- endif %}
+{%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+# endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+{#- Rte_IWrite implementation #}
+{%- if pports or rports %}
+# ifndef RTE_CORE
+{%- endif %}
+{%- if pports %}
+/*
+ * Rte_IWrite/IWriteRef_<r>_<p>_<d> (implicit S/R communication with isQueued = false)
+ */
+{%- endif %}
+{%- for pport in pports %}
+    {%- set var_name = get_imp_sr_var_name(pport) %}
+    {%- if pport["m_to_n"] not in ["0", "mn"] or pport["signal_category"] in ["Signal", "SignalGroup"] %}
+#define Rte_IWrite_{{pport["name"]}}(data) \
+        {%- if pport["arg"]["datatype"]["native_category"] == "NUMERICAL" %}
+            {%- if pport.get('buff_struct_name', None) %}
+    ({{pport['buff_struct_name']}}.{{var_name}} = (data))
+            {%- else %}
+    ({{var_name}} = (data))
+            {%- endif %}
+        {%- else %}
+    (Rte_MemCpy(&({{var_name}}), data, sizeof({{pport["arg"]["datatype"]["name"]}})))
+        {%- endif %}
+    {%- else %}
+#define Rte_IWrite_{{pport["name"]}}(data) /* unconnected */
+    {%- endif %}
+#define Rte_IWriteRef_{{pport["name"]}}() \
+    {%- if pport["arg"]["datatype"]["native_category"] == "ARRAY" %}
+    (({{pport["arg"]["datatype"]["arr_basetype"]}} *) (&{{var_name}}))
+    {%- else %}
+            {%- if pport.get('buff_struct_name', None) %}
+    (({{pport["arg"]["datatype"]["name"]}} *) (&{{pport['buff_struct_name']}}.{{var_name}}))
+            {%- else %}
+    (({{pport["arg"]["datatype"]["name"]}} *) (&{{var_name}}))
+            {%- endif %}
+    {%- endif %}
+{%- endfor %}
+{#- Rte_IRead implementation #}
+{%- if rports %}
+/*
+ * Rte_IRead_<r>_<p>_<d> (implicit S/R communication with isQueued = false)
+ */
+{%- endif %}
+{%- for rport in rports %}
+    {%- set var_name = get_imp_sr_var_name(rport) %}
+    {%- if rport["m_to_n"] not in ["0", "mn"] or rport["signal_category"] in ["Signal", "SignalGroup"] %}
+#define Rte_IRead_{{rport["name"]}}() \
+        {%- if rport["arg"]["datatype"]["native_category"] == "NUMERICAL" %}
+            {%- if rport.get('buff_struct_name', None) %}
+    ({{rport['buff_struct_name']}}.{{var_name}})
+            {%- else %}
+    ({{var_name}})
+            {%- endif %}
+        {%- elif rport["arg"]["datatype"]["native_category"] == "ARRAY" %}
+    (({{rport["arg"]["datatype"]["arr_basetype"]}} *) (&{{var_name}}))
+        {%- else %}
+    (({{rport["arg"]["datatype"]["name"]}} *) (&{{var_name}}))
+        {%- endif %}
+    {%- else %}
+#define Rte_IRead_{{rport["name"]}}() \
+        {%- if rport['arg']['datatype']['native_category'] == 'NUMERICAL' %}
+    ({{rport['arg']['init_value']['value']['value']}})
+        {%- elif rport['arg']['datatype']['native_category'] == 'ARRAY' %}
+    (({{rport["arg"]["datatype"]["arr_basetype"]}} *) (&{{rport['arg']['init_value']['name']}}))
+        {%- else %}
+    (({{rport["arg"]["datatype"]["name"]}} *) (&{{rport['arg']['init_value']['name']}}))
+        {%- endif %}
+    {%- endif %}
+{%- endfor %}
+{%- if pports or rports %}
+# endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+{%- set explicit_pports = get_swc_sr_explicit_api_pport_list() %}
+{%- set explicit_rports = get_swc_sr_explicit_api_rport_list() %}
+{%- set isupdated_rports = get_swc_sr_nonqueue_enable_update_rport_list() %}
+{%- set queue_pports = get_swc_sr_queue_api_pport_list() %}
+{%- set queue_rports = get_swc_sr_queue_api_rport_list() %}
+{%- set int_trigger_apis = get_standard_internal_trigger_api() %}
+{%- set ext_trigger_apis = get_external_trigger_api() %}
+{#}{%- set api_nv_pports = get_nv_explicit_api_pport_list() %}{#}
+{%- if explicit_pports or explicit_rports or isupdated_rports or queue_pports or queue_rports or int_trigger_apis or ext_trigger_apis %}
+# ifndef RTE_CORE
+/*
+ * API prototypes
+ */
+{%- endif %}
+
+{#- Rte_Write API prototypes #}
+{%- for pport in explicit_pports %}
+    {%- set datatype = pport["arg"]["datatype"] %}
+    {%- set data_arg = get_sr_write_data_arg(datatype) %}
+#define Rte_Write_{{pport["name"]}} Rte_Write_{{pport["component"]}}_{{pport["name"]}}
+extern Std_ReturnType Rte_Write_{{pport["component"]}}_{{pport["name"]}}({{data_arg}});
+{%- endfor %}
+
+{#- Rte_Read API prototypes #}
+{%- for rport in explicit_rports %}
+    {%- if rport["read_by_value"] %}
+#define Rte_DRead_{{rport["name"]}} Rte_DRead_{{rport["component"]}}_{{rport["name"]}}
+extern {{rport["arg"]["datatype"]["name"]}} Rte_DRead_{{rport["component"]}}_{{rport["name"]}}(void);
+    {%- else %}
+        {%- set datatype = rport["arg"]["datatype"] %}
+        {%- set data_arg = get_sr_read_data_arg(datatype) %}
+#define Rte_Read_{{rport["name"]}} Rte_Read_{{rport["component"]}}_{{rport["name"]}}
+extern Std_ReturnType Rte_Read_{{rport["component"]}}_{{rport["name"]}}({{data_arg}});
+    {%- endif %}
+{%- endfor %}
+{#- Rte_IsUpdated API #}
+{%- if isupdated_rports %}
+/*
+ * Rte_IsUpdated_<p>_<d> (explicit S/R communication with isQueued == false and enableUpdate == true)
+ */
+{%- for rport in isupdated_rports %}
+#define Rte_IsUpdated_{{rport['name']}} Rte_IsUpdated_{{rport['component']}}_{{rport['name']}}
+    {%- if rport['m_to_n'] == '0' %}
+#define Rte_IsUpdated_{{rport['component']}}_{{rport['name']}}() (FALSE)
+    {%- else %}
+#define Rte_IsUpdated_{{rport['component']}}_{{rport['name']}}() (Rte_RxUpdate_{{rport['component']}}_{{rport['name']}})
+    {%- endif %}
+{%- endfor %}
+{%- endif %}
+{#- Rte_Send API prototypes #}
+{%- for pport in queue_pports %}
+    {%- set datatype = pport['arg']['datatype'] %}
+    {%- set data_arg = get_sr_write_data_arg(datatype) %}
+#define Rte_Send_{{pport['port_prototype']}}_{{pport['data_element']}} Rte_Send_{{pport['component']}}_{{pport["port_prototype"]}}_{{pport['data_element']}}
+extern Std_ReturnType Rte_Send_{{pport['component']}}_{{pport['port_prototype']}}_{{pport['data_element']}}({{data_arg}});
+{%- endfor %}
+{#- Rte_Receive API prototypes #}
+{%- for rport in queue_rports %}
+    {%- set datatype = rport['arg']['datatype'] %}
+    {%- set data_arg = get_sr_read_data_arg(datatype) %}
+#define Rte_Receive_{{rport['port_prototype']}}_{{rport['data_element']}} Rte_Receive_{{rport['component']}}_{{rport['port_prototype']}}_{{rport['data_element']}}
+extern Std_ReturnType Rte_Receive_{{rport['component']}}_{{rport['port_prototype']}}_{{rport['data_element']}}({{data_arg}});
+{%- endfor %}
+{#- Internal_Trigger API prototypes #}
+#define RTE_START_SEC_CODE
+#include "rte_memmap.h"
+{%- for swc_runnable_trigger, trigger_apis in int_trigger_apis.items() %}
+{%- set swc, runnable, trigger = swc_runnable_trigger.split('/') %}
+FUNC(void, RTE_CODE) Rte_IrTrigger_{{swc}}_{{runnable}}_{{trigger}}(void);
+{%- endfor %}
+{#- External_Trigger API prototypes #}
+{%- for trigger_api in ext_trigger_apis %}
+FUNC(void, RTE_CODE) Rte_Trigger_{{trigger_api["sort_name"]}}(void);
+{%- endfor %}
+#define RTE_STOP_SEC_CODE
+#include "rte_memmap.h"
+{%- if explicit_pports or explicit_rports or isupdated_rports or queue_pports or queue_rports or int_trigger_apis or ext_trigger_apis %}
+# endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+
+{%- set rx_updated_ports = get_swc_data_mapping_rx_is_updated_port() %}
+{%- if rx_updated_ports %}
+/**
+ * Rte_IsUpdated_<p>_<d> (explicit S/R communication with isQueued = false)
+*/
+    {%- for port in rx_updated_ports %}
+        {%- set flag = port["data_mapping_flag"]["is_updated"] %}
+#define Rte_IsUpdated_{{port["name"]}} Rte_IsUpdated_{{port["swc_port_var"]}}
+#define Rte_IsUpdated_{{port["swc_port_var"]}}() ({{flag["parent_struct_name"]}}.{{flag["name"]}} == 1U)
+    {%- endfor %}
+{%- endif %}
+
+{#- API for mode management #}
+{%- set mode_switch_rports, mode_switch_pports = get_mode_switch_port_connected_in_swc() %}
+{%- set mode_switch_rports_unconnected, mode_switch_pports_unconnected = get_mode_switch_port_unconnected_in_swc() %}
+{%- if mode_switch_rports|length or mode_switch_rports_unconnected|length%}
+{#- Rte_Mode API prototypes #}
+# ifndef RTE_CORE
+/*
+ * Rte_Mode_<p>_<m>
+ */
+    {%- for mode_switch_rport_unconnected in mode_switch_rports_unconnected %}
+        {%- if mode_switch_rport_unconnected["use_enhanced_mode_api"] %}
+# define Rte_Mode_{{mode_switch_rport_unconnected["port_name"]}}_{{mode_switch_rport_unconnected["mode_group_prototype"]}}(previousMode, nextMode) (*(previousMode) = RTE_MODE_{{mode_switch_rport_unconnected["mode_group"]}}_{{mode_switch_rport_unconnected["init_mode"]}}, *(nextMode) = RTE_MODE_{{mode_switch_rport_unconnected["mode_group"]}}_{{mode_switch_rport_unconnected["init_mode"]}}, RTE_MODE_{{mode_switch_rport_unconnected["mode_group"]}}_{{mode_switch_rport_unconnected["init_mode"]}})
+        {%- else %}
+# define Rte_Mode_{{mode_switch_rport_unconnected["port_name"]}}_{{mode_switch_rport_unconnected["mode_group_prototype"]}}() (RTE_MODE_{{mode_switch_rport_unconnected["mode_group"]}}_{{mode_switch_rport_unconnected["init_mode"]}})
+        {%- endif %}
+    {%- endfor %}
+    {%- for mode_switch_rport in mode_switch_rports %}
+        {%- if mode_switch_rport["use_enhanced_mode_api"] %}
+extern uint8 Rte_Mode_{{mode_switch_rport["swc_name"]}}_{{mode_switch_rport["port_name"]}}_{{mode_switch_rport["mode_group_prototype"]}}(uint8 *previousMode, uint8 *nextMode);
+        {%- else %}
+extern uint8 Rte_Mode_{{mode_switch_rport["swc_name"]}}_{{mode_switch_rport["port_name"]}}_{{mode_switch_rport["mode_group_prototype"]}}(void);
+        {%- endif %}
+# define Rte_Mode_{{mode_switch_rport["port_name"]}}_{{mode_switch_rport["mode_group_prototype"]}} Rte_Mode_{{mode_switch_rport["swc_name"]}}_{{mode_switch_rport["port_name"]}}_{{mode_switch_rport["mode_group_prototype"]}}
+    {%- endfor %}
+# endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+{%- if mode_switch_pports|length or mode_switch_pports_unconnected|length %}
+{#- Rte_Switch & Rte_SwitchAck API prototypes #}
+# ifndef RTE_CORE
+/*
+ * Rte_Switch_<p>_<m>
+ */
+    {%- for mode_switch_pport_unconnected in mode_switch_pports_unconnected %}
+extern Std_ReturnType Rte_Switch_{{mode_switch_pport_unconnected["swc_name"]}}_{{mode_switch_pport_unconnected["port_name"]}}_{{mode_switch_pport_unconnected["mode_group_prototype"]}}(uint8 nextMode);
+# define Rte_Switch_{{mode_switch_pport_unconnected["port_name"]}}_{{mode_switch_pport_unconnected["mode_group_prototype"]}} Rte_Switch_{{mode_switch_pport_unconnected["swc_name"]}}_{{mode_switch_pport_unconnected["port_name"]}}_{{mode_switch_pport_unconnected["mode_group_prototype"]}}
+    {%- endfor %}
+    {%- for mode_switch_pport in mode_switch_pports %}
+extern Std_ReturnType Rte_Switch_{{mode_switch_pport["swc_name"]}}_{{mode_switch_pport["port_name"]}}_{{mode_switch_pport["mode_group_prototype"]}}(uint8 nextMode);
+# define Rte_Switch_{{mode_switch_pport["port_name"]}}_{{mode_switch_pport["mode_group_prototype"]}} Rte_Switch_{{mode_switch_pport["swc_name"]}}_{{mode_switch_pport["port_name"]}}_{{mode_switch_pport["mode_group_prototype"]}}
+        {%- if mode_switch_pport["mode_switched_ack"] %}
+extern Std_ReturnType Rte_SwitchAck_{{mode_switch_pport["swc_name"]}}_{{mode_switch_pport["port_name"]}}_{{mode_switch_pport["mode_group_prototype"]}}(void);
+# define Rte_SwitchAck_{{mode_switch_pport["port_name"]}}_{{mode_switch_pport["mode_group_prototype"]}}  Rte_SwitchAck_{{mode_switch_pport["swc_name"]}}_{{mode_switch_pport["port_name"]}}_{{mode_switch_pport["mode_group_prototype"]}}
+        {%- endif %}
+    {%- endfor %}
+# endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+{#- Rte_Call API #}
+{%- set client_server_rports, client_server_pports = get_client_server_port_in_swc() -%}
+{%- set client_server_rports_no_dup = get_client_server_port_in_swc_no_dup() -%}
+{%- set sync_rports = get_swc_sync_cs_multicore_rports() -%}
+{%- set async_rports = get_swc_async_cs_multicore_rports() %}
+{%- if client_server_rports or sync_rports or async_rports %}
+# ifndef RTE_CORE
+/*
+ * Rte_Call_<p>_<o>
+ */
+{%- for client_server_rport in client_server_rports_no_dup %}
+{%- set connected_port = client_server_rport["connected_ports"]["ports"][0] %}
+{%- set port_def_args = connected_port["port_def_args"] %}
+{%- set operation = client_server_rport["operation"] %}
+{%- if port_def_args and connected_port["symbol"] %}
+extern {{operation["return_type"]}} {{connected_port["symbol"]}}({{(get_args_str_list(port_def_args.values()) + get_args_str_list(operation["args"].values())) | join(", ") if (get_args_str_list(port_def_args.values()) + get_args_str_list(operation["args"].values())) else "void"}});
+{%- elif connected_port["symbol"] %}
+extern {{operation["return_type"]}} {{connected_port["symbol"]}}({{get_args_str_list(operation["args"].values()) | join(", ") if (get_args_str_list(operation["args"].values())) else "void"}});
+{%- endif %}
+{%- endfor %}
+
+{%- set iso_call_func_include_header_files = get_iso_call_func_include_header_file() %}
+{%- if iso_call_func_include_header_files %}
+{# blank line #}
+/* header filer for isolate function call */
+    {%- for h_file in get_iso_call_func_include_header_file() %}
+#include "{{h_file}}"
+    {%- endfor %}
+{# blank line #}
+{%- endif %}
+
+{#- Rte_Call_<p>_<o> (unmapped) for synchronous C/S communication #}
+{%- for client_server_rport in client_server_rports %}
+{%- if judge_unconnected_cs_rport(client_server_rport) %}
+{%- set operation = client_server_rport["operation"] %}
+{%- set operation_args = get_args_str_list(client_server_rport["operation"]["args"].values()) %}
+#define Rte_Call_{{client_server_rport["name"]}} Rte_Call_{{swc_name}}_{{client_server_rport["name"]}}
+extern Std_ReturnType Rte_Call_{{swc_name}}_{{client_server_rport["name"]}}({{"void" if operation_args | length == 0 else operation_args | join(", ")}});
+{%- else %}
+{%- set connected_port = client_server_rport["connected_ports"]["ports"][0] %}
+{%- set port_def_args = connected_port["port_def_args"] %}
+{%- set operation = client_server_rport["operation"] %}
+{%- set operation_args = get_args_str_list(operation["args"].values()) %}
+{%- set arg_str = "void" if operation_args | length == 0 else operation_args | join(", ") %}
+{%- if port_def_args and connected_port["symbol"] %}
+    {%- if operation["return_type"] == "void" %}
+static inline Std_ReturnType Rte_Call_{{client_server_rport["name"]}}({{arg_str}}) {
+    (void){{connected_port["symbol"]}}({{(get_port_def_arg_str_list(port_def_args.values()) + get_arg_name_list(operation["args"].values())) | join(", ")}});
+    return RTE_E_OK;
+}
+    {%- else %}
+#define Rte_Call_{{client_server_rport["name"]}}({{get_arg_name_list(operation["args"].values()) | join(", ")}}) ({{connected_port["symbol"]}}({{(get_port_def_arg_str_list(port_def_args.values()) + get_arg_name_list(operation["args"].values())) | join(", ")}}))
+    {%- endif %}
+{%- elif connected_port["symbol"] %}
+    {%- if operation["return_type"] == "void" %}
+static inline Std_ReturnType Rte_Call_{{client_server_rport["name"]}}({{arg_str}}) {
+    (void){{connected_port["symbol"]}}({{get_arg_name_list(operation["args"].values()) | join(", ")}});
+    return RTE_E_OK;
+}
+    {%- else %}
+#define Rte_Call_{{client_server_rport["name"]}} {{connected_port["symbol"]}}
+    {%- endif %}
+{%- endif %}
+{%- endif %}
+{%- endfor %}
+# endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+# ifndef RTE_CORE
+{#- Rte_Call_<p>_<o> (mapped) for C/S Sync Communication #}
+{%- for rport in sync_rports %}
+#define Rte_Call_{{rport["name"]}} Rte_Call_{{rport["component"]}}_{{rport["name"]}}
+    {%- set arg_list = get_args_str_list(rport["operation"]["args"].values()) %}
+extern Std_ReturnType Rte_Call_{{rport["component"]}}_{{rport["name"]}}({{"void" if arg_list | length == 0 else arg_list | join(", ")}});
+{%- endfor %}
+
+{#- Rte_Call_<p>_<o> (mapped) for C/S Async Communication #}
+{%- for rport in async_rports %}
+#define Rte_Call_{{rport["name"]}} Rte_Call_{{rport["component"]}}_{{rport["name"]}}
+    {%- set arg_list = get_input_args_str_list(rport["operation"]["args"].values()) %}
+extern Std_ReturnType Rte_Call_{{rport["component"]}}_{{rport["name"]}}({{"void" if arg_list | length == 0 else arg_list | join(", ")}});
+#define Rte_Result_{{rport["name"]}} Rte_Result_{{rport["component"]}}_{{rport["name"]}}
+    {%- set arg_list = get_output_args_str_list(rport["operation"]["args"].values()) %}
+extern Std_ReturnType Rte_Result_{{rport["component"]}}_{{rport["name"]}}({{"void" if arg_list | length == 0 else arg_list | join(", ")}});
+{%- endfor %}
+# endif /* !defined(RTE_CORE) */
+
+{#- ---------------------------------------------------------------- #}
+{#- PIM API #}
+{#- ---------------------------------------------------------------- #}
+
+{%- set vars, vars_no_init_value, apis = get_swc_pim_var_and_api() %}
+{%- set pim_typedefs = get_swc_pim_user_typedefs() %}
+
+{%- if apis %}
+# ifndef RTE_CORE
+{%- endif %}
+
+{%- if pim_typedefs %}
+{# typedef #}
+/*
+ * Per Instance Memory
+ */
+    {%- for def in pim_typedefs %}
+{{def}}
+    {%- endfor %}
+{%- endif %}
+
+{# buffer declaration #}
+{%- if vars %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+    {%- for pim in vars %}
+extern VAR({{pim["buff_type"]}}, RTE_{{appl_name.upper()}}_PRIVATE_DATA) {{pim["buff"]}};
+    {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+{%- endif %}
+{%- if vars_no_init_value %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+    {%- for pim in vars_no_init_value %}
+extern VAR({{pim["buff_type"]}}, RTE_{{appl_name.upper()}}_PRIVATE_BSS) {{pim["buff"]}};
+    {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+{%- endif %}
+
+{# pim APIs #}
+{%- if apis %}
+    {%- for api in apis %}
+#define Rte_Pim_{{api['name']}}() (&{{api['buff']}})
+    {%- endfor %}
+{%- endif %}
+
+{%- if apis %}
+# endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+{#- ---------------------------------------------------------------- #}
+{#- IRV API #}
+{#- ---------------------------------------------------------------- #}
+
+{%- set irv_var_exp, irv_var_exp_no_init_value = get_swc_irv_var_exp() %}
+{%- set irv_var_imp_copy = get_swc_irv_var_imp_copy() %}
+
+{%- set irv_exp_write_api_func = get_swc_irv_exp_write_api_func() %}
+{%- set irv_exp_write_api_macro = get_swc_irv_exp_write_api_macro() %}
+{%- set irv_exp_read_api_func = get_swc_irv_exp_read_api_func() %}
+{%- set irv_exp_read_api_macro = get_swc_irv_exp_read_api_macro() %}
+
+{%- set irv_imp_write_api_macro = get_swc_irv_imp_write_api_macro() %}
+{%- set irv_imp_read_api_macro = get_swc_irv_imp_read_api_macro() %}
+
+{%- if irv_exp_write_api_func or irv_exp_write_api_macro or irv_exp_read_api_func or irv_exp_read_api_macro or irv_imp_write_api_macro or irv_imp_read_api_macro %}
+{# title #}
+# ifndef RTE_CORE
+
+/*
+ * Inter Runnable Variable
+ */
+{%- endif %}
+
+{#- var def #}
+{%- if irv_var_exp %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+    {%- for irv in irv_var_exp %}
+extern VAR({{irv["datatype"]["name"]}}, RTE_{{appl_name.upper()}}_PRIVATE_DATA) {{irv["buff"]}};
+    {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+{%- endif %}
+
+{%- if irv_var_exp_no_init_value or irv_var_imp_copy %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+    {%- for irv in irv_var_exp_no_init_value %}
+extern VAR({{irv["datatype"]["name"]}}, RTE_{{appl_name.upper()}}_PRIVATE_BSS) {{irv["buff"]}};
+    {%- endfor %}
+    {%- for access in irv_var_imp_copy %}
+extern VAR({{access["data"]["datatype"]["name"]}}, RTE_{{appl_name.upper()}}_PRIVATE_BSS) {{access["buff_imp_copy"]}};
+    {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+{%- endif %}
+
+{#- explicit #}
+{%- for irv in irv_exp_write_api_func %}
+    {%- set data_arg = get_sr_write_data_arg(irv["data"]["datatype"], 'irv') %}
+#define Rte_IrvWrite_{{irv["run_var"]}} Rte_IrvWrite_{{irv["swc_inst"]}}_{{irv["run_var"]}}
+extern void Rte_IrvWrite_{{irv["swc_inst"]}}_{{irv["run_var"]}}({{data_arg}});
+{%- endfor %}
+
+{%- for irv in irv_exp_write_api_macro %}
+#define Rte_IrvWrite_{{irv["run_var"]}}(data) \
+    {%- if irv["m_to_n"] == "0" %}
+    /* unconnected */
+    {%- else %}
+        {%- if irv["data"]["datatype"]["native_category"] == "NUMERICAL" %}
+    ({{irv["data"]["buff"]}} = data)
+        {%- else %}
+    Rte_MemCpy(&{{irv["data"]["buff"]}}, data, sizeof({{irv["data"]["datatype"]["name"]}}));
+        {%- endif %}
+    {%- endif %}
+{%- endfor %}
+
+{%- for irv in irv_exp_read_api_func %}
+    {%- set datatype = api["data"]["datatype"]["name"] %}
+    {%- set data_arg = get_sr_read_data_arg(datatype, 'irv') %}
+#define Rte_IrvRead_{{irv["run_var"]}} Rte_IrvRead_{{irv["swc_inst"]}}_{{irv["run_var"]}}
+    {%- if irv["data"]["datatype"]["native_category"] == "NUMERICAL" %}
+extern {{irv["data"]["datatype"]["name"]}} Rte_IrvRead_{{irv["swc_inst"]}}_{{irv["run_var"]}}({{data_arg}});
+    {%- else %}
+extern void Rte_IrvRead_{{irv["swc_inst"]}}_{{irv["run_var"]}}({{data_arg}});
+    {%- endif %}
+{%- endfor %}
+
+{%- for irv in irv_exp_read_api_macro %}
+    {%- if irv["data"]["datatype"]["native_category"] == "NUMERICAL" %}
+#define Rte_IrvRead_{{irv["run_var"]}}() \
+    {{irv["data"]["buff"]}}
+    {%- else %}
+#define Rte_IrvRead_{{irv["run_var"]}}(data) \
+    Rte_MemCpy(data, &{{irv["data"]["buff"]}}, sizeof({{irv["data"]["datatype"]["name"]}}));
+    {%- endif %}
+{%- endfor %}
+
+{#- implicit #}
+{%- for irv in irv_imp_write_api_macro %}
+#define Rte_IrvIWrite_{{irv["run_var"]}}(data) \
+    {%- if irv["m_to_n"] == "0" %}
+    /* unconnected */
+    {%- else %}
+        {%- if irv["data"]["datatype"]["native_category"] == "NUMERICAL" %}
+    ({{irv["buff_imp_copy"]}} = data)
+        {%- else %}
+    Rte_MemCpy(&{{irv["buff_imp_copy"]}}, data, sizeof({{irv["data"]["datatype"]["name"]}}));
+        {%- endif %}
+    {%- endif %}
+{%- endfor %}
+
+{%- for irv in irv_imp_read_api_macro %}
+#define Rte_IrvIRead_{{irv["run_var"]}}() \
+    {%- if irv["data"]["datatype"]["native_category"] == "NUMERICAL" %}
+    {{irv["buff_imp_copy"]}}
+    {%- elif irv["data"]["datatype"]["native_category"] == "ARRAY"  %}
+    ((const {{irv["data"]["datatype"]["arr_basetype"]}} *) (&{{irv["buff_imp_copy"]}}))
+    {%- else %}
+    ((const {{irv["data"]["datatype"]["name"]}} *) (&{{irv["buff_imp_copy"]}}))
+    {%- endif %}
+{%- endfor %}
+
+{%- if irv_exp_write_api_func or irv_exp_write_api_macro or irv_exp_read_api_func or irv_exp_read_api_macro or irv_imp_write_api_macro or irv_imp_read_api_macro %}
+# endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+{%- if int_trigger_apis or ext_trigger_apis %}
+# ifndef RTE_CORE
+{%- endif %}
+
+{#- Inter-runnable triggering (Rte_IrTrigger API) #}
+{%- if int_trigger_apis %}
+/*
+ * Inter-runnable triggering (Rte_IrTrigger API)
+ */
+{%- endif %}
+{%- for swc_runnable_trigger, trigger_apis in int_trigger_apis.items() %}
+{%- set swc, runnable, trigger = swc_runnable_trigger.split('/') %}
+#define Rte_IrTrigger_{{runnable}}_{{trigger}}() \
+    Rte_IrTrigger_{{swc}}_{{runnable}}_{{trigger}}()
+{%- endfor %}
+
+{#- Rte Trigger API (Rte_Trigger) #}
+{%- if ext_trigger_apis %}
+/*
+ * Rte_Trigger_<p>_<o> (external event trigger communication)
+ */
+{%- endif %}
+{%- for trigger_api in ext_trigger_apis %}
+#define Rte_Trigger_{{trigger_api["name"]}} Rte_Trigger_{{trigger_api["sort_name"]}}
+{%- endfor %}
+
+{%- if int_trigger_apis or ext_trigger_apis %}
+# endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+
+{%- set prm_rports = get_cal_prm_rports_connected(swc_name) %}
+{%- if prm_rports %}
+
+# ifndef RTE_CORE
+/**********************************************************************************************************************
+ * Rte_Prm (Calibration component calibration parameters)
+ *********************************************************************************************************************/
+    {{- macros.CAL_PARAM_CONSTS_MEMMAP(true)}}
+    {%- for port_info in prm_rports %}
+        {{- macros.CAL_PARAM_CONST(ind="", const_name=port_info['cal_prm_const'], port_arg=port_info['arg'], is_extern=true)}}
+    {%- endfor %}
+    {{- macros.CAL_PARAM_CONSTS_MEMMAP(false)}}
+{# new line #}
+    {%- for port_info in prm_rports %}
+        {{- macros.RTE_PRM_INTERFACE_MACRO(port_info)}}
+    {%- endfor %}
+# endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+
+{#- Runnable API prototypes #}
+{%- set runnables = get_runnable_entity_list() %}
+{%- if runnables %}
+{%- if swc_type in gen_file_swc_type%}
+#define {{swc_name}}_START_SEC_CODE
+//#include "{{swc_name}}_MemMap.h"
+{%- endif %}
+# ifdef RTE_CORE
+/*
+ * Runnable entity prototypes
+ */
+{%- endif %}
+{%- for runnable in runnables %}
+{%- if runnable["return_type"] == "" and runnable["trigger_event"] == "OperationInvokedEvent" or runnable["trigger_event"] == None%}
+{%- elif runnable["args"] | length != 0 %}
+/* Schedulable entities are declared by the RTE and also by the BSW modules, No functional risk, Both adhere to the Autosar specification. */
+extern {{runnable["return_type"]}} {{runnable["name"]}}({{ get_args_str_list(runnable["args"].values()) | join(", ") }});
+{%- elif runnable["args"] | length == 0 %}
+/* Schedulable entities are declared by the RTE and also by the BSW modules, No functional risk, Both adhere to the Autosar specification. */
+extern {{runnable["return_type"]}} {{runnable["name"]}}(void);
+{%- endif %}
+{%- endfor %}
+{% if runnables %}
+# endif /* !defined(RTE_CORE) */
+{% if swc_type in gen_file_swc_type%}
+# define {{swc_name}}_STOP_SEC_CODE
+//#include "{{swc_name}}_MemMap.h"
+{%- endif %}
+{%- endif %}
+
+{#- Runnable Exclusive Areas #}
+{%- set exclusive_areas = get_can_enter_exclusive_areas(runnables) %}
+{%- for exclusive_area in exclusive_areas %}
+{%- if exclusive_area["name"] %}
+{% if loop.first %}
+/*
+ * Exclusive Areas
+ */
+{%- endif %}
+{%- if "input_param" in exclusive_area and exclusive_area["input_param"] %}
+#define Rte_Enter_{{exclusive_area["name"]}}() \
+    { \
+        (void){{exclusive_area["suspend"]}}( {{exclusive_area["input_param"]}} ); \
+    }
+#define Rte_Exit_{{exclusive_area["name"]}}() \
+    {\
+        (void){{exclusive_area["resume"]}}( {{exclusive_area["input_param"]}} ); \
+    }
+{%- else %}
+    {%- if "ea_empty_imp" in exclusive_area%}
+#define Rte_Enter_{{exclusive_area["name"]}}()
+#define Rte_Exit_{{exclusive_area["name"]}}()
+    {%- else %}
+#define Rte_Enter_{{exclusive_area["name"]}}() {{exclusive_area["suspend"]}}()
+#define Rte_Exit_{{exclusive_area["name"]}}() {{exclusive_area["resume"]}}()
+    {%- endif %}
+{%- endif %}
+{%- endif %}
+{%- endfor %}
+
+{#- Application errors #}
+{%- set used_port_interface_list_for_swc = get_used_port_interface_list_for_swc() %}
+{%- if used_port_interface_list_for_swc %}
+# ifndef RTE_CORE
+/* Application errors*/
+{%- endif %}
+{%- for port_interface_name, application_error_dict  in used_port_interface_list_for_swc.items() %}
+    {%- for application_error_name, application_error_code  in application_error_dict.items() %}
+#define RTE_E_{{port_interface_name}}_{{application_error_name}} ({{application_error_code}}U)
+    {%- endfor %}
+{%- endfor %}
+{%- if used_port_interface_list_for_swc %}
+# endif /* !defined(RTE_CORE) */
+{%- endif %}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* RTE_{{swc_name|upper}}_H_ */
+{# blank line at end of file #}

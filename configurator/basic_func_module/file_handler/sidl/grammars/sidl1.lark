@@ -1,0 +1,64 @@
+start: (syntax_version | enum_def | struct_def | service_def | typedef_def)*
+
+identifier: CNAME
+param_type: CNAME
+
+syntax_version: "syntax"":" "\""CNAME?"\""";"
+
+// Parser rules of enum
+enum_def: "enum" identifier"{" enum_body "}"";"
+    enum_body: [enum_element ("," enum_element)*]
+    enum_element: CNAME
+
+// Parser rules of struct
+struct_def: COMPITABLE_FLAG? "struct" identifier "{" struct_body "}"";"
+    COMPITABLE_FLAG: "@compatible"
+    struct_body: (struct_item";")*
+    struct_item: (data_type | dynamic_array_type) var_token
+    data_type: CNAME
+    ?var_token: identifier | c_array
+    c_array: identifier"["array_len"]"
+    array_len: INT
+    dynamic_array_type: "sequence""<"data_type">"
+
+// Parser rules of typedef
+typedef_def: "typedef" origin_type alias";"
+    alias: CNAME
+    origin_type: data_type | dynamic_array_type
+
+// Parser rules of service
+service_def: "service" identifier "{" service_body "}"";"
+service_body: (version_def | method_def | field_def | event_def)*
+    param_list:[CNAME ("," CNAME)*]
+
+    // Parser rules of version
+    version_def: "version""{" "major" INT"," "minor" INT "}"";"
+
+    // Parser rules of method
+    method_def: "method" identifier"("param_list")" "returns" "("return_type")" ("raises" "("error_type")")? ";"
+        error_type: CNAME
+        return_type: VOID | CNAME
+        VOID: "void"
+
+    // Parser rule of field
+    field_def: "field" identifier"("param_list")" field_body* ";"
+        field_body: "{" ((get | set | notify) ";")~3"}"
+        get: "get"":" (TRUE | FALSE)
+        set: "set"":" (TRUE | FALSE)
+        notify: "notify"":" (TRUE | FALSE)
+        TRUE: "true"
+        FALSE: "false"
+
+    // Parser rule of event
+    event_def: "event" identifier"("param_list")"";"
+
+
+%import common.INT
+%import common.CNAME
+%import common.WS
+%import common.C_COMMENT
+%import common.CPP_COMMENT
+
+%ignore WS
+%ignore C_COMMENT
+%ignore CPP_COMMENT

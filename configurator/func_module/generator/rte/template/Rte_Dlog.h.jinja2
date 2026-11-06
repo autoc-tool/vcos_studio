@@ -1,0 +1,233 @@
+{{get_copyright()}}
+
+/*!*********************************************************************************************************************
+ * @file        Rte_Dlog.h
+ * @brief       Interface for diagnostic logging functionality within the system
+ * @details     This header file provides declarations for diagnostic logging features
+ * @date        {{get_generation_time_temp()}}
+ * @toolversion {{get_vcos_version_temp()}}
+ **********************************************************************************************************************/
+
+#ifndef RTE_DLOG_H_
+#define RTE_DLOG_H_
+
+#include "Rte_Type.h"
+
+#define RTE_DLOG_EMPTY_ID 0U
+
+/**
+ * function switch: "Rte/RteGeneration/RteDevErrorDetect"
+ */
+
+extern void Rte_DetRte(uint8 serviceId, uint32 apiId, uint8 errorCode);
+extern void Rte_DetCom(uint8 rteServiceId, uint32 rteApiId, uint8 comServiceId, uint32 comApiId, uint8 errorCode);
+extern void Rte_DetOs(uint8 rteServiceId, uint32 rteApiId, uint8 osServiceId, uint32 osApiId, uint8 errorCode);
+
+/*
+ * log API: Rte_LogRte / Rte_LogCom / Rte_LogOs
+ */
+#define Rte_LogRte(serviceId, apiId, errorCode) Rte_DetRte((uint8) serviceId, (uint32) apiId, (uint8) errorCode)
+#define Rte_LogCom(rteServiceId, rteApiId, comServiceId, comApiId, errorCode) Rte_DetCom((uint8) rteServiceId, (uint32) rteApiId, (uint8) comServiceId, (uint32) comApiId, (uint8) errorCode)
+#define Rte_LogOs(rteServiceId, rteApiId, osServiceId, osApiId, errorCode) Rte_DetOs((uint8) rteServiceId, (uint32) rteApiId, (uint8) osServiceId, (uint32) osApiId, (uint8) errorCode)
+
+{%- if not is_rte_dlog_enabled() %}
+#define RTE_DLOG_ENABLED STD_OFF
+{%- else %}
+{#- log enabled #}
+
+{%- if "Det" in get_enable_module_list() %}
+#define RTE_DLOG_ENABLED STD_ON
+{%- else %}
+#define RTE_DLOG_ENABLED STD_OFF
+{%- endif %}
+
+#if (RTE_DLOG_ENABLED == STD_ON)
+
+/* COM Service ids */
+#define RTE_COM_SENDSIGNAL_ID               0x0A
+#define RTE_COM_RECEIVESIGNAL_ID            0x0B
+#define RTE_COM_SENDSIGNALGROUP_ID          0x0D
+#define RTE_COM_RECEIVESIGNALGROUP_ID       0x0E
+
+/*
+ * RTE generated API ID
+ */
+{%- set async_rports = get_all_async_cs_multicore_rports() %}
+{%- set sync_rports = get_all_sync_cs_multicore_rports() %}
+
+{%- set api_value_pports = get_dlog_sr_explicit_api_value_pport_list() %}
+{%- set api_pointer_pports = get_dlog_sr_explicit_api_pointer_pport_list() %}
+{%- set api_rports = get_dlog_sr_explicit_api_rport_list() %}
+
+{%- set sr_queued_pports = get_all_sr_queue_pport_list() %}
+{%- set sr_queued_rports = get_all_sr_queue_rport_list() %}
+
+{%- set mode_switch_rports, mode_switch_pports = get_all_mode_switch_port_connected_in_swc() %}
+
+{#- Rte_Call API #}
+{%- if sync_rports or async_rports %}
+/*
+ * Rte_Call API
+ */
+typedef enum {
+    /* sync */
+    {%- for rport in sync_rports %}
+        {%- if loop.first %}
+    Rte_Call_{{rport["component"]}}_{{rport["name"]}}_ID, /* {{loop.index - 1}} */
+        {%- else %}
+    Rte_Call_{{rport["component"]}}_{{rport["name"]}}_ID, /* {{loop.index - 1}} */
+        {%- endif %}
+    {%- endfor %}
+    /* Async */
+    {%- set num_sync_rports = (sync_rports | length) %}
+    {%- for rport in async_rports %}
+        {%- if loop.first and (num_sync_rports == 0) %}
+    Rte_Call_{{rport["component"]}}_{{rport["name"]}}_ID, /*  {{loop.index + num_sync_rports - 1}} */
+        {%- else %}
+    Rte_Call_{{rport["component"]}}_{{rport["name"]}}_ID, /*  {{loop.index + num_sync_rports - 1}} */
+        {%- endif %}
+    {%- endfor %}
+    RTE_CALL_CNT
+} RTE_CALL_DEF;
+{%- endif %}
+
+{#- Rte_Result API #}
+{%- if async_rports %}
+{# blank line #}
+/*
+ * Rte_Result API
+ */
+typedef enum {
+    {%- for rport in async_rports %}
+    Rte_Result_{{rport["component"]}}_{{rport["name"]}}_ID, /* {{loop.index - 1}} */
+    {%- endfor %}
+    RTE_RESULT_CNT
+} RTE_RESULT_DEF;
+{%- endif %}
+
+{#- Rte_Write API #}
+{%- if api_value_pports or api_pointer_pports %}
+{# blank line #}
+/*
+ * Rte_Write API
+ */
+typedef enum {
+/* value */
+    {%- for pport in api_value_pports %}
+    Rte_Write_{{pport["component"]}}_{{pport["name"]}}_ID, /* {{loop.index - 1}} */
+    {%- endfor %}
+    {%- set num_value = (api_value_pports | length) %}
+/* pointer */
+    {%- for pport in api_pointer_pports %}
+    Rte_Write_{{pport["component"]}}_{{pport["name"]}}_ID, /* {{loop.index + num_value - 1}} */
+    {%- endfor %}
+    RTE_WRITE_CNT
+} RTE_WRITE_DEF;
+{%- endif %}
+
+{#- Rte_Read API #}
+{%- if api_rports %}
+{# blank line #}
+/*
+ * Rte_Read API
+ */
+typedef enum {
+    {%- for rport in api_rports %}
+    Rte_Read_{{rport["component"]}}_{{rport["name"]}}_ID, /* {{loop.index - 1}} */
+    {%- endfor %}
+    RTE_READ_CNT
+} RTE_READ_DEF;
+{%- endif %}
+
+{#- Rte_Send API #}
+{%- if sr_queued_pports %}
+{# blank line #}
+/*
+ * Rte_Send API
+ */
+typedef enum {
+    {%- for pport in sr_queued_pports %}
+    Rte_Send_{{pport["component"]}}_{{pport["port_prototype"]}}_{{pport['data_element']}}_ID, /* {{loop.index - 1}} */
+    {%- endfor %}
+    RTE_SEND_CNT
+} RTE_SEND_DEF;
+{%- endif %}
+
+{#- Rte_Receive API #}
+{%- if sr_queued_rports %}
+{# blank line #}
+/*
+ * Rte_Receive API
+ */
+typedef enum {
+    {%- for rport in sr_queued_rports %}
+    Rte_Receive_{{rport["component"]}}_{{rport["port_prototype"]}}_{{rport['data_element']}}_ID, /* {{loop.index - 1}} */
+    {%- endfor %}
+    RTE_RECEIVE_CNT
+} RTE_RECEIVE_DEF;
+{%- endif %}
+
+{#- Rte_Switch API #}
+{%- if mode_switch_pports %}
+{# blank line #}
+/*
+ * Rte_Switch API
+ */
+typedef enum {
+    {%- for mode_switch_pport in mode_switch_pports %}
+    Rte_Switch_{{mode_switch_pport["swc_name"]}}_{{mode_switch_pport["port_name"]}}_{{mode_switch_pport["mode_group_prototype"]}}_ID, /* {{loop.index - 1}} */
+    {%- endfor %}
+    RTE_SWITCH_CNT
+} RTE_SWITCH_DEF;
+{%- endif %}
+
+{#- Rte_SwitchAck API #}
+{%- if mode_switch_pports %}
+{# blank line #}
+/*
+ * Rte_SwitchAck API
+ */
+typedef enum {
+    {%- for mode_switch_pport in mode_switch_pports if mode_switch_pport["mode_switched_ack"] %}
+    Rte_SwitchAck_{{mode_switch_pport["swc_name"]}}_{{mode_switch_pport["port_name"]}}_{{mode_switch_pport["mode_group_prototype"]}}_ID, /* {{loop.index - 1}} */
+    {%- endfor %}
+    RTE_SWITCHACK_CNT
+} RTE_SWITCHACK_DEF;
+{%- endif %}
+{# blank line #}
+
+{#- Rte_COM API #}
+{%- set tx_proxies = get_rte_com_tx_proxy_list() %}
+{%- if tx_proxies %}
+{# blank line #}
+/*
+ * Rte_COM API
+ */
+typedef enum {
+    {%- for proxy_name in tx_proxies %}
+    {{proxy_name}}_ID, /* {{loop.index - 1}} */
+    {%- endfor %}
+    RTE_COMSENDSIGNALPROXY_CNT
+} RTE_COMSENDSIGNALPROXY_DEF;
+{%- endif %}
+{%- set com_cbk_dict_same_core, com_cbk_dict_inter_core = get_rte_com_cbk_dict() %}
+{%- if com_cbk_dict_same_core or com_cbk_dict_inter_core %}
+{# blank line #}
+typedef enum {
+    {%- set len_same_core = (com_cbk_dict_same_core | length) %}
+    {%- for signa_name, _ in com_cbk_dict_same_core.items() %}
+    Rte_COMCbk_{{signa_name}}_Rx_ID, /* {{loop.index - 1}} */
+    {%- endfor %}
+    {%- for signa_name, _ in com_cbk_dict_inter_core.items() %}
+    Rte_COMCbk_{{signa_name}}_Rx_ID, /* {{loop.index + len_same_core - 1}} */
+    {%- endfor %}
+    RTE_COMCBK_CNT
+} RTE_COMCBK_DEF;
+{%- endif %}
+{# blank line #}
+
+#endif
+
+{%- endif %}
+
+#endif

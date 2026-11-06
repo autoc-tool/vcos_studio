@@ -1,0 +1,145 @@
+[project]
+name = "configurator"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.8,<3.9"
+dependencies = [
+    "ansi2html==1.9.1",
+    "attrs==23.2.0",
+    "bitstruct==8.19.0",
+    "bs4==0.0.2",
+    "certifi==2025.1.31",
+    "cfile==0.2.0",
+    "chardet==5.2.0",
+    "coverage==7.3.2",
+    "diskcache==5.6.3",
+    "durable-rules==2.0.28 ; sys_platform == 'linux'",
+    "et-xmlfile==1.1.0",
+    "idna==3.10",
+    "importlib-resources==6.4.0",
+    "jinja2==3.1.3",
+    "jsonref==1.1.0",
+    "jsonschema==4.21.1",
+    "kconfiglib==14.1.0",
+    "lark==1.1.9",
+    "ldfparser==0.26.0",
+    "loguru==0.7.2",
+    "lxml==5.2.0",
+    "markupsafe==2.1.5",
+    "matplotlib==3.7.5",
+    "msgpack==1.0.8",
+    "openpyxl==3.1.2",
+    "packaging==24.0",
+    "protobuf==5.29.0",
+    "psutil==5.9.8",
+    "pyserial==3.5",
+    "pyside6==6.6.3.1",
+    "python-can==4.3.2rc4",
+    "pyyaml==6.0.1",
+    "referencing==0.35.0",
+    "requests==2.32.3",
+    "rpds-py==0.18.1",
+    "six==1.16.0",
+    "textparser==0.24.0",
+    "typing-extensions==4.11.0",
+    "urllib3==1.26.20",
+    "windows-curses==2.3.2 ; sys_platform == 'win32'",
+    "wrapt==1.16.0",
+    "xmltodict==0.13.0",
+    "zipp==3.20.2",
+]
+
+[tool.ruff]
+line-length = 120
+
+# 目标 Python 版本
+target-version = "py38"
+
+# 要包含的文件
+include = ["*.py", "*.pyi"]
+
+# 排除的目录和文件
+exclude = [
+    ".git",
+    ".venv",
+    "third_party",
+    "**/resources/ui/ui_*.py",
+    "**/resources/images/images_rc.py",
+    "api_demo", "cmd_demo",
+    "*pb2.py",
+    "**/trace/trace_processor.py"
+]
+
+# 启用的检查规则
+# 启用 pycodestyle (E), pyflakes (F), isort (I), 等
+lint.select = ["E", "F", "I"]
+
+# 禁用某些特定规则
+# 例如: E203 (空格与冒号) 与 Black 冲突
+lint.ignore = ["E203", "I001"]
+
+# 下面是格式化相关设置
+[tool.ruff.format]
+# 引号风格，使用双引号
+quote-style = "double"
+# 是否在可能的地方保留尾随逗号
+line-ending = "auto"
+# 缩进样式
+indent-style = "space"
+# 启用docstring代码片段格式化
+docstring-code-format = true
+preview = true
+
+[tool.ruff.lint.isort]
+# 控制导入排序
+known-first-party = []
+known-third-party = []
+
+[tool.black]
+# 每行最大字符数
+line-length = 120
+
+# 目标 Python 版本，影响 Black 生成的代码语法
+# 可选值: ['py33', 'py34', 'py35', 'py36', 'py37', 'py38', 'py39', 'py310', 'py311']
+target-version = ['py38']
+
+# 要格式化的文件的正则表达式模式
+include = '\.pyi?$'
+
+# 要排除的文件或目录的正则表达式模式
+force-exclude = '''
+(
+    \.git
+  | \.venv
+  | third_party
+  | resources/ui/ui_.*\.py
+  | resources/images/images_rc\.py
+  | trace/trace_processor\.py
+  | .*_pb2\.py
+)
+'''
+
+# 是否允许使用单引号字符串（默认为False，强制使用双引号）
+# 设置为 true 时，Black 不会将单引号转换为双引号
+skip-string-normalization = false
+
+# 设置为 true 时不会在 Python 3.6+ 中添加尾随逗号
+skip-magic-trailing-comma = false
+
+# 是否启用预览功能（默认为 false）
+preview = false
+
+# 如果设置为 true，则在标准错误输出上显示内容差异
+# 类似于 `--diff` 命令行选项
+diff = false
+
+# 设置为 true 时，输出的文件以 ASCII 表示彩色差异
+# 要求 diff = true
+color = false
+
+# 是否安静模式（减少输出）
+quiet = false
+
+# 快速模式 - 如果文件已正确格式化则跳过它
+fast = false

@@ -1,0 +1,144 @@
+{{get_copyright()}}
+
+/*!*********************************************************************************************************************
+ * @file        Rte.h
+ * @brief       Header file containing RTE types
+ * @details     This header file defines Service IDs of Rte APIs,structural errors, symbolic names used by the RTE
+ * @date        {{get_generation_time_temp()}}
+ * @toolversion {{get_vcos_version_temp()}}
+ **********************************************************************************************************************/
+
+#ifndef RTE_H
+#define RTE_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <string.h>
+#include "Std_Types.h"
+#include "Rte_UserTypes.h"
+
+// Errors
+#define RTE_E_OK                ((Std_ReturnType) 0)
+#define RTE_E_INVALID           ((Std_ReturnType) 1)
+#define RTE_E_COMMS_ERROR       ((Std_ReturnType) 128)
+#define RTE_E_TIMEOUT           ((Std_ReturnType) 129)
+#define RTE_E_LIMIT             ((Std_ReturnType) 130)
+#define RTE_E_NO_DATA           ((Std_ReturnType) 131)
+#define RTE_E_TRANSMIT_ACK      ((Std_ReturnType) 132)
+#define RTE_E_UNCONNECTED       ((Std_ReturnType) 134)
+
+/* overlayed errors */
+# define RTE_E_LOST_DATA        (64U)
+# define RTE_E_MAX_AGE_EXCEEDED (64U)
+
+# define Rte_HasOverlayedError(_status) (((_status) & 64U) != 0U)
+
+/* immediate infrastructure errors */
+# define RTE_E_COM_STOPPED      (128U)
+//# define RTE_E_TIMEOUT          (129U)
+//# define RTE_E_LIMIT            (130U)
+//# define RTE_E_NO_DATA          (131U)
+//# define RTE_E_TRANSMIT_ACK     (132U)
+# define RTE_E_NEVER_RECEIVED   (133U)
+//# define RTE_E_UNCONNECTED            (134U)
+# define RTE_E_IN_EXCLUSIVE_AREA      (135U)
+# define RTE_E_SEG_FAULT              (136U)
+# define RTE_E_OUT_OF_RANGE           (137U)
+# define RTE_E_SERIALIZATION_ERROR    (138U)
+# define RTE_E_HARD_TRANSFORMER_ERROR (138U)
+# define RTE_E_SERIALIZATION_LIMIT    (139U)
+# define RTE_E_TRANSFORMER_LIMIT      (139U)
+# define RTE_E_SOFT_TRANSFORMER_ERROR (140U)
+# define RTE_E_COM_BUSY               (141U)
+
+/*
+ * Service IDs of Rte APIs
+ */
+# define SCHM_INIT_SERVICE_ID                       (0x00U)
+# define SCHM_DEINIT_SERVICE_ID                     (0x01U)
+# define SCHM_ENTER_SERVICE_ID                      (0x03U)
+# define SCHM_EXIT_SERVICE_ID                       (0x04U)
+# define SCHM_START_SERVICE_ID                      (0x70U)
+# define SCHM_STARTTIMING_SERVICE_ID                (0x76U)
+# define RTE_SEND_SERVICE_ID                        (0x13U)
+# define RTE_WRITE_SERVICE_ID                       (0x14U)
+# define RTE_SWITCH_SERVICE_ID                      (0x15U)
+# define RTE_INVALIDATE_SERVICE_ID                  (0x16U)
+# define RTE_FEEDBACK_SERVICE_ID                    (0x17U)
+# define RTE_SWITCHACK_SERVICE_ID                   (0x18U)
+# define RTE_READ_SERVICE_ID                        (0x19U)
+# define RTE_DREAD_SERVICE_ID                       (0x1AU)
+# define RTE_RECEIVE_SERVICE_ID                     (0x1BU)
+# define RTE_CALL_SERVICE_ID                        (0x1CU)
+# define RTE_RESULT_SERVICE_ID                      (0x1DU)
+# define RTE_CDATA_SERVICE_ID                       (0x1FU)
+# define RTE_PRM_SERVICE_ID                         (0x20U)
+# define RTE_IRVREAD_SERVICE_ID                     (0x28U)
+# define RTE_IRVWRITE_SERVICE_ID                    (0x29U)
+# define RTE_ENTER_SERVICE_ID                       (0x2AU)
+# define RTE_EXIT_SERVICE_ID                        (0x2BU)
+# define RTE_MODE_SERVICE_ID                        (0x2CU)
+# define RTE_TRIGGER_SERVICE_ID                     (0x2DU)
+# define RTE_IRTRIGGER_SERVICE_ID                   (0x2EU)
+# define RTE_ISUPDATED_SERVICE_ID                   (0x30U)
+# define RTE_START_SERVICE_ID                       (0x70U)
+# define RTE_STOP_SERVICE_ID                        (0x71U)
+# define RTE_PARTITIONTERMINATED_SERVICE_ID         (0x72U)
+# define RTE_PARTITIONRESTARTING_SERVICE_ID         (0x73U)
+# define RTE_RESTARTPARTITION_SERVICE_ID            (0x74U)
+# define RTE_INIT_SERVICE_ID                        (0x75U)
+# define RTE_STARTTIMING_SERVICE_ID                 (0x76U)
+# define RTE_COMCBKTACK_SN_SERVICE_ID               (0x90U)
+# define RTE_COMCBKTERR_SN_SERVICE_ID               (0x91U)
+# define RTE_COMCBKINV_SN_SERVICE_ID                (0x92U)
+# define RTE_COMCBKRXTOUT_SN_SERVICE_ID             (0x93U)
+# define RTE_COMCBKTXTOUT_SN_SERVICE_ID             (0x94U)
+# define RTE_COMCBK_SG_SERVICE_ID                   (0x95U)
+# define RTE_COMCBKTACK_SG_SERVICE_ID               (0x96U)
+# define RTE_COMCBKTERR_SG_SERVICE_ID               (0x97U)
+# define RTE_COMCBKINV_SG_SERVICE_ID                (0x98U)
+# define RTE_COMCBKRXTOUT_SG_SERVICE_ID             (0x99U)
+# define RTE_COMCBKTXTOUT_SG_SERVICE_ID             (0x9AU)
+# define RTE_SETMIRROR_SERVICE_ID                   (0x9BU)
+# define RTE_GETMIRROR_SERVICE_ID                   (0x9CU)
+# define RTE_NVMNOTIFYJOBFINISHED_SERVICE_ID        (0x9DU)
+# define RTE_NVMNOTIFYINITBLOCK_SERVICE_ID          (0x9EU)
+# define RTE_COMCBK_SN_SERVICE_ID                   (0x9FU)
+# define RTE_LDCOMCBKRXINDICATION_SERVICE_ID        (0xA0U)
+# define RTE_LDCOMCBKSTARTOFRECEPTION_SERVICE_ID    (0xA1U)
+# define RTE_LDCOMCBKCOPYRXDATA_SERVICE_ID          (0xA2U)
+# define RTE_LDCOMCBKTPRXINDICATION_SERVICE_ID      (0xA3U)
+# define RTE_LDCOMCBKCOPYTXDATA_SERVICE_ID          (0xA4U)
+# define RTE_LDCOMCBKTPTXCONFIRMATION_SERVICE_ID    (0xA5U)
+# define RTE_LDCOMCBKTRIGGERTRANSMIT_SERVICE_ID     (0xA6U)
+# define RTE_LDCOMCBKTXCONFIRMATION_SERVICE_ID      (0xA7U)
+/* additional service ids */
+# define RTE_TASK_SERVICE_ID                        (0xF0U)
+# define RTE_COMSENDSIGNALPROXYPERIODIC_SERVICE_ID  (0xFAU)
+
+/*
+ * Rte Copy API
+ */
+#define Rte_MemClr(dest, num)       (void)memset(dest, 0, num)
+#define Rte_MemCpy(dest, src, num)  (void)memcpy(dest, src, num)
+
+#if defined(__GNUC__) || defined(__ghs__)
+#define WARNING_542_DISABLE
+#define WARNING_542_RESTORE
+#endif
+
+#if defined(__TASKING__)
+#define WARNING_542_DISABLE  \
+    _Pragma("warning 542")
+#define WARNING_542_RESTORE  \
+    _Pragma("warning restore")
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* RTE_H */
+{# blank line #}

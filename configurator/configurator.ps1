@@ -1,0 +1,1 @@
+Start-Process ./configurator.bat -WindowStyle Hidden

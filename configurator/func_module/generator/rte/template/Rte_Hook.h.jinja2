@@ -1,0 +1,34 @@
+{{get_copyright()}}
+
+/*!*********************************************************************************************************************
+ * @file        Rte_Hook_Rtm.c
+ * @brief       RTE runnable vfb hooks declare
+ * @details     Declare rtm start and stop vfb trace functions
+ * @date        {{get_generation_time_temp()}}
+ * @toolversion {{get_vcos_version_temp()}}
+ **********************************************************************************************************************/
+
+#ifndef RTE_HOOK_H
+#define RTE_HOOK_H
+
+
+{% set vfb_trace_enabled = is_vfb_trace_enabled() %}
+{%- set enabled_val = 1 if vfb_trace_enabled else 0 -%}
+#define RTE_VFB_TRACE_ENABLED ({{ enabled_val }})
+
+{% set vfb_trace_hooks = get_all_vfb_hook_name_list() %}
+{%- for hook_name in vfb_trace_hooks %}
+#if (RTE_VFB_TRACE_ENABLED == 1)
+
+#define RTE_START_SEC_CODE
+#include "rte_memmap.h"
+FUNC(void, RTE_CODE) {{hook_name}}(void);
+#define RTE_STOP_SEC_CODE
+#include "rte_memmap.h"
+
+#else
+#define {{hook_name}}() ((void)(0))
+#endif
+{% endfor %}
+
+#endif /* RTE_HOOK_H */

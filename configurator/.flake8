@@ -1,0 +1,40 @@
+# https://flake8.pycqa.org/en/latest/user/options.html#options-list
+[flake8]
+# 配置颜色输出
+color = True
+# 通过指定文件或目录的路径作为命令行参数来告诉 flake8 要检查的文件
+filename = *.py
+# stdin-display-name 配置选项只适用于从标准输入读取的代码，而不适用于文件检查。
+# stdin-display-name
+# 
+# flake8 的 format 配置选项用于自定义输出结果的格式 default/pylint
+format = default
+# per-file-ignores 配置项允许您为特定文件或文件模式设置忽略的错误或警告
+#per-file-ignores = tests/*:S101 example.py:E501
+# 设置代码行的最大长度
+max-line-length = 120
+# 指定要忽略的错误代码
+ignore = E203,
+         W503,
+# extend-select 是 flake8 的配置选项之一，用于在已有的错误代码选择基础上进一步添加需要检查的错误代码。
+# flake8 会在错误和警告信息中显示相应的文件名、行号和列号，但不会显示源代码的具体内容。但您可以通过 show-source 选项将源代码行包含在错误和警告信息中。
+# "Noqa" 注释是一种特殊的注释，可以在代码中用于禁用特定的 flake8 检查
+# statistics 是 flake8 的一种输出格式选项，用于显示静态代码分析的统计信息。
+statistics = True
+# 被排除在检查之外的文件或目录
+exclude = .venv, .git, third_party, cmd_api/api_demo/*, cmd_api/cmd_demo/*, **/resources/ui/ui_*.py, **/resources/images/images_rc.py, *pb2.py, **/trace/trace_processor.py
+# 指定要检查的错误代码 select设置为E,W,F,C，表示只检查并显示错误（E）、警告（W）、严重问题（F）和一致性问题或编码规范上的约定违规（C）的代码问题
+select = E, W, F, C, N
+# 用于控制 flake8 的退出码（exit code）。默认非零
+exit-zero = True
+# output-file = ./pre—commit-check.log
+# 忽略行尾空格检查
+ignore-space-expliciTS = True
+# 禁用某些检查
+#disable = R, W504
+# 是否显示错误码
+show-error-codes = True
+# 是否显示每行代码的错误位置
+show-column-numbers = True
+# max-complexity 指定允许的最大圈复杂度（cyclomatic complexity）的阈值
+; max-complexity = 20

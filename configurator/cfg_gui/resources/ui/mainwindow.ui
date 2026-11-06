@@ -1,0 +1,1066 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>mainWindow</class>
+ <widget class="QMainWindow" name="mainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1031</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1024</width>
+    <height>768</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Microsoft YaHei UI</family>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>VCOS Studio</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../images/images.qrc">
+    <normaloff>:/Home.svg</normaloff>:/Home.svg</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_14">
+    <item>
+     <widget class="QSplitter" name="splitter_4">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <widget class="QSplitter" name="splitter">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <widget class="QWidget" name="secondary_menu_widget" native="true">
+        <property name="font">
+         <font>
+          <family>微软雅黑</family>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(255, 255, 255); /* 设置背景色为白色*/
+border-width: 1px;  /* 设置边框宽度为1像素 */
+border-color: black;  /* 设置边框颜色为黑色 */</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_13"/>
+       </widget>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="font">
+         <font>
+          <family>Microsoft YaHei UI</family>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>24</height>
+         </size>
+        </property>
+        <widget class="QWidget" name="vcos_bsw">
+         <attribute name="icon">
+          <iconset resource="../images/images.qrc">
+           <normaloff>:/Overview.svg</normaloff>:/Overview.svg</iconset>
+         </attribute>
+         <attribute name="title">
+          <string>VCOS BSW</string>
+         </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QTabWidget" name="bswTabWidget">
+            <property name="font">
+             <font>
+              <family>Microsoft YaHei UI</family>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="tabPosition">
+             <enum>QTabWidget::South</enum>
+            </property>
+            <property name="documentMode">
+             <bool>true</bool>
+            </property>
+            <property name="tabsClosable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="tabOverview">
+             <attribute name="title">
+              <string>Overview</string>
+             </attribute>
+             <layout class="QGridLayout" name="gridLayout_2">
+              <item row="0" column="0">
+               <widget class="QSplitter" name="splitter_3">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <widget class="QLabel" name="label_17">
+                 <property name="font">
+                  <font>
+                   <family>Microsoft YaHei UI</family>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color: rgba(0,0,0,0);
+color:rgb(0, 120, 215)</string>
+                 </property>
+                 <property name="text">
+                  <string>BSW Editor</string>
+                 </property>
+                </widget>
+                <widget class="QSplitter" name="splitter_2">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="handleWidth">
+                  <number>1</number>
+                 </property>
+                 <widget class="QTreeWidget" name="treeWidgetOverview">
+                  <property name="font">
+                   <font>
+                    <family>Microsoft YaHei UI</family>
+                    <pointsize>10</pointsize>
+                   </font>
+                  </property>
+                  <property name="selectionMode">
+                   <enum>QAbstractItemView::ExtendedSelection</enum>
+                  </property>
+                  <attribute name="headerVisible">
+                   <bool>false</bool>
+                  </attribute>
+                  <column>
+                   <property name="text">
+                    <string notr="true">1</string>
+                   </property>
+                  </column>
+                 </widget>
+                 <widget class="QFrame" name="frame">
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <widget class="QWidget" name="layoutWidget">
+                   <property name="geometry">
+                    <rect>
+                     <x>10</x>
+                     <y>10</y>
+                     <width>341</width>
+                     <height>229</height>
+                    </rect>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout">
+                    <item alignment="Qt::AlignLeft">
+                     <widget class="QPushButton" name="pushButtonAdd">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                        <horstretch>10</horstretch>
+                        <verstretch>10</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <family>Microsoft YaHei UI</family>
+                        <pointsize>10</pointsize>
+                       </font>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QPushButton {background-color:rgba(0,0,0,0);}
+QPushButton:hover {	background-color:#e3f3fd;}</string>
+                      </property>
+                      <property name="text">
+                       <string> Add module</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../images/images.qrc">
+                        <normaloff>:/add.svg</normaloff>:/add.svg</iconset>
+                      </property>
+                      <property name="autoDefault">
+                       <bool>true</bool>
+                      </property>
+                      <property name="default">
+                       <bool>true</bool>
+                      </property>
+                      <property name="flat">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item alignment="Qt::AlignLeft">
+                     <widget class="QPushButton" name="pushButtonRemove">
+                      <property name="font">
+                       <font>
+                        <family>Microsoft YaHei UI</family>
+                        <pointsize>10</pointsize>
+                       </font>
+                      </property>
+                      <property name="autoFillBackground">
+                       <bool>false</bool>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QPushButton {background-color:rgba(0,0,0,0);}
+QPushButton:hover {	background-color:#e3f3fd;}</string>
+                      </property>
+                      <property name="text">
+                       <string> Remove module</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../images/images.qrc">
+                        <normaloff>:/not_ok.svg</normaloff>:/not_ok.svg</iconset>
+                      </property>
+                      <property name="autoDefault">
+                       <bool>true</bool>
+                      </property>
+                      <property name="default">
+                       <bool>true</bool>
+                      </property>
+                      <property name="flat">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item alignment="Qt::AlignLeft">
+                     <widget class="QPushButton" name="import_files_button">
+                      <property name="minimumSize">
+                       <size>
+                        <width>100</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <family>Microsoft YaHei UI</family>
+                        <pointsize>10</pointsize>
+                       </font>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::NoContextMenu</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QPushButton {background-color:rgba(0,0,0,0);}
+QPushButton:hover {	background-color:#e3f3fd;}</string>
+                      </property>
+                      <property name="text">
+                       <string> Input files   </string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../images/images.qrc">
+                        <normaloff>:/import.svg</normaloff>:/import.svg</iconset>
+                      </property>
+                      <property name="autoDefault">
+                       <bool>true</bool>
+                      </property>
+                      <property name="default">
+                       <bool>true</bool>
+                      </property>
+                      <property name="flat">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item alignment="Qt::AlignLeft">
+                     <widget class="QPushButton" name="import_asw_arxml_button">
+                      <property name="font">
+                       <font>
+                        <family>Microsoft YaHei UI</family>
+                        <pointsize>10</pointsize>
+                       </font>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::NoContextMenu</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QPushButton {background-color:rgba(0,0,0,0);}
+QPushButton:hover {	background-color:#e3f3fd;}</string>
+                      </property>
+                      <property name="text">
+                       <string>  Import Asw</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../images/images.qrc">
+                        <normaloff>:/import.svg</normaloff>:/import.svg</iconset>
+                      </property>
+                      <property name="autoDefault">
+                       <bool>true</bool>
+                      </property>
+                      <property name="default">
+                       <bool>true</bool>
+                      </property>
+                      <property name="flat">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item alignment="Qt::AlignLeft">
+                     <widget class="QPushButton" name="import_arxml_button">
+                      <property name="font">
+                       <font>
+                        <family>Microsoft YaHei UI</family>
+                        <pointsize>10</pointsize>
+                       </font>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::NoContextMenu</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QPushButton {background-color:rgba(0,0,0,0);}
+QPushButton:hover {	background-color:#e3f3fd;}</string>
+                      </property>
+                      <property name="text">
+                       <string>  Import ARXML</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../images/images.qrc">
+                        <normaloff>:/import.svg</normaloff>:/import.svg</iconset>
+                      </property>
+                      <property name="autoDefault">
+                       <bool>true</bool>
+                      </property>
+                      <property name="default">
+                       <bool>true</bool>
+                      </property>
+                      <property name="flat">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item alignment="Qt::AlignLeft">
+                     <widget class="QPushButton" name="export_arxml_button">
+                      <property name="font">
+                       <font>
+                        <family>Microsoft YaHei UI</family>
+                        <pointsize>10</pointsize>
+                       </font>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::NoContextMenu</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QPushButton {background-color:rgba(0,0,0,0);}
+QPushButton:hover {	background-color:#e3f3fd;}</string>
+                      </property>
+                      <property name="text">
+                       <string>  Export ARXML</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../images/images.qrc">
+                        <normaloff>:/import.svg</normaloff>:/import.svg</iconset>
+                      </property>
+                      <property name="autoDefault">
+                       <bool>true</bool>
+                      </property>
+                      <property name="default">
+                       <bool>true</bool>
+                      </property>
+                      <property name="flat">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </widget>
+                </widget>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="vcos_rte">
+         <attribute name="icon">
+          <iconset resource="../images/images.qrc">
+           <normaloff>:/Overview.svg</normaloff>:/Overview.svg</iconset>
+         </attribute>
+         <attribute name="title">
+          <string>VCOS RTE</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QTabWidget" name="rteTabWidget">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="font">
+             <font>
+              <family>Microsoft YaHei</family>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="mouseTracking">
+             <bool>false</bool>
+            </property>
+            <property name="acceptDrops">
+             <bool>false</bool>
+            </property>
+            <property name="whatsThis">
+             <string/>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="inputMethodHints">
+             <set>Qt::ImhNone</set>
+            </property>
+            <property name="tabPosition">
+             <enum>QTabWidget::South</enum>
+            </property>
+            <property name="tabShape">
+             <enum>QTabWidget::Rounded</enum>
+            </property>
+            <property name="currentIndex">
+             <number>2</number>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>16</height>
+             </size>
+            </property>
+            <property name="elideMode">
+             <enum>Qt::ElideMiddle</enum>
+            </property>
+            <property name="usesScrollButtons">
+             <bool>true</bool>
+            </property>
+            <property name="documentMode">
+             <bool>true</bool>
+            </property>
+            <property name="tabsClosable">
+             <bool>false</bool>
+            </property>
+            <property name="movable">
+             <bool>false</bool>
+            </property>
+            <property name="tabBarAutoHide">
+             <bool>false</bool>
+            </property>
+            <widget class="QWidget" name="widget">
+             <attribute name="title">
+              <string>Task Mapping</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_9">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <layout class="QVBoxLayout" name="taskMappingLayout" stretch="0">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="label_16">
+                  <property name="font">
+                   <font>
+                    <family>微软雅黑</family>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgba(0,0,0,0);color:rgb(0, 120, 215)</string>
+                  </property>
+                  <property name="text">
+                   <string>Task Mapping Editor</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="widget_4">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <attribute name="title">
+              <string>Port Mapping</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <layout class="QVBoxLayout" name="portMappingLayout" stretch="0">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="label_15">
+                  <property name="font">
+                   <font>
+                    <family>微软雅黑</family>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgba(0,0,0,0);color:rgb(0, 120, 215)</string>
+                  </property>
+                  <property name="text">
+                   <string>Port Mapping Editor</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="widget_2">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <attribute name="title">
+              <string>Data Mapping</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_7">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <layout class="QVBoxLayout" name="dataMappingLayout" stretch="0">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="label_18">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>微软雅黑</family>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgba(0,0,0,0);color:rgb(0, 120, 215)</string>
+                  </property>
+                  <property name="text">
+                   <string>Data Mapping Editor</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="widget_3">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <attribute name="title">
+              <string>Service Mapping</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_8">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <layout class="QVBoxLayout" name="serviceMappingLayout" stretch="0">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="label_12">
+                  <property name="font">
+                   <font>
+                    <family>微软雅黑</family>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background-color: rgba(0,0,0,0);color:rgb(0, 120, 215)</string>
+                  </property>
+                  <property name="text">
+                   <string>Service Mapping Editor</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </widget>
+      <widget class="QTabWidget" name="tabWidget_2">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei UI</family>
+        </font>
+       </property>
+       <property name="currentIndex">
+        <number>2</number>
+       </property>
+       <widget class="QWidget" name="tabLog">
+        <attribute name="title">
+         <string>Log</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tabValidation">
+        <attribute name="title">
+         <string>Validation</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_5"/>
+       </widget>
+       <widget class="QWidget" name="tabProperties">
+        <attribute name="title">
+         <string>Properties</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_10">
+         <item>
+          <widget class="QTabWidget" name="tabWidget_3">
+           <property name="tabPosition">
+            <enum>QTabWidget::North</enum>
+           </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="tabDescription">
+            <attribute name="title">
+             <string>Description</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_11">
+             <item>
+              <widget class="QTextBrowser" name="textBrowserDescription">
+               <property name="html">
+                <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Microsoft YaHei UI','Microsoft YaHei UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Microsoft YaHei UI,Microsoft YaHei UI';&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="tabDefinition">
+            <attribute name="title">
+             <string>Definition</string>
+            </attribute>
+           </widget>
+           <widget class="QWidget" name="tabStatus">
+            <attribute name="title">
+             <string>Status</string>
+            </attribute>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tabFind">
+        <attribute name="title">
+         <string>Find</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_12">
+         <item>
+          <widget class="QLineEdit" name="lineEdit"/>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1031</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(224, 230, 245);</string>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menuOs_Configuration">
+     <property name="title">
+      <string>Os Configuration</string>
+     </property>
+     <addaction name="action_import_os_cfg"/>
+     <addaction name="action_export_os_cfg"/>
+    </widget>
+    <addaction name="actionNew"/>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionImport"/>
+    <addaction name="actionExport"/>
+    <addaction name="actionSave_As"/>
+    <addaction name="menuOs_Configuration"/>
+   </widget>
+   <widget class="QMenu" name="menuCodeGen">
+    <property name="title">
+     <string>CodeGen</string>
+    </property>
+    <addaction name="actionValidation"/>
+    <addaction name="actionGenerator"/>
+    <addaction name="actionSWC_Generator"/>
+    <addaction name="actionUpdate"/>
+   </widget>
+   <widget class="QMenu" name="menuProject">
+    <property name="title">
+     <string>Project</string>
+    </property>
+    <addaction name="actionProject_Setting"/>
+    <addaction name="actionTaskAnalysis"/>
+    <addaction name="actionJitterOpt"/>
+   </widget>
+   <widget class="QMenu" name="menuGeneral">
+    <property name="title">
+     <string>General</string>
+    </property>
+    <addaction name="actionToolsSetting"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuCodeGen"/>
+   <addaction name="menuProject"/>
+   <addaction name="menuGeneral"/>
+   <addaction name="menuhelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionUndo"/>
+   <addaction name="actionRedo"/>
+  </widget>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/save.svg</normaloff>:/save.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/open.svg</normaloff>:/open.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionGenerate">
+   <property name="text">
+    <string>Generate</string>
+   </property>
+  </action>
+  <action name="actionBuild">
+   <property name="text">
+    <string>Build</string>
+   </property>
+  </action>
+  <action name="actionmodules">
+   <property name="text">
+    <string>modules</string>
+   </property>
+  </action>
+  <action name="actionmodule_manager">
+   <property name="text">
+    <string>bsw module manager</string>
+   </property>
+  </action>
+  <action name="action_module">
+   <property name="text">
+    <string>BSW Editor</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/New.svg</normaloff>:/New.svg</iconset>
+   </property>
+   <property name="text">
+    <string>New</string>
+   </property>
+  </action>
+  <action name="actionGenerator">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/generator.svg</normaloff>:/generator.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Generator</string>
+   </property>
+  </action>
+  <action name="actionValidation">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/validation.svg</normaloff>:/validation.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Validation</string>
+   </property>
+  </action>
+  <action name="actionUpdate">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/update.svg</normaloff>:/update.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Update</string>
+   </property>
+  </action>
+  <action name="actionProject_Setting">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/project_settings.svg</normaloff>:/project_settings.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Project Setting</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/close.svg</normaloff>:/close.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Close</string>
+   </property>
+  </action>
+    <action name="actionSWC_Generator">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/swc_generator.svg</normaloff>:/swc_generator.svg</iconset>
+   </property>
+   <property name="text">
+    <string>SWC Generator</string>
+   </property>
+  </action>
+  <action name="actionImport">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/import1.svg</normaloff>:/import1.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Import ARXML</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/export.svg</normaloff>:/export.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Export ARXML</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/unreset.svg</normaloff>:/unreset.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Redo</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;反撤销当前module页面的修改&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/reset.svg</normaloff>:/reset.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="toolTip">
+    <string>撤销当前module页面的修改</string>
+   </property>
+   <property name="autoRepeat">
+    <bool>true</bool>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+   <property name="shortcutVisibleInContextMenu">
+    <bool>true</bool>
+   </property>
+   <property name="priority">
+    <enum>QAction::NormalPriority</enum>
+   </property>
+  </action>
+  <action name="actionMenuconfig">
+   <property name="text">
+    <string>Menuconfig</string>
+   </property>
+  </action>
+  <action name="actionSave_As">
+   <property name="text">
+    <string>Save_As</string>
+   </property>
+  </action>
+  <action name="action_import_os_cfg">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/import1.svg</normaloff>:/import1.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Import</string>
+   </property>
+  </action>
+  <action name="action_export_os_cfg">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/export.svg</normaloff>:/export.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Export</string>
+   </property>
+  </action>
+  <action name="actionTaskAnalysis">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Task Analysis</string>
+   </property>
+  </action>
+  <action name="actionToolsSetting">
+   <property name="text">
+    <string>Tool Setting</string>
+   </property>
+  </action>
+  <action name="actionJitterOpt">
+   <property name="text">
+    <string>Jitter Auto Optimization</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../images/images.qrc"/>
+ </resources>
+ <connections/>
+</ui>

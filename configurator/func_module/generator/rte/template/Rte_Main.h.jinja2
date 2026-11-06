@@ -1,0 +1,105 @@
+{{get_copyright()}}
+
+/*!*********************************************************************************************************************
+ * @file        Rte_Main.h
+ * @brief       Provide declarations for RTE and SchM Lifecycle APIs
+ * @details     This header file provides declarations responsible for system initialization, starting the RTE schedule
+ * @date        {{get_generation_time_temp()}}
+ * @toolversion {{get_vcos_version_temp()}}
+ **********************************************************************************************************************/
+
+/*
+ * DESCRIPTION
+ * This header file implements Rte life-cycle apis.
+ */
+
+#ifndef RTE_MAIN_H
+#define RTE_MAIN_H
+
+#include "Rte.h"
+#include "Os.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* BSW Scheduler Life-Cycle API */
+extern void SchM_Init(void);
+extern void SchM_Deinit(void);
+
+/* RTE Life-Cycle API */
+extern Std_ReturnType Rte_Start(void);
+extern Std_ReturnType Rte_Stop(void);
+
+/* Extended Life-Cycle API */
+extern void Rte_InitMemory(void);
+{%- set appl_list = appl_list %}
+{%- for appl in appl_list %}
+extern void Rte_InitMemory_{{appl}}(void);
+{%- endfor %}
+{%- for appl_name in appl_list %}
+{%- set mode_switch_rports, mode_switch_pports = get_mode_switch_port_in_swc_list(appl_name) %}
+{%- for mode_switch_pport in  mode_switch_pports %}
+{%- set swc_name = mode_switch_pport["swc_name"] %}
+{%- set port_name = mode_switch_pport["port_name"] %}
+{%- set mode_group_prototype_name = mode_switch_pport["mode_group_prototype"] %}
+    {%- if mode_switch_pport["swc_mode_switch_event"]%}
+/* RTE mode management prototypes */
+        {%- set transition_events = mode_switch_pport["swc_mode_switch_event"].get("transition_events", []) %}
+        {%- set entry_events = mode_switch_pport["swc_mode_switch_event"].get("entry_events", []) %}
+        {%- set exit_events = mode_switch_pport["swc_mode_switch_event"].get("exit_events", []) %}
+        {%- if exit_events | length %}
+extern EventMaskType Rte_GetModeExitEventMask_{{swc_name}}_{{port_name}}_{{mode_group_prototype_name}}(uint8 mode);
+        {%- endif %}
+        {%- if entry_events | length %}
+extern EventMaskType Rte_GetModeEntryEventMask_{{swc_name}}_{{port_name}}_{{mode_group_prototype_name}}(uint8 mode);
+        {%- endif %}
+        {%- if transition_events | length %}
+extern EventMaskType Rte_GetModeTransitionEventMask_{{swc_name}}_{{port_name}}_{{mode_group_prototype_name}}(uint8 transition);
+        {%- endif %}
+    {%- endif %}
+{%- endfor %}
+{%- endfor %}
+
+{# extern of RTE IOC queue handling #}
+{%- set sr_ioc_enqueues = get_all_sr_queue_ioc_enqueue_dict_by_appl() %}
+{%- set sr_ioc_dequeues = get_all_sr_queue_ioc_dequeue_dict_by_appl(is_result_combined=True) %}
+{%- set cs_ioc_enqueues = get_all_cs_ioc_enqueue_dict_by_appl(is_result_combined=True) %}
+{%- set cs_ioc_dequeues = get_all_cs_ioc_dequeue_dict_by_appl(is_result_combined=True) %}
+{%- if sr_ioc_enqueues or sr_ioc_enqueues or cs_ioc_enqueues or cs_ioc_dequeues %}
+#define RTE_START_SEC_CODE
+#include "rte_memmap.h"
+#ifdef RTE_CORE
+    {%- for sr_queues in sr_ioc_enqueues.values() %}
+        {%- for queue in sr_queues %}
+        {%- set data_arg = get_sr_write_data_arg(queue["datatype"]) %}
+FUNC(Std_ReturnType, RTE_CODE) Rte_IocSend_{{queue['component']}}_{{queue['port']}}_{{queue['name']}}({{data_arg}});
+        {%- endfor %}
+    {%- endfor %}
+    {%- for sr_queues in sr_ioc_dequeues.values() %}
+        {%- for queue in sr_queues %}
+        {%- set data_arg = get_sr_read_data_arg(queue["datatype"]) %}
+FUNC(Std_ReturnType, RTE_CODE) Rte_IocReceive_{{queue['component']}}_{{queue['name']}}({{data_arg}});
+        {%- endfor %}
+    {%- endfor %}
+    {%- for cs_queues in cs_ioc_enqueues.values() %}
+        {%- for queue in cs_queues %}
+FUNC(Std_ReturnType, RTE_CODE) Rte_IocSend_{{queue['component']}}_{{queue['client_name']}}(uint8 data);
+        {%- endfor %}
+    {%- endfor %}
+    {%- for cs_queues in cs_ioc_dequeues.values() %}
+        {%- for queue in cs_queues %}
+FUNC(Std_ReturnType, RTE_CODE) Rte_IocReceive_{{queue['component']}}_{{queue['name']}}(uint8 *data);
+        {%- endfor %}
+    {%- endfor %}
+#endif
+#define RTE_STOP_SEC_CODE
+#include "rte_memmap.h"
+{%- endif %}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* RTE_MAIN_H */
+{# blank line #}

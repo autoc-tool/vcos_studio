@@ -1,0 +1,29 @@
+{{get_copyright()}}
+
+{% set module_name = get_bsw_instance_name() %}
+/*!*********************************************************************************************************************
+ * @file        SchM_{{module_name}}_Type.h
+ * @brief       Module Interlink Types Header for BSW Module {{module_name}}
+ * @details     Module Interlink Types Header for BSW Module {{module_name}}
+ * @date        {{get_generation_time_temp()}}
+ * @toolversion {{get_vcos_version_temp()}}
+ **********************************************************************************************************************/
+
+#ifndef SCHM_{{module_name|upper}}_TYPE_H
+#define SCHM_{{module_name|upper}}_TYPE_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+{%- if 'VCOS_MODULE_CONFIG_RTE' in sys_cfg['modules_info']['kfg_module_all_list'] and sys_cfg['modules_info']['kfg_module_all_list']['VCOS_MODULE_CONFIG_RTE'] == 'y' %}
+# include "Rte_Type.h"
+{%- endif %}
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* SCHM_{{module_name|upper}}_TYPE_H */
+{# blank line at end of file #}

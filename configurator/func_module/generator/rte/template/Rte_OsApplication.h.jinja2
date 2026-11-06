@@ -1,0 +1,26 @@
+{{get_copyright()}}
+
+/*!*********************************************************************************************************************
+ * @file        Rte_{{appl_name}}.h
+ * @brief       Declarations of OS tasks for {{appl_name}}
+ * @details     This header file contains the external declarations for operating system tasks
+ * @date        {{get_generation_time_temp()}}
+ * @toolversion {{get_vcos_version_temp()}}
+ **********************************************************************************************************************/
+
+#ifndef RTE_{{appl_name.upper()}}_H
+#define RTE_{{appl_name.upper()}}_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+{%- set task_list = get_cur_all_task_list() %}
+{%- for task_name in task_list %}
+extern void os_task_{{task_name.lower()}}(void *arg);
+{%- endfor %}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* RTE_{{appl_name.upper()}}_H */
+{# blank line #}

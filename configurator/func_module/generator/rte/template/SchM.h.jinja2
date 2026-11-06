@@ -1,0 +1,78 @@
+{{get_copyright()}}
+
+{% set module_name = get_bsw_instance_name() %}
+/*!*********************************************************************************************************************
+ * @file        SchM_{{module_name}}.h
+ * @brief       Header of BSW Scheduler for BSW Module {{module_name}}
+ * @details     This header file provides the necessary declarations for the BSW Scheduler functionality specific to 
+ *              the {{module_name}} module
+ * @date        {{get_generation_time_temp()}}
+ * @toolversion {{get_vcos_version_temp()}}
+ **********************************************************************************************************************/
+
+#ifndef SCHM_{{module_name|upper}}_H
+#define SCHM_{{module_name|upper}}_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "SchM_{{module_name}}_Type.h"
+#include "Os.h"
+#include "spinlock_cfg.h"
+
+{#-#}
+{#- each BSW module should insert their module specific code here #}
+{#- module specific code starts! #}
+{#-#}
+
+{#-#}
+{#- each BSW module should insert their module specific code here #}
+{#- module specific code ends! #}
+{#-#}
+
+
+{%- set event_to_task_mapping_entitys = get_bsw_instance_event_to_task_mapping_entitys() %}
+{%- for event_to_task_mapping_entity in event_to_task_mapping_entitys %}
+{% if loop.first %}
+/*
+ * BSW SCHEDULABLE ENTITY
+ */
+{%- endif %}
+void {{event_to_task_mapping_entity}}(void);
+{%- endfor %}
+
+{#- Bsw Instance Exclusive Areas #}
+{%- set exclusive_areas = get_bsw_instance_exclusive_areas() %}
+{%- for exclusive_area in exclusive_areas %}
+{%- if exclusive_area["name"] %}
+{% if loop.first %}
+/*
+ * Exclusive Areas
+ */
+{%- endif %}
+{%- if "input_param" in exclusive_area and exclusive_area["input_param"] %}
+#define SchM_Enter_{{exclusive_area["name"]}}() \
+    { \
+        (void){{exclusive_area["suspend"]}}( {{exclusive_area["input_param"]}} ); \
+    }
+#define SchM_Exit_{{exclusive_area["name"]}}() \
+    {\
+        (void){{exclusive_area["resume"]}}( {{exclusive_area["input_param"]}} ); \
+    }
+{%- elif exclusive_area['imp_mechanism'] == 'NONE' %}
+#define SchM_Enter_{{exclusive_area["name"]}}()
+#define SchM_Exit_{{exclusive_area["name"]}}()
+{%- else %}
+#define SchM_Enter_{{exclusive_area["name"]}}() {{exclusive_area["suspend"]}}()
+#define SchM_Exit_{{exclusive_area["name"]}}() {{exclusive_area["resume"]}}()
+{%- endif %}
+{%- endif %}
+{%- endfor %}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* SCHM_{{module_name|upper}}_H*/
+{# blank line at end of file #}

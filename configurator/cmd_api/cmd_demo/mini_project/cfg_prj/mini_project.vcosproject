@@ -1,0 +1,68 @@
+{
+    "project": "mini_project",
+    "version": "V0.1.0-DEV",
+    "system_version": "V0.1.0-DEV",
+    "compiler": "gcc",
+    "target": "AURIX2G_TC397",
+    "mode": "release",
+    "generation_limit": "Error",
+    "modules_info": {
+        "enabled_module_list": [
+            "EcuC",
+            "Os"
+        ],
+        "codegen_module_list": [
+            "Os"
+        ],
+        "validation_module_list": [
+            "Os"
+        ],
+        "codegen_swc_list": [],
+        "bsw_ecuc_hash": {
+            "bsw": {
+                "os": {
+                    "autosar_hash": "375aef38ede7a95fc56b2c69ecc584c82a27be60b8be6cec9edfbff5d10f7e5e",
+                    "code_hash": "ea22a981503604e53a461c8780168c056d71f9d7c74dba16cca527c8df6965e6"
+                }
+            },
+            "unchanged_modules": []
+        }
+    },
+    "config_path": ".",
+    "gendata_path": "gen_data",
+    "is_add_channel_name": false,
+    "path": {
+        "config_base_path": "config",
+        "swc_template_path": "../../../../../../examples/mini_project/apps/asw_swc",
+        "bswcallout_path": "../../../../../../examples/mini_project/apps/bsw_user_callout",
+        "import_plugin_path_list": [],
+        "user_plugin_output_path": "",
+        "config_file_path": {
+            "ldf": {
+                "num": 0,
+                "list": {}
+            },
+            "dbc": {
+                "num": 0,
+                "list": {}
+            },
+            "cdd": {
+                "num": 0,
+                "single_signal": true,
+                "list": {}
+            },
+            "swc": "",
+            "eb_arxml": "."
+        },
+        "studio_path": "../../../..",
+        "application_path": "../../../../../../examples/mini_project/apps",
+        "internal_behavior_path": "config/internal_behavior",
+        "log_path": "log",
+        "service_component_path": "config/service_components",
+        "compiler_path": "../../../../../../tools/GnuArmToolchain/windows",
+        "mcal_path": "../../../../../../drivers",
+        "mcal_gendata_path": "",
+        "system_path": "../../../../../../components/configs/configurator_plug_in"
+    },
+    "MCAL_VERSION": "MC-ISAR_AS422_TC3xx_BASIC_1.40.0"
+}

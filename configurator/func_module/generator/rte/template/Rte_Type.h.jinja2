@@ -1,0 +1,1438 @@
+{{get_copyright()}}
+
+/*!*********************************************************************************************************************
+ * @file        Rte_Type.h
+ * @brief       Header file containing user defined AUTOSAR types and RTE structures
+ * @details     Defines data structures that are required by the SWC to use the RTE implementation
+ * @date        {{get_generation_time_temp()}}
+ * @toolversion {{get_vcos_version_temp()}}
+ **********************************************************************************************************************/
+{%- import 'macros.jinja2' as macros %}
+
+#ifndef RTE_TYPE_H
+#define RTE_TYPE_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "Platform_Types.h"
+#include "Std_Types.h"
+#include "Rte.h"
+
+{%- set idt_constraints = get_idt_constraint_list() %}
+{%- if idt_constraints %}
+/*
+ * Data Constraint of IDT
+ */
+    {%- for constr in idt_constraints %}
+#define {{constr['idt_name']}}_LowerLimit ({{constr['min_shown']}})
+#define {{constr['idt_name']}}_UpperLimit ({{constr['max_shown']}})
+    {%- endfor %}
+{%- endif %}
+
+#define RTE_STATE_UNINIT          (0U)
+#define RTE_STATE_SCHM_INIT       (1U)
+#define RTE_STATE_INIT            (2U)
+
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+extern volatile VAR(uint8, RTE_MULTI_APP_BSS) Rte_StartTiming_InitState;  // RTE_STATE_UNINIT
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+{%- set task_access_app = get_os_task_accessing_application() %}
+{%- for core_id in core_id_list %}
+    {%- if core_id == "0" %}
+        {%- if task_access_app[core_id] %}
+#define RTE_START_SEC_{{task_access_app[core_id].upper()}}_BSS
+#include "rte_memmap.h"
+extern volatile VAR(uint8, RTE_{{task_access_app[core_id].upper()}}_BSS) Rte_InitState;
+#define RTE_STOP_SEC_{{task_access_app[core_id].upper()}}_BSS
+#include "rte_memmap.h"
+        {%- else %}
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+extern volatile VAR(uint8, RTE_MULTI_APP_BSS) Rte_InitState;
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+        {%- endif %}
+    {%- else %}
+        {%- if task_access_app[core_id] %}
+#define RTE_START_SEC_{{task_access_app[core_id].upper()}}_BSS
+#include "rte_memmap.h"
+extern volatile VAR(uint8, RTE_{{task_access_app[core_id].upper()}}_BSS) Rte_InitState_{{core_id}};
+#define RTE_STOP_SEC_{{task_access_app[core_id].upper()}}_BSS
+#include "rte_memmap.h"
+        {%- else %}
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+extern volatile VAR(uint8, RTE_MULTI_APP_BSS) Rte_InitState_{{core_id}};
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+        {%- endif %}
+    {%- endif %}
+{%- endfor %}
+typedef uint32 Rte_BitType;
+
+/*
+ * Type definitions for activation reasons of runnables
+ */
+{%- set activation_reasons = get_activation_reasons() %}
+{%- for activation_reason in activation_reasons %}
+    {%- set activation_vector = get_activation_vector(activation_reason) %}
+typedef {{activation_vector["type"]}} Rte_ActivatingEvent_{{activation_vector["name"]}};
+    {%- set activation_reason_defines = get_activation_reason_defines(activation_reason) %}
+    {%- for activation_reason_define in activation_reason_defines %}
+#define Rte_ActivatingEvent_{{activation_reason_define["name"]}}    ({{activation_reason_define["value"]}}U)
+    {%- endfor %}
+{%- endfor %}
+
+/*
+ * Data type definitions
+ */
+{%- set datatypes = get_ordered_datatype_dict() %}
+{%- for datatype in datatypes.values() %}
+    {%- if datatype["type_emitter"] and datatype["type_emitter"] != "RTE" %}
+    {#- TYPE_REFERENCE #}
+    {%- elif datatype["category"] == "TYPE_REFERENCE" %}
+#define Rte_TypeDef_{{datatype["name"]}}
+typedef {{datatype["typedef_type"]}} {{datatype["name"]}};
+    {#- DATA_REFERENCE #}
+    {%- elif datatype["category"] == "DATA_REFERENCE" %}
+#define Rte_TypeDef_{{datatype["name"]}}
+typedef {{datatype["sw_impl_policy"]}}{{datatype["typedef_type"]}} * {{datatype["name"]}};
+    {#- ARRAY #}
+    {%- elif datatype["category"] == "ARRAY" %}
+#define Rte_TypeDef_{{datatype["name"]}}
+typedef {{datatype["basetype"]}} {{datatype["name"]}}[{{datatype["size"]}}];
+    {#- STRUCTURE #}
+    {%- elif datatype["category"] == "STRUCTURE" %}
+#define Rte_TypeDef_{{datatype["name"]}}
+typedef struct {
+{%- for member in datatype["members"] %}
+    {%- if member["is_user_typed"] %}
+        {%- if member["category"] == "ARRAY" %}
+    {{member["arr_basetype"]}} {{member["name"]}}[{{member["size"]}}];
+        {%- else %}
+        {#- TODO: other types #}
+        {%- endif %}
+    {%- else %}
+    {{member["datatype"]}} {{member["name"]}};
+    {%- endif %}
+{%- endfor %}
+} {{datatype["name"]}};
+    {#- UNION #}
+    {%- elif datatype["category"] == "UNION" %}
+#define Rte_TypeDef_{{datatype["name"]}}
+typedef union
+{
+{%- for member in datatype["members"]%}
+    {%- if member["is_user_typed"] %}
+        {%- if member["category"] == "ARRAY" %}
+    {{member["arr_basetype"]}} {{member["name"]}}[{{member["size"]}}];
+        {%- else %}
+        {#- TODO: other types #}
+        {%- endif %}
+    {%- else %}
+    {{member["datatype"]}} {{member["name"]}};
+    {%- endif %}
+{%- endfor %}
+} {{datatype["name"]}};
+    {%- endif %}
+{%- endfor %}
+
+{#- SR non-zero init value template #}
+{%- macro sr_init_value_non_zero(appl_prefix, appl_name_or_core_id, appl_postfix, buffer) %}
+    {%- set datatype = buffer['arg']['datatype'] %}
+    {%- if datatype['native_category'] == 'NUMERICAL' %}
+        {%- set init_value = buffer["arg"].get("init_value", {}).get("value", {}) %}
+        {%- set basetype = datatype["basetype"] %}
+        {%- if basetype[0] == "b" and (init_value.get("value", "FALSE") == "TRUE" or init_value.get("value", "FALSE") == "True" or init_value.get("value", "FALSE") == "1")%}                    {#- boolean #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- elif basetype[0] == "u" and init_value.get("value", "0U") not in ["0U", "0ULL"] %}        {#- unsigned #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- elif basetype[0] == "s" and init_value.get("value", "0") != "0" %}          {#- signed #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- elif basetype[0] == "f" and init_value.get("value", "0.0F") not in ["0.0", "0.0F"] %}    {#- float #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- endif %}
+    {%- else %}
+        {%- set init_value_complex = buffer["arg"].get("init_value", {}).get("value", {}).get("value", {}) %}
+        {%- set all_zero = all_complex_data_init_values_zero(init_value_complex) %}
+        {%- if not all_zero %}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- endif %}
+    {%- endif %}
+{%- endmacro %}
+
+{#- SR zero init value template #}
+{%- macro sr_init_value_zero(appl_prefix, appl_name_or_core_id, appl_postfix, buffer) %}
+    {%- set datatype = buffer['arg']['datatype'] %}
+    {%- if datatype['native_category'] == 'NUMERICAL' %}
+        {%- set init_value = buffer["arg"].get("init_value", {}).get("value", {}) %}
+        {%- set basetype = datatype["basetype"] %}
+        {%- if basetype[0] == "b" and not (init_value.get("value", "FALSE") == "TRUE" or init_value.get("value", "FALSE") == "True" or init_value.get("value", "FALSE") == "1")%}                    {#- boolean #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- elif basetype[0] == "u" and init_value.get("value", "0U") in ["0U", "0ULL"] %}             {#- unsigned #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- elif basetype[0] == "s" and init_value.get("value", "0") == "0" %}                          {#- signed #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- elif basetype[0] == "f" and init_value.get("value", "0.0F") in ["0.0", "0.0F"] %}           {#- float #}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- endif %}
+    {%- else %}
+        {%- set init_value_complex = buffer["arg"].get("init_value", {}).get("value", {}).get("value", {}) %}
+        {%- set all_zero = all_complex_data_init_values_zero(init_value_complex) %}
+        {%- if all_zero %}
+extern VAR({{datatype['name']}}, {{appl_prefix}}{{appl_name_or_core_id}}_{{appl_postfix}}) {{buffer["variable"]}};
+        {%- endif %}
+    {%- endif %}
+{%- endmacro %}
+
+{%- set appl_buffers = get_sr_nonqueue_osa_share_variable_dict_by_appl() %}
+{%- if appl_buffers %}
+/*
+ * Buffer extern for osa shared in same core S/R Non-Queue
+*/
+    {%- for appl_name, buffers in appl_buffers.items() %}
+        {%- set core_id = get_appl_core_id(appl_name) %}
+{# non-zero init value#}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+        {%- for buffer in buffers.values() %}
+            {{-sr_init_value_non_zero("RTE_", appl_name.upper(), "DATA", buffer)}}
+        {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+{# zero init value #}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+        {%- for buffer in buffers.values() %}
+            {{-sr_init_value_zero("RTE_", appl_name.upper(), "SEMISHARED_DATA", buffer)}}
+        {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+    {% endfor %}
+{%- endif %}
+
+{# Buffer extern for inter-osa S/R Non-Queue #}
+{%- set appl_buffers = get_sr_nonqueue_core_share_variable_dict_by_appl() %}
+{%- if appl_buffers %}
+/*
+ * Buffer extern for inter-osa in same core S/R Non-Queue
+*/
+    {%- for appl_name, buffers in appl_buffers.items() %}
+        {%- set core_id = get_appl_core_id(appl_name) %}
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+{# non-zero init value#}
+        {%- for buffer in buffers.values() %}
+            {{-sr_init_value_non_zero("RTE", "", "MULTI_APP_DATA", buffer)}}
+        {%- endfor %}
+{# zero init value #}
+        {%- for buffer in buffers.values() %}
+            {{-sr_init_value_zero("RTE", "", "MULTI_APP_DATA", buffer)}}
+        {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+    {% endfor %}
+{%- endif %}
+
+{%- set appl_buffers = get_sr_nonqueue_global_variable_dict_by_appl() %}
+{%- if appl_buffers %}
+/*
+ * Buffer extern for inter-core S/R Non-Queue
+*/
+    {%- for appl_name, buffers in appl_buffers.items() %}
+        {%- if appl_name == "GLOBAL-VARS" %}
+{# non-zero init value #}
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+            {%- for buffer in buffers.values() %}
+                {{-sr_init_value_non_zero("RTE", "", "MULTI_APP_DATA", buffer)}}
+            {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+{# zero init value #}
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+            {%- for buffer in buffers.values() %}
+                {{-sr_init_value_zero("RTE", "", "MULTI_APP_DATA", buffer)}}
+            {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+        {%- else %}
+{# non-zero init value #}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+            {%- for buffer in buffers.values() %}
+                {{-sr_init_value_non_zero("RTE_", appl_name.upper(), "SEMISHARED_DATA", buffer)}}
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_DATA
+#include "rte_memmap.h"
+{# zero init value #}
+#define RTE_START_SEC_{{appl_name.upper()}}_DATA
+#include "rte_memmap.h"
+            {%- for buffer in buffers.values() %}
+                {{-sr_init_value_zero("RTE_", appl_name.upper(), "SEMISHARED_DATA", buffer)}}
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+    {% endfor %}
+{%- endif %}
+
+{# Count extern for S/R Non-Queue #}
+{%- set global_counters, local_counters = get_appl_sr_unqueued_counters_extern() %}
+{%- for osa, cnt_in_osa in local_counters.items() %}
+#define RTE_START_SEC_{{osa.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+    {%- for cnt in cnt_in_osa %}
+extern VAR(uint32, RTE_{{osa.upper()}}_SEMISHARED_DATA) {{cnt}};
+    {%- endfor %}
+#define RTE_STOP_SEC_{{osa.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+{%- endfor %}
+
+{%- if global_counters %}
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+{%- for cnt in global_counters %}
+extern VAR(uint32, RTE_MULTI_APP_DATA) {{cnt}};
+{%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+{%- endif %}
+
+{#- ---------------------------------------------------------------- #}
+{#- sr non-ioc queue data type #}
+{#- ---------------------------------------------------------------- #}
+
+{%- set appl_queues = get_all_sr_queue_non_ioc_dequeue_dict_by_appl() %}
+{%- if appl_queues %}
+/*
+ * DataType for S/R Non-IOC Queue
+ */
+typedef struct
+{
+  void* Rte_BasePtr;
+  uint8 Rte_BytesPerElement;
+  uint8 Rte_MaxElements;
+} Rte_QRomInfoType;
+
+typedef struct
+{
+  uint8 Rte_head;
+  uint8 Rte_tail;
+  uint8 Rte_ElementCnt;
+} Rte_QRamInfoType;
+
+    {%- for appl_name, queues in appl_queues.items() %}
+typedef struct
+{
+        {%- for queue in queues %}
+    Rte_BitType {{queue['overflow_name']}} : 1;
+        {%- endfor %}
+} Rte_QOverflowType_{{appl_name}};
+    {%- endfor %}
+{%- endif %}
+
+{#- ---------------------------------------------------------------- #}
+{#- sr ioc queue vars #}
+{#- ---------------------------------------------------------------- #}
+
+{#- 1:1 / 1:n ioc queue #}
+{%- set sr_ioc_enqueues = get_all_sr_queue_ioc_1to1_1toN_enqueue_dict_by_appl() %}
+{%- set sr_ioc_dequeues = get_all_sr_queue_ioc_1to1_1toN_dequeue_dict_by_appl() %}
+{%- if sr_ioc_enqueues or sr_ioc_dequeues %}
+    {%- for appl_name, queues in sr_ioc_enqueues.items() %}
+        {%- set core_id = queues["core_id"] %}
+        {%- set queues_inter_osa_same_core = queues["inter_osa_same_core"] %}
+        {%- set queues_inter_core = queues["inter_core"] %}
+        {%- if queues_inter_osa_same_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_tail;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue['name']}}_Overflow0;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+
+        {%- if queues_inter_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_tail;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue['name']}}_Overflow0;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+
+        {%- if queues_inter_osa_same_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_osa_same_core %}
+extern VAR({{queue['datatype']['name']}}, RTE_{{appl_name.upper()}}_SEMISHARED_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+        {%- endif %}
+
+        {%- if queues_inter_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_core %}
+extern VAR({{queue['datatype']['name']}}, RTE_{{appl_name.upper()}}_SEMISHARED_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+        {%- endif %}
+    {%- endfor %}
+
+    {%- for appl_name, queues in sr_ioc_dequeues.items() %}
+        {%- set core_id = queues["core_id"] %}
+        {%- set queues_inter_osa_same_core = queues["inter_osa_same_core"] %}
+        {%- set queues_inter_core = queues["inter_core"] %}
+        {%- if queues_inter_osa_same_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_head;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue['name']}}_Overflow1;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+
+        {%- if queues_inter_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_head;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue['name']}}_Overflow1;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+    {%- endfor %}
+
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+    {%- for appl_name, queues in sr_ioc_dequeues.items() %}
+        {%- set queues_inter_osa_same_core = queues["inter_osa_same_core"] %}
+        {%- set queues_inter_core = queues["inter_core"] %}
+        {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_ElementCnt;
+        {%- endfor %}
+        {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_ElementCnt;
+        {%- endfor %}
+    {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+{%- endif %}
+
+{#- n:1 ioc queue #}
+{%- set sr_ioc_dequeues = get_all_sr_queue_ioc_Nto1_dequeue_dict_by_appl() %}
+{%- if sr_ioc_dequeues %}
+/*
+ * RTE internal IOC replacement for S/R N:1 IOC Queue
+ */
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+    {%- for queues in sr_ioc_dequeues.values() %}
+        {%- set queues_inter_osa_same_core = queues["inter_osa_same_core"] %}
+        {%- set queues_inter_core = queues["inter_core"] %}
+        {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_tail;
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_Overflow0;
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_ElementCnt;
+        {%- endfor %}
+        {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_tail;
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_Overflow0;
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_ElementCnt;
+        {%- endfor %}
+    {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+    {%- for queues in sr_ioc_dequeues.values() %}
+        {%- set queues_inter_osa_same_core = queues["inter_osa_same_core"] %}
+        {%- set queues_inter_core = queues["inter_core"] %}
+        {%- for queue in queues_inter_osa_same_core %}
+extern VAR({{queue['datatype']['name']}}, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+        {%- endfor %}
+        {%- for queue in queues_inter_core %}
+extern VAR({{queue['datatype']['name']}}, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+        {%- endfor %}
+    {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+
+    {%- for appl_name, queues in sr_ioc_dequeues.items() %}
+        {%- set core_id = queues["core_id"] %}
+        {%- set queues_inter_osa_same_core = queues["inter_osa_same_core"] %}
+        {%- set queues_inter_core = queues["inter_core"] %}
+        {%- if queues_inter_osa_same_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_head;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue['name']}}_Overflow1;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+
+        {%- if queues_inter_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_head;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue['name']}}_Overflow1;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+    {%- endfor %}
+{%- endif %}
+
+{#- ---------------------------------------------------------------- #}
+{#- Update flags extern for inter-osa S/R Receiver with enableUpdate == True #}
+{#- ---------------------------------------------------------------- #}
+
+{%- set inter_osa_flags = get_all_sr_nonqueue_inter_osa_update_flag_dict_by_appl() %}
+{%- if inter_osa_flags %}
+/*
+ * Update flags extern for inter-osa S/R Receiver with enableUpdate == True
+ */
+    {%- for appl_name, flags in inter_osa_flags.items() %}
+        {%- set core_id = get_appl_core_id(appl_name) %}
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+        {%- for flag in flags %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) {{flag["flag_name"]}};
+        {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+    {%- endfor %}
+{%- endif %}
+
+{%- set inter_core_flags = get_all_sr_nonqueue_inter_core_update_flag_dict_by_appl() %}
+{%- if inter_core_flags %}
+/*
+ * Update flags extern for inter-osa S/R Receiver with enableUpdate == True
+ */
+    {%- for appl_name, flags in inter_core_flags.items() %}
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+        {%- for flag in flags %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) {{flag["flag_name"]}};
+        {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+    {%- endfor %}
+{%- endif %}
+
+{#- ---------------------------------------------------------------- #}
+{#- cs queue vars #}
+{#- ---------------------------------------------------------------- #}
+
+{#- cs 1:1 #}
+{%- set cs_ioc_enqueues = get_all_cs_ioc_1to1_enqueue_dict_by_appl() %}
+{%- set cs_ioc_dequeues = get_all_cs_ioc_1to1_dequeue_dict_by_appl() %}
+{%- if cs_ioc_enqueues or cs_ioc_dequeues %}
+    {#- enqueue: tail, overflow0, queue #}
+    {%- for appl_name, queues in cs_ioc_enqueues.items() %}
+        {%- set core_id = queues["core_id"] %}
+        {%- set queues_intra_osa = queues["intra_osa"] %}
+        {%- set queues_inter_osa_same_core = queues["inter_osa_same_core"] %}
+        {%- set queues_inter_core = queues["inter_core"] %}
+        {%- if queues_intra_osa or queues_inter_osa_same_core or queues_inter_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_intra_osa %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_Overflow0;
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_tail;
+            {%- endfor %}
+            {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_tail;
+            {%- endfor %}
+            {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_tail;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+        {%- if queues_inter_osa_same_core or queues_inter_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue['name']}}_Overflow0;
+            {%- endfor %}
+            {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue['name']}}_Overflow0;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+
+        {%- if queues_intra_osa %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+            {%- for queue in queues_intra_osa %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+        {%- endif %}
+        {%- if queues_inter_osa_same_core or queues_inter_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+            {%- endfor %}
+            {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+        {%- endif %}
+    {%- endfor %}
+
+    {#- dequeue:-var head #}
+    {%- for appl_name, queues in cs_ioc_dequeues.items() %}
+        {%- set core_id = queues["core_id"] %}
+        {%- set queues_intra_osa = queues["intra_osa"] %}
+        {%- set queues_inter_osa_same_core = queues["inter_osa_same_core"] %}
+        {%- set queues_inter_core = queues["inter_core"] %}
+        {%- if queues_intra_osa or queues_inter_osa_same_core or queues_inter_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+        {%- for queue in queues_intra_osa %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_head;
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_Overflow1;
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_ElementCnt;
+        {%- endfor %}
+        {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_head;
+        {%- endfor %}
+        {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_head;
+        {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+
+    {#- dequeue:-var Overflow1 #}
+        {%- if queues_inter_osa_same_core or queues_inter_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue['name']}}_Overflow1;
+            {%- endfor %}
+            {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue['name']}}_Overflow1;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+
+    {#- dequeue:-var ElementCnt #}
+        {%- if queues_inter_osa_same_core %}
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+        {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_ElementCnt;
+        {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+
+        {%- if queues_inter_core %}
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+        {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_ElementCnt;
+        {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+    {%- endfor %}
+{%- endif %}
+
+{#- cs 1:n #}
+{%- set cs_ioc_dequeues = get_all_cs_ioc_1toN_dequeue_dict_by_appl() %}
+{%- set cs_ioc_enqueues_tail_private = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_tail', mem_filter='PRIVATE', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_overflow0_private = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_overflow0', mem_filter='PRIVATE', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_queue_private = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q', mem_filter='PRIVATE', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_tail_shared_osa = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_tail', mem_filter='SHARED_OSA', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_overflow0_shared_osa = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_overflow0', mem_filter='SHARED_OSA', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_queue_shared_osa = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q', mem_filter='SHARED_OSA', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_tail_shared_core = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_tail', mem_filter='SHARED_CORE', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_overflow0_shared_core = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_overflow0', mem_filter='SHARED_CORE', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_queue_shared_core = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q', mem_filter='SHARED_CORE', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_tail_global = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_tail', mem_filter='GLOBAL', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_overflow0_global = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q_overflow0', mem_filter='GLOBAL', is_result_combined=True) %}
+{%- set cs_ioc_enqueues_queue_global = get_all_cs_ioc_1toN_enqueue_dict_by_appl(var_filter='mem_q', mem_filter='GLOBAL', is_result_combined=True) %}
+
+/*
+ * RTE internal IOC replacement for C/S 1:N IOC
+ */
+    {#- cs 1:n enqueue vars: tail, overflow0, queue #}
+    {#- cs 1:n enqueue: private #}
+{%- set appl_name_list = (cs_ioc_enqueues_tail_private.keys() | list) + (cs_ioc_enqueues_overflow0_private.keys() | list)%}
+{%- for appl_name in appl_name_list | unique | sort %}
+{%- set queues_tail = cs_ioc_enqueues_tail_private[appl_name] %}
+{%- set queues_overflow0 = cs_ioc_enqueues_overflow0_private[appl_name] %}
+    {%- if queues_tail or queues_overflow0 %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+        {%- for queue_tail in queues_tail %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue_tail['name']}}_tail;
+        {%- endfor %}
+        {%- for queue_overflow0 in queues_overflow0 %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue_overflow0['name']}}_Overflow0;
+        {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+{# blank line #}
+{%- for appl_name, queues in cs_ioc_enqueues_queue_private.items() %}
+    {%- if queues %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+        {%- for queue in queues %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+        {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+{# blank line #}
+    {#- cs 1:n enqueue: shared osa #}
+{%- set appl_name_list = (cs_ioc_enqueues_tail_shared_osa.keys() | list) + (cs_ioc_enqueues_overflow0_shared_osa.keys() | list)%}
+{%- for appl_name in appl_name_list | unique | sort %}
+{%- set queues_tail = cs_ioc_enqueues_tail_shared_osa[appl_name] %}
+{%- set queues_overflow0 = cs_ioc_enqueues_overflow0_shared_osa[appl_name] %}
+    {%- if queues_tail or queues_overflow0 %}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+        {%- for queue_tail in queues_tail %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue_tail['name']}}_tail;
+        {%- endfor %}
+        {%- for queue_overflow0 in queues_overflow0 %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue_overflow0['name']}}_Overflow0;
+        {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+{# blank line #}
+{%- for appl_name, queues in cs_ioc_enqueues_queue_shared_osa.items() %}
+    {%- if queues %}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+        {%- for queue in queues %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+        {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+{# blank line #}
+    {#- cs 1:n enqueue: shared core #}
+{%- set appl_name_list = (cs_ioc_enqueues_tail_shared_core.keys() | list) + (cs_ioc_enqueues_overflow0_shared_core.keys() | list)%}
+{%- for appl_name in appl_name_list | unique | sort %}
+{%- set queues_tail = cs_ioc_enqueues_overflow0_shared_core[appl_name] %}
+{%- set queues_overflow0 = cs_ioc_enqueues_overflow0_shared_core[appl_name] %}
+    {%- if queues_tail or queues_overflow0 %}
+    {%- set core_id = get_appl_core_id(appl_name) %}
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+        {%- for queue_tail in queues_tail %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue_tail['name']}}_tail;
+        {%- endfor %}
+        {%- for queue_overflow0 in queues_overflow0 %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue_overflow0['name']}}_Overflow0;
+        {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+{# blank line #}
+{%- for appl_name, queues in cs_ioc_enqueues_queue_shared_core.items() %}
+    {%- if queues %}
+        {%- set core_id = get_appl_core_id(appl_name) %}
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+        {%- for queue in queues %}
+extern VAR(uint8, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+        {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+{# blank line #}
+    {#- cs 1:n enqueue: global #}
+{%- if cs_ioc_enqueues_tail_global or cs_ioc_enqueues_overflow0_global %}
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+    {%- for appl_name, queues in cs_ioc_enqueues_tail_global.items() %}
+        {%- for queue in queues %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_tail;
+        {%- endfor %}
+    {%- endfor %}
+    {%- for appl_name, queues in cs_ioc_enqueues_overflow0_global.items() %}
+        {%- for queue in queues %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_Overflow0;
+        {%- endfor %}
+    {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+{%- endif %}
+{# blank line #}
+{%- if cs_ioc_enqueues_queue_global %}
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+    {%- for appl_name, queues in cs_ioc_enqueues_queue_global.items() %}
+        {%- for queue in queues %}
+extern VAR(uint8, RTE_MULTI_APP_BSS) Rte_ioc_{{queue['name']}}[{{queue['size']}}];
+        {%- endfor %}
+    {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+{%- endif %}
+{# blank line #}
+{%- if cs_ioc_dequeues %}
+    {%- for appl_name, queues in cs_ioc_dequeues.items() %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+        {%- for queue in queues["intra_osa"] %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_head;
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_Overflow1;
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_ElementCnt;
+        {%- endfor %}
+        {%- for queue in queues["inter_osa_same_core"] %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_head;
+        {%- endfor %}
+        {%- for queue in queues["inter_core"] %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_{{queue['name']}}_head;
+        {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+    {%- endfor %}
+
+    {%- for appl_name, queues in cs_ioc_dequeues.items() %}
+        {%- set core_id = queues["core_id"] %}
+        {%- set queues_intra_osa = queues["intra_osa"] %}
+        {%- set queues_inter_osa_same_core = queues["inter_osa_same_core"] %}
+        {%- set queues_inter_core = queues["inter_core"] %}
+        {%- if queues_inter_osa_same_core or queues_inter_core %}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue['name']}}_Overflow1;
+            {%- endfor %}
+            {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_{{queue['name']}}_Overflow1;
+            {%- endfor %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+    {%- endfor %}
+
+    {%- for appl_name, queues in cs_ioc_dequeues.items() %}
+        {%- set core_id = queues["core_id"] %}
+        {%- set queues_inter_osa_same_core = queues["inter_osa_same_core"] %}
+        {%- if queues_inter_osa_same_core %}
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+            {%- for queue in queues_inter_osa_same_core %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_ElementCnt;
+            {%- endfor %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+    {%- endfor %}
+{%- endif %}
+
+{%- if cs_ioc_dequeues %}
+{%- set ns = namespace(counter=0) %}
+    {%- for appl_name, queues in cs_ioc_dequeues.items() %}
+        {%- set queues_inter_core = queues["inter_core"] %}
+        {%- if queues_inter_core %}
+        {%- set ns.counter = ns.counter + 1 %}
+            {%- if ns.counter == 1 %}
+#define RTE_START_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+            {%- endif %}
+            {%- for queue in queues_inter_core %}
+extern VAR(uint8, RTE_MULTI_APP_DATA) Rte_ioc_{{queue['name']}}_ElementCnt;
+            {%- endfor %}
+        {%- endif %}
+    {%- endfor %}
+    {%- if ns.counter > 0 %}
+#define RTE_STOP_SEC_MULTI_APP_DATA
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endif %}
+
+{#- ---------------------------------------------------------------- #}
+{#- cs arguments DataType for C/S MultiCore #}
+{#- ---------------------------------------------------------------- #}
+
+{%- set cs_multicore_pports = get_all_cs_multicore_pports() %}
+{%- for pport in cs_multicore_pports %}
+typedef struct
+{
+    {%- for typesize in [8, 4, 2 ,1] %}
+        {%- for arg in pport["operation"]["sorted_args"][typesize].values() %}
+    {{arg["type"] if arg["category"] != "ARRAY" else arg["base_type"]}} *{{arg["name"]}};
+        {%- endfor %}
+    {%- endfor %}
+    Std_ReturnType *Rte_Result;
+    boolean *Rte_CallCompleted_Client;
+    boolean *Rte_CallCompleted_Server;
+    uint32 TriggerEvent;
+    uint16 TriggerTask;
+    uint16 waitingTask;
+} Rte_CS_DataType_{{pport["component"]}}_{{pport["name"]}};
+{%- endfor %}
+
+
+{# extern Client info for C/S MultiCore #}
+{%- set pports = get_all_cs_multicore_pports() %}
+{%- if pports | length > 0 %}
+#define RTE_START_SEC_CONST
+#include "rte_memmap.h"
+{%- endif %}
+{%- for pport in pports %}
+extern CONST(Rte_CS_DataType_{{pport["component"]}}_{{pport["name"]}}, RTE_CONST) Rte_CS_Data_{{pport["component"]}}_{{pport["name"]}}[{{pport["connected_ports"]["ports"] | length}}];
+{%- endfor %}
+{%- if pports | length > 0 %}
+#define RTE_STOP_SEC_CONST
+#include "rte_memmap.h"
+{%- endif %}
+
+/*
+ * CS multicore arguments
+*/
+{%- for osa in get_appl_name_list() %}
+{%- if get_all_cs_non_direct_pports_extern().get(osa, {}) or get_all_cs_non_direct_rports_extern().get(osa, {}) %}
+#define RTE_START_SEC_{{osa.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+    {%- for rport, serv_port in get_all_cs_non_direct_rports_extern().get(osa, {}) %}
+        {%- if rport["ioc"] %}
+            {%- set client_id = rport["client_id"] %}
+extern VAR(boolean, RTE_{{osa.upper()}}_SEMISHARED_BSS) Rte_CS_Flag_{{serv_port["component"]}}_{{serv_port["name"]}}_{{client_id}}_CallCompleted_Client;
+        {%- endif %}
+    {%- endfor %}
+    {%- for serv_port, rport in get_all_cs_non_direct_pports_extern().get(osa, {}) %}
+        {%- if rport["ioc"] %}
+            {%- set client_id = rport["client_id"] %}
+extern VAR(boolean, RTE_{{osa.upper()}}_SEMISHARED_BSS) Rte_CS_Flag_{{serv_port["component"]}}_{{serv_port["name"]}}_{{client_id}}_CallCompleted_Server;
+extern VAR(Std_ReturnType, RTE_{{osa.upper()}}_SEMISHARED_BSS) Rte_CS_Result_{{serv_port["component"]}}_{{serv_port["name"]}}_{{client_id}};
+        {%- endif %}
+    {%- endfor %}
+#define RTE_STOP_SEC_{{osa.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+
+#define RTE_START_SEC_{{osa.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+    {%- for rport, serv_port in get_all_cs_non_direct_rports_extern().get(osa, {}) %}
+        {%- set client_id = rport["client_id"] %}
+        {%- for arg in serv_port["operation"]["args"].values() %}
+            {%- if arg["direction"] == "IN" %}
+extern VAR({{arg["type"]}}, RTE_{{osa.upper()}}_SEMISHARED_BSS) Rte_CS_Arg_{{serv_port["component"]}}_{{serv_port["name"]}}_{{client_id}}_{{arg["name"]}};
+            {%- endif %}
+        {%- endfor %}
+    {%- endfor %}
+    {%- for serv_port, rport in get_all_cs_non_direct_pports_extern().get(osa, {}) %}
+        {%- set client_id = rport["client_id"] %}
+        {%- for arg in serv_port["operation"]["args"].values() %}
+            {%- if arg["direction"] == "OUT" %}
+extern VAR({{arg["type"]}}, RTE_{{osa.upper()}}_SEMISHARED_BSS) Rte_CS_Arg_{{serv_port["component"]}}_{{serv_port["name"]}}_{{client_id}}_{{arg["name"]}};
+            {%- endif %}
+        {%- endfor %}
+    {%- endfor %}
+#define RTE_STOP_SEC_{{osa.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+{%- endif %}
+{%- endfor %}
+
+{%- set inout_args = get_all_cs_non_direct_inout_arg_extern() %}
+{%- if inout_args %}
+    {%- for osa in get_appl_name_list() %}
+    {%- set infix = osa + '_PRIVATE' %}
+    {%- set ns = namespace(counter=0) %}
+        {%- for arg, pport, rport in inout_args %}
+            {%- if rport['infix']['mem_arg_inout'] == infix %}
+            {%- set ns.counter = ns.counter + 1 %}
+                {%- if ns.counter == 1 %}
+#define RTE_START_SEC_{{osa.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+                {%- endif %}
+extern VAR({{arg["type"]}}, RTE_{{osa.upper()}}_PRIVATE_BSS) Rte_CS_Arg_{{pport["component"]}}_{{pport["name"]}}_{{rport["client_id"]}}_{{arg["name"]}};
+            {%- endif %}
+        {%- endfor %}
+        {%- if ns.counter > 0 %}
+#define RTE_STOP_SEC_{{osa.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+        {%- endif %}
+    {%- endfor %}
+{%- endif %}
+
+{%- set inout_args = get_all_cs_non_direct_inout_arg_extern() %}
+{%- set ns = namespace(counter=0) %}
+{%- if inout_args %}
+    {%- for arg, pport, rport in inout_args %}
+        {%- if rport['infix']['mem_arg_inout'] == 'MULTI_APP' %}
+        {%- set ns.counter = ns.counter + 1 %}
+            {%- if ns.counter == 1 %}
+#define RTE_START_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+            {%- endif %}
+extern VAR({{arg["type"]}}, RTE_MULTI_APP_BSS) Rte_CS_Arg_{{pport["component"]}}_{{pport["name"]}}_{{rport["client_id"]}}_{{arg["name"]}};
+        {%- endif %}
+    {%- endfor %}
+    {%- if ns.counter > 0 %}
+#define RTE_STOP_SEC_MULTI_APP_BSS
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endif %}
+
+{#- Constant value declaration #}
+#define RTE_START_SEC_CONST
+#include "rte_memmap.h"
+{%- set consts = get_all_sr_init_value_const_list() %}
+{%- if consts %}
+/*
+ * Constant value declaration
+ */
+{%- endif %}
+{%- for const in consts %}
+extern CONST({{const["datatype"]}},RTE_CONST) {{const["name"]}};
+{%- endfor %}
+
+{#- comment out temp #}
+{#- {%- set buffers = get_appl_sr_unqueued_structure_variable_list() + get_appl_sr_unqueued_array_variable_list() %}
+{%- set buffers = get_initial_buffer_list(buffers) %}
+{%- if buffers | length > 0 %}
+/*
+ * _Constant value declaration
+ */
+{%- for buffer in buffers %}
+extern CONST({{buffer["datatype"]}},RTE_CONST) Rte_C_{{buffer["datatype"]}}_0;
+{%- endfor %}
+{%- endif %} #}
+#define RTE_STOP_SEC_CONST
+#include "rte_memmap.h"
+
+{#- AckFlag datatype #}
+{%- set appl_name_list = get_appl_name_list() -%}
+{%- if has_ack_flag_datatype(appl_name_list) %}
+/*
+ * AckFlag datatype
+ */
+{%- endif %}
+{%- for appl_name in appl_name_list %}
+{%- set mode_switch_pports_appl = get_appl_task_mode_switch_port_list(appl_name, with_pport = "yes") -%}
+    {%- if mode_switch_pports_appl|length %}
+typedef struct
+{
+        {%- for mode_switch_pport in mode_switch_pports_appl %}
+    Rte_BitType Rte_ModeSwitchAck_{{mode_switch_pport["swc_name"]}}_{{mode_switch_pport["port_name"]}}_{{mode_switch_pport["mode_group_prototype"]}}_Ack : 1;
+        {%- endfor %}
+} Rte_{{appl_name}}_AckFlagsType;
+#define RTE_START_SEC_{{mode_switch_pports_appl[0]['infix']['mem_ack_flags'].upper()}}_DATA
+#include "rte_memmap.h"
+extern VAR(Rte_{{appl_name}}_AckFlagsType, RTE_{{mode_switch_pports_appl[0]['infix']['mem_ack_flags'].upper()}}_DATA) Rte_{{appl_name}}_AckFlags;
+#define RTE_STOP_SEC_{{mode_switch_pports_appl[0]['infix']['mem_ack_flags'].upper()}}_DATA
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+
+{#- SR intra osa boolean buffer #}
+/*
+ * SR intra osa boolean buffer
+ */
+{%- set appl_name_list = get_appl_name_list() -%}
+{%- for appl_name in appl_name_list -%}
+    {%- set zero_boolean_vars = get_sr_nonqueue_intra_osa_boolean_variable_dict_by_appl(appl_name, 'zero') -%}
+    {%- set nonzero_boolean_vars = get_sr_nonqueue_intra_osa_boolean_variable_dict_by_appl(appl_name, 'nonzero') -%}
+    {%- if zero_boolean_vars %}
+typedef struct
+{
+        {%- for zero_boolean_var in zero_boolean_vars[appl_name].values() %}
+    Rte_BitType {{zero_boolean_var["variable"]}} : 1;
+        {%- endfor %}
+} Rte_Private_{{appl_name}}_ZeroBool_VarType;
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+extern VAR(Rte_Private_{{appl_name}}_ZeroBool_VarType, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_Private_{{appl_name}}_ZeroBool_Vars;
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+    {%- endif %}
+    {%- if nonzero_boolean_vars %}
+typedef struct
+{
+        {%- for nonzero_boolean_var in nonzero_boolean_vars[appl_name].values() %}
+    Rte_BitType {{nonzero_boolean_var["variable"]}} : 1;
+        {%- endfor %}
+} Rte_Private_{{appl_name}}_NonZeroBool_VarType;
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+extern VAR(Rte_Private_{{appl_name}}_NonZeroBool_VarType, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_Private_{{appl_name}}_NonZeroBool_Vars;
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+
+{#- RTE internal IOC replacement #}
+{%- if has_ioc_replacment(appl_name_list) %}
+/*
+ * RTE internal IOC replacements
+ */
+{%- endif %}
+{%- for appl_name in appl_name_list %}
+{%- set mode_switch_pports_appl = get_mode_switch_event_pport_all_swc_same_appl(appl_name) -%}
+{%- set ns_intra_no_init = namespace(counter=0) %}
+{%- set ns_intra_zero_init = namespace(counter=0) %}
+{%- set ns_inter_no_init = namespace(counter=0) %}
+{%- set ns_inter_zero_init = namespace(counter=0) %}
+{#- intra_partition  queue #}
+    {%- for mode_switch_event_pport in mode_switch_pports_appl %}
+    {%- set swc_name = mode_switch_event_pport["swc_name"] %}
+    {%- set port_name = mode_switch_event_pport["port_name"] %}
+    {%- set mode_group_prototype_name = mode_switch_event_pport["mode_group_prototype"] %}
+    {%- set queue_length = mode_switch_event_pport["queue_length"] %}
+        {%- if not mode_switch_event_pport['inter_partition'] %}
+        {%- set ns_intra_no_init.counter = ns_intra_no_init.counter + 1 %}
+            {%- if ns_intra_no_init.counter == 1 %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+            {%- endif %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_BSS) Rte_ioc_Rte_M_{{swc_name}}_{{port_name}}_{{mode_group_prototype_name}}_Queue[{{queue_length}}];
+        {%- endif %}
+    {%- endfor %}
+    {%- if ns_intra_no_init.counter > 0 %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_BSS
+#include "rte_memmap.h"
+    {%- endif %}
+{#- intra_partition  head&tail #}
+    {%- for mode_switch_event_pport in mode_switch_pports_appl %}
+    {%- set swc_name = mode_switch_event_pport["swc_name"] %}
+    {%- set port_name = mode_switch_event_pport["port_name"] %}
+    {%- set mode_group_prototype_name = mode_switch_event_pport["mode_group_prototype"] %}
+        {%- if not mode_switch_event_pport['inter_partition'] %}
+        {%- set ns_intra_zero_init.counter = ns_intra_zero_init.counter + 1 %}
+            {%- if ns_intra_zero_init.counter == 1 %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+            {%- endif %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_Rte_M_{{swc_name}}_{{port_name}}_{{mode_group_prototype_name}}_tail;
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ioc_Rte_M_{{swc_name}}_{{port_name}}_{{mode_group_prototype_name}}_head;
+        {%- endif %}
+    {%- endfor %}
+    {%- if ns_intra_zero_init.counter > 0 %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+    {%- endif %}
+{#- inter_partition queue #}
+    {%- for mode_switch_event_pport in mode_switch_pports_appl %}
+    {%- set swc_name = mode_switch_event_pport["swc_name"] %}
+    {%- set port_name = mode_switch_event_pport["port_name"] %}
+    {%- set mode_group_prototype_name = mode_switch_event_pport["mode_group_prototype"] %}
+    {%- set queue_length = mode_switch_event_pport["queue_length"] %}
+        {%- if mode_switch_event_pport['inter_partition'] %}
+        {%- set ns_inter_no_init.counter = ns_inter_no_init.counter + 1 %}
+            {%- if ns_inter_no_init.counter == 1 %}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+            {%- endif %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_BSS) Rte_ioc_Rte_M_{{swc_name}}_{{port_name}}_{{mode_group_prototype_name}}_Queue[{{queue_length}}];
+        {%- endif %}
+    {%- endfor %}
+    {%- if ns_inter_no_init.counter > 0 %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_BSS
+#include "rte_memmap.h"
+    {%- endif %}
+{#- intra_partition tail #}
+    {%- for mode_switch_event_pport in mode_switch_pports_appl %}
+    {%- set swc_name = mode_switch_event_pport["swc_name"] %}
+    {%- set port_name = mode_switch_event_pport["port_name"] %}
+    {%- set mode_group_prototype_name = mode_switch_event_pport["mode_group_prototype"] %}
+        {%- if mode_switch_event_pport['inter_partition'] %}
+        {%- set ns_inter_zero_init.counter = ns_inter_zero_init.counter + 1 %}
+            {%- if ns_inter_zero_init.counter == 1 %}
+#define RTE_START_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+            {%- endif %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_SEMISHARED_DATA) Rte_ioc_Rte_M_{{swc_name}}_{{port_name}}_{{mode_group_prototype_name}}_tail;
+        {%- endif %}
+    {%- endfor %}
+    {%- if ns_inter_zero_init.counter > 0 %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_SEMISHARED_DATA
+#include "rte_memmap.h"
+    {%- endif %}
+{#- intra_partition head #}
+    {%- for mode_switch_event_pport in mode_switch_pports_appl %}
+    {%- set swc_name = mode_switch_event_pport["swc_name"] %}
+    {%- set port_name = mode_switch_event_pport["port_name"] %}
+    {%- set mode_group_prototype_name = mode_switch_event_pport["mode_group_prototype"] %}
+        {%- if mode_switch_event_pport['inter_partition'] %}
+#define RTE_START_SEC_{{mode_switch_event_pport['infix']['mem_head'].upper()}}_DATA
+#include "rte_memmap.h"
+extern VAR(uint8, RTE_{{mode_switch_event_pport['infix']['mem_head'].upper()}}_DATA) Rte_ioc_Rte_M_{{swc_name}}_{{port_name}}_{{mode_group_prototype_name}}_head;
+#define RTE_STOP_SEC_{{mode_switch_event_pport['infix']['mem_head'].upper()}}_DATA
+#include "rte_memmap.h"
+        {%- endif %}
+    {%- endfor %}
+{%- endfor %}
+
+{%- set mode_switch_pports = get_mode_switch_pports_with_transition_event() %}
+{%- if mode_switch_pports|length %}
+#define RTE_START_SEC_CONST
+#include "rte_memmap.h"
+    {%- for mode_switch_pport in mode_switch_pports %}
+extern CONST(uint8, RTE_CONST) Rte_ModeTransitionEventId_{{mode_switch_pport["swc_name"]}}_{{mode_switch_pport["port_name"]}}_{{mode_switch_pport["mode_group_prototype"]}}[{{mode_switch_pport["mode_group_len"]}}][{{mode_switch_pport["mode_group_len"]}}];
+    {%- endfor %}
+#define RTE_STOP_SEC_CONST
+#include "rte_memmap.h"
+{%- endif %}
+{%- set mode_switch_rports, mode_switch_pports = get_mode_switch_port_in_swc_list_all_appls() %}
+{%- if mode_switch_pports|length %}
+/*
+ * Data structure for mode management
+ */
+{%- endif %}
+{#- intra partition #}
+{%- for appl_name in appl_name_list %}
+{%- set ns = namespace(counter=0) %}
+    {%- for mode_switch_pport in mode_switch_pports %}
+    {%- set swc_name = mode_switch_pport["swc_name"] %}
+    {%- set port_name = mode_switch_pport["port_name"] %}
+    {%- set mode_group_prototype_name = mode_switch_pport["mode_group_prototype"] %}
+    {%- set osapplication = mode_switch_pport["osapplication"] %}
+    {%- set inter_partition = mode_switch_pport["inter_partition"] %}
+        {%- if not inter_partition and osapplication == appl_name %}
+        {%- set ns.counter = ns.counter + 1 %}
+            {%- if ns.counter == 1 %}
+#define RTE_START_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+            {%- endif %}
+extern VAR(uint8, RTE_{{appl_name.upper()}}_PRIVATE_DATA) Rte_ModeMachine_{{swc_name}}_{{port_name}}_{{mode_group_prototype_name}};
+        {%- endif %}
+    {%- endfor %}
+    {%- if ns.counter > 0 %}
+#define RTE_STOP_SEC_{{appl_name.upper()}}_PRIVATE_DATA
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+{#- inter partition #}
+{%- for mode_switch_pport in mode_switch_pports %}
+{%- set swc_name = mode_switch_pport["swc_name"] %}
+{%- set port_name = mode_switch_pport["port_name"] %}
+{%- set mode_group_prototype_name = mode_switch_pport["mode_group_prototype"] %}
+{%- set inter_partition = mode_switch_pport["inter_partition"] %}
+    {%- if inter_partition %}
+#define RTE_START_SEC_{{mode_switch_pport['infix']['mem_mode_machine'].upper()}}_DATA
+#include "rte_memmap.h"
+extern VAR(uint8, RTE_{{mode_switch_pport['infix']['mem_mode_machine'].upper()}}_DATA) Rte_ModeMachine_{{swc_name}}_{{port_name}}_{{mode_group_prototype_name}};
+#define RTE_STOP_SEC_{{mode_switch_pport['infix']['mem_mode_machine'].upper()}}_DATA
+#include "rte_memmap.h"
+    {%- endif %}
+{%- endfor %}
+
+{#- ---------------------------------------------------------------- #}
+{#- data mapping types #}
+{#- ---------------------------------------------------------------- #}
+
+{%- for infix, vars in get_sr_dm_buff().items() %}
+{%-  set infix_upper = infix.upper() %}
+#define RTE_START_SEC_{{infix_upper}}
+#include "rte_memmap.h"
+    {%- for var in vars %}
+extern VAR({{var["datatype"]["name"]}}, RTE_{{infix_upper}}) {{var["name"]}};
+    {%- endfor %}
+#define RTE_STOP_SEC_{{infix_upper}}
+#include "rte_memmap.h"
+{%- endfor %}
+
+{%- for infix, vars in get_sr_dm_buff_last().items() %}
+{%-  set infix_upper = infix.upper() %}
+#define RTE_START_SEC_{{infix_upper}}
+#include "rte_memmap.h"
+    {%- for var in vars %}
+extern VAR({{var["datatype"]["name"]}}, RTE_{{infix_upper}}) {{var["name"]}};
+    {%- endfor %}
+#define RTE_STOP_SEC_{{infix_upper}}
+#include "rte_memmap.h"
+{%- endfor %}
+
+{%- for infix, vars in get_sr_dm_buff_status().items() %}
+{%-  set infix_upper = infix.upper() %}
+#define RTE_START_SEC_{{infix_upper}}
+#include "rte_memmap.h"
+    {%- for var in vars %}
+extern VAR(uint8, RTE_{{infix_upper}}) {{var["name"]}};
+    {%- endfor %}
+#define RTE_STOP_SEC_{{infix_upper}}
+#include "rte_memmap.h"
+{%- endfor %}
+
+{#- flags #}
+{%- macro sr_dm_flag_typedef_flag_decl(parent_struct_name, infix, vars) %}
+{%-  set infix_upper = infix.upper() %}
+typedef struct {
+{%- for flag in vars %}
+    Rte_BitType {{flag["name"]}} : 1U;
+{%- endfor %}
+} {{parent_struct_name}}_Type;
+
+#define RTE_START_SEC_{{infix_upper}}
+#include "rte_memmap.h"
+extern VAR({{parent_struct_name}}_Type, RTE_{{infix_upper}}) {{parent_struct_name}};
+#define RTE_STOP_SEC_{{infix_upper}}
+#include "rte_memmap.h"
+{%- endmacro %}
+
+{%- for parent_struct_name, vars in get_sr_dm_flag_is_proxy_sending().items() %}
+{{-sr_dm_flag_typedef_flag_decl(parent_struct_name, vars[0], vars[1])}}
+{%- endfor %}
+
+{%- for parent_struct_name, vars in get_sr_dm_flag_is_updated_tx().items() %}
+{{-sr_dm_flag_typedef_flag_decl(parent_struct_name, vars[0], vars[1])}}
+{%- endfor %}
+
+{%- for parent_struct_name, vars in get_sr_dm_flag_is_updated_rx().items() %}
+{{-sr_dm_flag_typedef_flag_decl(parent_struct_name, vars[0], vars[1])}}
+{%- endfor %}
+
+{%- for parent_struct_name, vars in get_sr_dm_flag_is_received().items() %}
+{{-sr_dm_flag_typedef_flag_decl(parent_struct_name, vars[0], vars[1])}}
+{%- endfor %}
+
+{%- for parent_struct_name, vars in get_sr_dm_flag_is_timeout().items() %}
+{{-sr_dm_flag_typedef_flag_decl(parent_struct_name, vars[0], vars[1])}}
+{%- endfor %}
+
+{#- ---------------------------------------------------------------- #}
+{#- mode disable types #}
+{#- ---------------------------------------------------------------- #}
+
+{%- set pports = get_all_mode_disabled_pports() %}
+{%- if pports %}
+/*
+ * RTE mode disabled entities
+ */
+    {%- for osa in get_appl_name_list() %}
+        {%- set pports = get_all_mode_disabled_pports(osa) %}
+        {%- if pports %}
+typedef struct
+{
+            {%- for pport in pports %}
+                {%- for swc_run, _ in pport["mode_disabled_flag"].items() %}
+    boolean Rte_Flag_ModeDisableTrigger_{{swc_run}};
+                {%- endfor %}
+            {%- endfor %}
+} Rte_Flag_ModeDisableTrigger_{{osa}}_Type;
+
+        {%- endif %}
+    {%- endfor %}
+{%- endif %}
+
+{%- set pports = get_all_mode_disabled_pports() %}
+{%- if pports %}
+    {%- for osa in get_appl_name_list() %}
+        {%- set osa_pports = get_all_mode_disabled_pports(osa) %}
+        {%- if osa_pports %}
+#define RTE_START_SEC_{{osa_pports[0]['infix']['mem_ack_flags'].upper()}}_DATA
+#include "rte_memmap.h"
+extern VAR(Rte_Flag_ModeDisableTrigger_{{osa}}_Type, RTE_{{osa_pports[0]['infix']['mem_ack_flags'].upper()}}_DATA) Rte_Flag_ModeDisableTrigger_{{osa}};
+#define RTE_STOP_SEC_{{osa_pports[0]['infix']['mem_ack_flags'].upper()}}_DATA
+#include "rte_memmap.h"
+{# blank line #}
+        {%- endif %}
+    {%- endfor %}
+{%- endif %}
+
+{%- set pim_typedefs = get_all_pim_user_typedefs() %}
+{%- if pim_typedefs %}
+/*
+ * Pim type definitions
+ */
+    {%- for def in pim_typedefs %}
+{{def}}
+    {%- endfor %}
+{%- endif %}
+
+{%- set param_consts = get_cal_prm_consts() %}
+{%- if param_consts %}
+
+/**********************************************************************************************************************
+ * Calibration component and SW-C local calibration parameters
+ *********************************************************************************************************************/
+    {{- macros.CAL_PARAM_CONSTS_MEMMAP(true)}}
+    {%- for const_name, port_info in param_consts.items() %}
+        {{- macros.CAL_PARAM_CONST(ind="", const_name=const_name, port_arg=port_info['arg'], is_extern=true)}}
+    {%- endfor %}
+    {{- macros.CAL_PARAM_CONSTS_MEMMAP(false)}}
+{%- endif %}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* RTE_TYPE_H */
+{# blank line at end of file #}

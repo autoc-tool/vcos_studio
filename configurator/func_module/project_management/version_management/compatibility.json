@@ -1,0 +1,11 @@
+{
+    "software": "Studio",
+    "components": {
+        "Studio": {
+            "compatibleProjectVersions": [
+                "V0.1.x"
+            ],
+            "version": "V0.1.0-DEV"
+        }
+    }
+}

@@ -1,0 +1,43 @@
+<RCC>
+    <qresource prefix="/">
+        <file>validate_on.png</file>
+        <file>validate_off.png</file>
+        <file>validate_clean.png</file>
+        <file>validateAll.png</file>
+        <file>validate.png</file>
+        <file>unavailable.svg</file>
+        <file>ok.svg</file>
+        <file>not_ok.svg</file>
+        <file>add.svg</file>
+        <file>add_s.svg</file>
+        <file>Overview.svg</file>
+        <file>container.svg</file>
+        <file>generator.svg</file>
+        <file>import.svg</file>
+        <file>last.svg</file>
+        <file>next.svg</file>
+        <file>New.svg</file>
+        <file>open.svg</file>
+        <file>containers.svg</file>
+        <file>save.svg</file>
+        <file>swc_generator.svg</file>
+        <file>reset.svg</file>
+        <file>unreset.svg</file>
+        <file>close.svg</file>
+        <file>update.svg</file>
+        <file>validation.svg</file>
+        <file>project_settings.svg</file>
+        <file>manual.svg</file>
+        <file>plugin.svg</file>
+        <file>Home.svg</file>
+        <file>import1.svg</file>
+        <file>export.svg</file>
+        <file>copy.svg</file>
+        <file>paste.svg</file>
+        <file>attention_info.svg</file>
+        <file>cancel_all.svg</file>
+        <file>check_all.svg</file>
+        <file>pin.svg</file>
+        <file>auto_fix.svg</file>
+    </qresource>
+</RCC>

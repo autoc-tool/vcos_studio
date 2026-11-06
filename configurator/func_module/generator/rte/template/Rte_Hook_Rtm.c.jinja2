@@ -1,0 +1,29 @@
+{{get_copyright()}}
+
+/*!*********************************************************************************************************************
+ * @file        Rte_Hook_Rtm.c
+ * @brief       RTE runnable vfb hooks implementation
+ * @details     Provide the runnable hooks for UI configuration, which will call RTM's macros (Rtm Start, Rtm Stop)
+ * @date        {{get_generation_time_temp()}}
+ * @toolversion {{get_vcos_version_temp()}}
+ **********************************************************************************************************************/
+
+#include "Rte_Hook.h"
+
+{% set vfb_trace_enabled = is_vfb_trace_enabled() %}
+{%- if vfb_trace_enabled %}
+#define RTE_START_SEC_CODE
+#include "rte_memmap.h"
+    {%- set vfb_func_call_list = get_vfb_trace_start_stop_function_call() %}
+    {%- for hook_func_list in vfb_func_call_list %}
+        {%- set hook_name = hook_func_list[0] %}
+        {%- set vfb_func_call = hook_func_list[1] %}
+FUNC(void, RTE_CODE) {{hook_name}}(void)
+{
+    {{ vfb_func_call }}
+}
+    {%- endfor %}
+#define RTE_STOP_SEC_CODE
+#include "rte_memmap.h"
+
+{% endif %}
