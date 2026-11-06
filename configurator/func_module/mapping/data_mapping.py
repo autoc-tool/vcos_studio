@@ -686,7 +686,14 @@ class DataMapping:
         system_signals = communication_autosar.find_nodes("SYSTEM-SIGNAL")
         for system_signal in system_signals:
             short_name = get_short_name(system_signal)
-            conditional = system_signal.PHYSICAL_PROPS.SW_DATA_DEF_PROPS_VARIANTS.SW_DATA_DEF_PROPS_CONDITIONAL[0]
+            # Missing PHYSICAL-PROPS used to AttributeError and abort all verify.
+            # Skip so validation can finish; callers treat absent keys as unconfigured.
+            if system_signal.PHYSICAL_PROPS is None:
+                continue
+            variants = system_signal.PHYSICAL_PROPS.SW_DATA_DEF_PROPS_VARIANTS
+            if variants is None or not variants.SW_DATA_DEF_PROPS_CONDITIONAL:
+                continue
+            conditional = variants.SW_DATA_DEF_PROPS_CONDITIONAL[0]
             compu_method_ref = get_valueOf(conditional.COMPU_METHOD_REF)
             data_constr_ref = get_valueOf(conditional.DATA_CONSTR_REF)
             rv.update({short_name: {"compu_method_ref": compu_method_ref, "data_constr_ref": data_constr_ref}})

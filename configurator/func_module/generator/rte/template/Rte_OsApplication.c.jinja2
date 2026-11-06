@@ -188,26 +188,14 @@
 {%- endfor %}
 #else
 {%- for signal_name in port["mapping_to_signals"] %}
-    {%- if loop.first %}
-        {%- if gen_compu_method and port["arg"]["datatype"]["native_category"] == "NUMERICAL" %}
-            {%- for signal_info in signal_infos %}
-                {%- if signal_info['full_name'] == signal_name %}
+    {%- if gen_compu_method and port["arg"]["datatype"]["native_category"] == "NUMERICAL" %}
+        {%- for signal_info in signal_infos %}
+            {%- if signal_info['full_name'] == signal_name %}
 {{-gen_tx_num_sig_dm_compu_method(ind, " ", "data", input_buff, signal_info["real_sig_type"], signal_info['compu_method'], signal_name)}}
-                {%- endif %}
-            {%- endfor %}
-        {%- else %}
-{{ind}}ret = com_send_signal(ComConf_ComSignal_{{signal_name}}_Tx, {{and_op}}{{input_buff}});
-        {%- endif %}
+            {%- endif %}
+        {%- endfor %}
     {%- else %}
-        {%- if gen_compu_method and port["arg"]["datatype"]["native_category"] == "NUMERICAL" %}
-            {%- for signal_info in signal_infos %}
-                {%- if signal_info['full_name'] == signal_name %}
-{{-gen_tx_num_sig_dm_compu_method(ind, " |", "data", input_buff, signal_info["real_sig_type"], signal_info['compu_method'], signal_name)}}
-                {%- endif %}
-            {%- endfor %}
-        {%- else %}
-{{ind}}ret |= com_send_signal(ComConf_ComSignal_{{signal_name}}_Tx, {{and_op}}{{input_buff}});
-        {%- endif %}
+{{ind}}(void)com_send_signal(ComConf_ComSignal_{{signal_name}}_Tx, {{and_op}}{{input_buff}});
     {%- endif %}
 {%- endfor %}
 #endif
@@ -405,6 +393,7 @@
     {#- directly receive from COM #}
     {%- set signal_name = rport.get("mapping_to_signals", [])[0] %}
     {%- if rport.get("signal_category", None) == "SignalGroup" %}
+#if (RTE_DLOG_ENABLED == STD_ON)
 {{ind}}ret |= com_receive_signal_group(ComConf_ComSignalGroup_{{signal_name}}_Rx);
         {%- set type_mappings = rport["type_mappings"].get(signal_name)%}
         {%- for type_mapping in type_mappings %}
@@ -413,22 +402,35 @@
 {{-gen_rx_signal_group_dm_compu_method(ind, out_buff_addr, type_mapping["implementation_record_element"], type_mapping["datatype"], type_mapping['compu_method'])}}
             {%- endif %}
         {%- endfor %}
-#if (RTE_DLOG_ENABLED == STD_ON)
 {{ind}}if (ret != E_OK)
 {{ind}}{
 {{ind}}    Rte_LogCom({{rte_com_service_id}}, {{rte_com_api_id}}, RTE_COM_RECEIVESIGNALGROUP_ID, ComConf_ComSignalGroup_{{signal_name}}_Rx, ret);
 {{ind}}}
+#else
+{{ind}}(void)com_receive_signal_group(ComConf_ComSignalGroup_{{signal_name}}_Rx);
+        {%- set type_mappings = rport["type_mappings"].get(signal_name)%}
+        {%- for type_mapping in type_mappings %}
+{{ind}}(void)com_receive_signal(ComConf_ComGroupSignal_{{type_mapping["i_signal"]}}_Rx, &({{out_buff_addr}}->{{type_mapping["implementation_record_element"]}}));
+            {%- if gen_compu_method %}
+{{-gen_rx_signal_group_dm_compu_method(ind, out_buff_addr, type_mapping["implementation_record_element"], type_mapping["datatype"], type_mapping['compu_method'])}}
+            {%- endif %}
+        {%- endfor %}
 #endif
     {%- else %}
+#if (RTE_DLOG_ENABLED == STD_ON)
 {{ind}}ret |= com_receive_signal(ComConf_ComSignal_{{signal_name}}_Rx, {{out_buff_addr}});
         {%- if gen_compu_method and datatype["native_category"] == "NUMERICAL" %}
 {{-gen_rx_num_sig_dm_compu_method(ind, out_buff_addr, out_buff_addr, datatype['basetype'], signal_infos[0]['compu_method'])}}
         {%- endif %}
-#if (RTE_DLOG_ENABLED == STD_ON)
 {{ind}}if (ret != E_OK)
 {{ind}}{
 {{ind}}    Rte_LogCom({{rte_com_service_id}}, {{rte_com_api_id}}, RTE_COM_RECEIVESIGNAL_ID, ComConf_ComSignal_{{signal_name}}_Rx, ret);
 {{ind}}}
+#else
+{{ind}}(void)com_receive_signal(ComConf_ComSignal_{{signal_name}}_Rx, {{out_buff_addr}});
+        {%- if gen_compu_method and datatype["native_category"] == "NUMERICAL" %}
+{{-gen_rx_num_sig_dm_compu_method(ind, out_buff_addr, out_buff_addr, datatype['basetype'], signal_infos[0]['compu_method'])}}
+        {%- endif %}
 #endif
     {%- endif %}
 {%- endif %}
@@ -2137,7 +2139,7 @@ static FUNC(void, RTE_CODE) Rte_DeActivateModeDisabling_{{pport["osapplication"]
 {{indent}}ret = GetSpinlock{{rport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{rport_data["lock_id"].upper()}}_ID);
 {{indent}}if (ret != E_OK)
 {{indent}}{
-{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_GetSpinlock, OS_SPINLOCK_{{rport_data["lock_id"].upper()}}_ID, ret);
+{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_GetSpinlock, OS_SPINLOCK_{{rport_data["lock_id"].upper()}}_ID, ret);
 {{indent}}}
 #else
 {{indent}}(void)GetSpinlock{{rport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{rport_data["lock_id"].upper()}}_ID);
@@ -2209,7 +2211,7 @@ static FUNC(void, RTE_CODE) Rte_DeActivateModeDisabling_{{pport["osapplication"]
 {{indent}}ret = ReleaseSpinlock{{rport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{rport_data["lock_id"].upper()}}_ID);
 {{indent}}if (ret != E_OK)
 {{indent}}{
-{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_ReleaseSpinlock, OS_SPINLOCK_{{rport_data["lock_id"].upper()}}_ID, ret);
+{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_ReleaseSpinlock, OS_SPINLOCK_{{rport_data["lock_id"].upper()}}_ID, ret);
 {{indent}}}
 #else
 {{indent}}(void)ReleaseSpinlock{{rport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{rport_data["lock_id"].upper()}}_ID);
@@ -2256,7 +2258,7 @@ static FUNC(void, RTE_CODE) Rte_DeActivateModeDisabling_{{pport["osapplication"]
 {{indent}}ret = GetSpinlock{{rport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{rport_data["variable_name"].upper()}}_ID);
 {{indent}}if (ret != E_OK)
 {{indent}}{
-{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_GetSpinlock, OS_SPINLOCK_{{rport_data["variable_name"].upper()}}_ID, ret);
+{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_GetSpinlock, OS_SPINLOCK_{{rport_data["variable_name"].upper()}}_ID, ret);
 {{indent}}}
 #else
 {{indent}}(void)GetSpinlock{{rport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{rport_data["variable_name"].upper()}}_ID);
@@ -2274,7 +2276,7 @@ static FUNC(void, RTE_CODE) Rte_DeActivateModeDisabling_{{pport["osapplication"]
 {{indent}}ret = ReleaseSpinlock{{rport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{rport_data["variable_name"].upper()}}_ID);
 {{indent}}if (ret != E_OK)
 {{indent}}{
-{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_ReleaseSpinlock, OS_SPINLOCK_{{rport_data["variable_name"].upper()}}_ID, ret);
+{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_ReleaseSpinlock, OS_SPINLOCK_{{rport_data["variable_name"].upper()}}_ID, ret);
 {{indent}}}
 #else
 {{indent}}(void)ReleaseSpinlock{{rport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{rport_data["variable_name"].upper()}}_ID);
@@ -2329,7 +2331,7 @@ static FUNC(void, RTE_CODE) Rte_DeActivateModeDisabling_{{pport["osapplication"]
 {{indent}}ret = GetSpinlock{{pport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{pport_data["lock_id"].upper()}}_ID);
 {{indent}}if (ret != E_OK)
 {{indent}}{
-{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_GetSpinlock, OS_SPINLOCK_{{pport_data["lock_id"].upper()}}_ID, ret);
+{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_GetSpinlock, OS_SPINLOCK_{{pport_data["lock_id"].upper()}}_ID, ret);
 {{indent}}}
 #else
     (void) TerminateTask();
@@ -2350,7 +2352,7 @@ static FUNC(void, RTE_CODE) Rte_DeActivateModeDisabling_{{pport["osapplication"]
 {{indent}}ret = ReleaseSpinlock{{pport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{pport_data["lock_id"].upper()}}_ID);
 {{indent}}if (ret != E_OK)
 {{indent}}{
-{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_ReleaseSpinlock, OS_SPINLOCK_{{pport_data["lock_id"].upper()}}_ID, ret);
+{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_ReleaseSpinlock, OS_SPINLOCK_{{pport_data["lock_id"].upper()}}_ID, ret);
 {{indent}}}
 #else
 {{indent}}(void)ReleaseSpinlock{{pport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{pport_data["lock_id"].upper()}}_ID);
@@ -2386,7 +2388,7 @@ static FUNC(void, RTE_CODE) Rte_DeActivateModeDisabling_{{pport["osapplication"]
 {{indent}}ret = GetSpinlock{{pport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{pport_data["variable_name"].upper()}}_ID);
 {{indent}}if (ret != E_OK)
 {{indent}}{
-{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_GetSpinlock, OS_SPINLOCK_{{pport_data["variable_name"].upper()}}_ID, ret);
+{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_GetSpinlock, OS_SPINLOCK_{{pport_data["variable_name"].upper()}}_ID, ret);
 {{indent}}}
 #else
 {{indent}}(void)GetSpinlock{{pport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{pport_data["variable_name"].upper()}}_ID);
@@ -2404,7 +2406,7 @@ static FUNC(void, RTE_CODE) Rte_DeActivateModeDisabling_{{pport["osapplication"]
 {{indent}}ret = ReleaseSpinlock{{pport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{pport_data["variable_name"].upper()}}_ID);
 {{indent}}if (ret != E_OK)
 {{indent}}{
-{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_ReleaseSpinlock, OS_SPINLOCK_{{pport_data["variable_name"].upper()}}_ID, ret);
+{{indent}}    Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_ReleaseSpinlock, OS_SPINLOCK_{{pport_data["variable_name"].upper()}}_ID, ret);
 {{indent}}}
 #else
 {{indent}}(void)ReleaseSpinlock{{pport_data["spinlock_api_postfix"]}}((SpinlockIdType)OS_SPINLOCK_{{pport_data["variable_name"].upper()}}_ID);
@@ -2552,7 +2554,7 @@ FUNC(void,RTE_CODE) os_task_{{task_name.lower()}}(void *arg)
     ret = TerminateTask();
     if (ret != E_OK)
     {
-        Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_TerminateTask, OS_TASK_{{task_name}}_ID, ret);
+        Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_TerminateTask, OS_TASK_{{task_name.upper()}}_ID, ret);
     }
 #else
     (void) TerminateTask();
@@ -2675,7 +2677,7 @@ FUNC(void,RTE_CODE) os_task_{{task_name.lower()}}(void *arg)
     ret = TerminateTask();
     if (ret != E_OK)
     {
-        Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_TerminateTask, OS_TASK_{{task_name}}_ID, ret);
+        Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_TerminateTask, OS_TASK_{{task_name.upper()}}_ID, ret);
     }
 #else
     (void) TerminateTask();
@@ -2760,17 +2762,17 @@ FUNC(void,RTE_CODE) os_task_{{task_name.lower()}}(void *arg)
         ret = WaitEvent({{get_event_masks_with_type_conversion(event_mask_list)}});
         if (ret != E_OK)
         {
-            Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_WaitEvent, OS_TASK_{{task_name}}_ID, ret);
+            Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_WaitEvent, OS_TASK_{{task_name.upper()}}_ID, ret);
         }
-        ret = GetEvent((TaskType) OS_TASK_{{task_name}}_ID, &ev);
+        ret = GetEvent((TaskType) OS_TASK_{{task_name.upper()}}_ID, &ev);
         if (ret != E_OK)
         {
-            Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_GetEvent, OS_TASK_{{task_name}}_ID, ret);
+            Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_GetEvent, OS_TASK_{{task_name.upper()}}_ID, ret);
         }
         ret = ClearEvent(ev & ({{get_event_masks_with_type_conversion(event_mask_list)}}));
         if (ret != E_OK)
         {
-            Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_ClearEvent, OS_TASK_{{task_name}}_ID, ret);
+            Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_ClearEvent, OS_TASK_{{task_name.upper()}}_ID, ret);
         }
 #else
         (void)WaitEvent({{get_event_masks_with_type_conversion(event_mask_list)}});
@@ -2997,7 +2999,7 @@ FUNC(void,RTE_CODE) os_task_{{task_name.lower()}}(void *arg)
     ret = TerminateTask();
     if (ret != E_OK)
     {
-        Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name}}_ID, OSServiceId_TerminateTask, OS_TASK_{{task_name}}_ID, ret);
+        Rte_LogOs(RTE_TASK_SERVICE_ID, OS_TASK_{{task_name.upper()}}_ID, OSServiceId_TerminateTask, OS_TASK_{{task_name.upper()}}_ID, ret);
     }
 #else
     (void) TerminateTask();
@@ -3870,7 +3872,7 @@ FUNC(Std_ReturnType, RTE_CODE) Rte_Receive_{{rport["component"]}}_{{rport["port_
             {
                 Rte_LogOs(RTE_RECEIVE_SERVICE_ID, Rte_Receive_{{rport["component"]}}_{{rport["port_prototype"]}}_{{rport['data_element']}}_ID, OSServiceId_WaitEvent, RTE_DLOG_EMPTY_ID, retLog);
             }
-            retLog = GetEvent((TaskType) OS_TASK_{{task_name}}_ID, &ev);
+            retLog = GetEvent((TaskType) OS_TASK_{{task_name.upper()}}_ID, &ev);
             if (retLog != E_OK)
             {
                 Rte_LogOs(RTE_RECEIVE_SERVICE_ID, Rte_Receive_{{rport["component"]}}_{{rport["port_prototype"]}}_{{rport['data_element']}}_ID, OSServiceId_GetEvent, RTE_DLOG_EMPTY_ID, retLog);
@@ -3903,7 +3905,7 @@ FUNC(Std_ReturnType, RTE_CODE) Rte_Receive_{{rport["component"]}}_{{rport["port_
         do
         {
             (void)WaitEvent(((EventMaskType) RTE_EV_WAITPOINT_{{task_name}}) | ((EventMaskType) RTE_EV_TIMEOUT_{{task_name}}));
-            (void)GetEvent((TaskType) OS_TASK_{{task_name}}_ID, &ev);
+            (void)GetEvent((TaskType) OS_TASK_{{task_name.upper()}}_ID, &ev);
             (void)ClearEvent(ev & ((EventMaskType)RTE_EV_WAITPOINT_{{task_name}} | (EventMaskType)RTE_EV_TIMEOUT_{{task_name}}));
 
             if ((ev & (EventMaskType)RTE_EV_TIMEOUT_{{task_name}}) == (EventMaskType)RTE_EV_TIMEOUT_{{task_name}})
@@ -3924,7 +3926,7 @@ FUNC(Std_ReturnType, RTE_CODE) Rte_Receive_{{rport["component"]}}_{{rport["port_
     {%- if rport['timeout'] > 0 %}
     else
     {
-        (void)GetEvent((TaskType) OS_TASK_{{task_name}}_ID, &ev);
+        (void)GetEvent((TaskType) OS_TASK_{{task_name.upper()}}_ID, &ev);
         (void)ClearEvent(ev & ((EventMaskType)RTE_EV_WAITPOINT_{{task_name}} | (EventMaskType)RTE_EV_TIMEOUT_{{task_name}}));
     }
     {%- endif %}
@@ -3977,7 +3979,7 @@ FUNC(Std_ReturnType, RTE_CODE) Rte_Receive_{{rport["component"]}}_{{rport["port_
             {
                 Rte_LogOs(RTE_RECEIVE_SERVICE_ID, Rte_Receive_{{rport["component"]}}_{{rport["port_prototype"]}}_{{rport['data_element']}}_ID, OSServiceId_WaitEvent, RTE_DLOG_EMPTY_ID, retLog);
             }
-            retLog = GetEvent((TaskType) OS_TASK_{{task_name}}_ID, &ev);
+            retLog = GetEvent((TaskType) OS_TASK_{{task_name.upper()}}_ID, &ev);
             if (retLog != E_OK)
             {
                 Rte_LogOs(RTE_RECEIVE_SERVICE_ID, Rte_Receive_{{rport["component"]}}_{{rport["port_prototype"]}}_{{rport['data_element']}}_ID, OSServiceId_GetEvent, RTE_DLOG_EMPTY_ID, retLog);
@@ -4010,7 +4012,7 @@ FUNC(Std_ReturnType, RTE_CODE) Rte_Receive_{{rport["component"]}}_{{rport["port_
         do
         {
             (void)WaitEvent(((EventMaskType) RTE_EV_WAITPOINT_{{task_name}}) | ((EventMaskType) RTE_EV_TIMEOUT_{{task_name}}));
-            (void)GetEvent((TaskType) OS_TASK_{{task_name}}_ID, &ev);
+            (void)GetEvent((TaskType) OS_TASK_{{task_name.upper()}}_ID, &ev);
             (void)ClearEvent(ev & ((EventMaskType)RTE_EV_WAITPOINT_{{task_name}} | (EventMaskType)RTE_EV_TIMEOUT_{{task_name}}));
 
             if ((ev & (EventMaskType)RTE_EV_TIMEOUT_{{task_name}}) == (EventMaskType)RTE_EV_TIMEOUT_{{task_name}})

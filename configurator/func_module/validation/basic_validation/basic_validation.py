@@ -795,7 +795,9 @@ class ValidationRef:
         search_obj_list = []
 
         if "I-SIGNAL-TO-I-PDU-MAPPING" == destination_type:
-            destination_type = "I-SIGNAL-I-PDU"
+            # Accept mapping path itself; also allow parent I-SIGNAL-I-PDU for legacy refs.
+            # Do not rewrite DEST to I-SIGNAL-I-PDU only (that falsely fails correct mapping paths).
+            destination_type = ["I-SIGNAL-TO-I-PDU-MAPPING", "I-SIGNAL-I-PDU"]
             if "Communication" in autosar_system_class:
                 search_obj_list.append(autosar_system_class["Communication"])
         elif destination_type in ["SW-ADDR-METHOD", "EXCLUSIVE-AREA", "BSW-MODULE-ENTRY"]:

@@ -742,6 +742,9 @@ def get_rte_cfg(container_value, autosar, perfix, os_cfg):
             mapping_cfg["ActivationOffset"] = 0
             mapping_cfg["Event"] = {}
             mapping_cfg["Event"]["EventType"] = None
+            # Optional refs omitted by tools (e.g. no OsAlarm on platform) must not KeyError later.
+            mapping_cfg["UsedOsAlarm"] = None
+            mapping_cfg["UsedOsEvent"] = None
             for value in values:
                 value_type = utils.get_definition_ref(value)
                 if value_type.endswith(f"{perfix}ActivationOffset"):
@@ -1011,15 +1014,15 @@ def get_task_binding_alarm_info(os_config: dict, mapping_config: dict) -> Option
     if mapping_config["Event"]["EventType"] != "TimingEvent":
         return None
     alarm_info = dict.fromkeys(["task_name", "alarm_name", "alarm_action_type", "alarm_action"])
-    task_name = mapping_config["MappedToTask"]
+    task_name = mapping_config.get("MappedToTask")
     alarm_info["task_name"] = task_name
-    task = os_config["OsTasks"].get(task_name)
-    if task["OsTaskType"] == "BASIC":
+    task = (os_config.get("OsTasks") or {}).get(task_name) or {}
+    if task.get("OsTaskType") == "BASIC":
         alarm_info["alarm_action_type"] = "activate_task"
-    elif task["OsTaskType"] == "EXTENDED":
+    elif task.get("OsTaskType") == "EXTENDED":
         alarm_info["alarm_action_type"] = "set_event"
-    alarm_info["alarm_name"] = mapping_config["UsedOsAlarm"]
-    alarm_info["alarm_action"] = mapping_config["UsedOsEvent"]
+    alarm_info["alarm_name"] = mapping_config.get("UsedOsAlarm")
+    alarm_info["alarm_action"] = mapping_config.get("UsedOsEvent")
     if not alarm_info["alarm_name"]:
         return None
     else:
@@ -1085,7 +1088,7 @@ def get_task_binding_schedulable_entity_info(exclusive_area_dict, mapping_config
         offset = None
     else:
         period = Decimal(mapping_config["Event"]["Period"])
-        mapping_config["UsedOsEvent"]
+        # UsedOsEvent may be omitted when OsEvent is used only via ECUC event refs
         # NOTE:OS组的对offset为零时的要求
         if offset == 0:
             offset = min(20, period)
@@ -1102,7 +1105,7 @@ def get_task_binding_schedulable_entity_info(exclusive_area_dict, mapping_config
     schedulable_entity_info["original_offset"] = float(mapping_config["ActivationOffset"])
     schedulable_entity_info["event_ref"] = mapping_config["Event"]["EventRef"]
     schedulable_entity_info["event_type"] = mapping_config["Event"]["EventType"]
-    schedulable_entity_info["event_mask"] = mapping_config["UsedOsEvent"]
+    schedulable_entity_info["event_mask"] = mapping_config.get("UsedOsEvent")
     schedulable_entity_info["mode_disabling_info"] = (
         mapping_config["Event"]["mode_disabling_info"] if "mode_disabling_info" in mapping_config["Event"] else []
     )

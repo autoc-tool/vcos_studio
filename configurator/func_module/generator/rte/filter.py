@@ -456,15 +456,17 @@ def get_template_input_parameter_dict_from_parsed_data(config_dict: dict) -> dic
     task_to_st_dict = get_task_to_st_dict(task_mappings)
 
     # Get the signal and SignalGroup for which Data Mapping has been done.
-    signals_and_signalgroups = config_dict["data_mapping_config"]["signals_and_signalgroups"]
+    # Missing data_mapping_config means no mappings yet (AutoC/partial projects).
+    _dm = config_dict.get("data_mapping_config") or {}
+    signals_and_signalgroups = _dm.get("signals_and_signalgroups", {})
 
     # Get the port of the data recevied event
-    data_received_event = config_dict["data_mapping_config"]["data_received_event_list"]
+    data_received_event = _dm.get("data_received_event_list", [])
 
     # Get the port associated with the task_id and event_id.
-    port_event_id_and_task_id = config_dict["data_mapping_config"]["port_event_id_and_task_id"]
+    port_event_id_and_task_id = _dm.get("port_event_id_and_task_id", {})
 
-    data_mapping_sr_rport_required_com_specs = config_dict["data_mapping_config"].get("sr_required_com_specs_dict", {})
+    data_mapping_sr_rport_required_com_specs = _dm.get("sr_required_com_specs_dict", {})
 
     RteGeneration_info = {}
     if "RteGeneration" in config_dict:
@@ -489,11 +491,11 @@ def get_template_input_parameter_dict_from_parsed_data(config_dict: dict) -> dic
         "port_event_id_and_task_id": port_event_id_and_task_id,
         "bsw_instances": config_dict["bsw_instances"],
         "sr_required_com_specs_dict": data_mapping_sr_rport_required_com_specs,
-        "sr_dm_glob_vars": config_dict["data_mapping_config"].get("glob_vars", {}),
+        "sr_dm_glob_vars": _dm.get("glob_vars", {}),
         "RteGeneration": RteGeneration_info,
         "appl_dict": config_dict["appl_dict"],
         "os_counter": config_dict["os_counter"],
-        "signal_dict": config_dict["data_mapping_config"]["signal_dict"],
+        "signal_dict": _dm.get("signal_dict", {}),
         "cal_prm": _get_calibration_parameter_codegen_dict(config_dict["asw_config"]),
     }
     if len(activation_reasons) > 0:
