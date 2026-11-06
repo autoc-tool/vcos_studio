@@ -48,7 +48,7 @@ def get_template_input_parameter_dict_from_parsed_data(config_dict: dict) -> dic
     """
 
     # Get the signal with the timeout set
-    timeout_signals_dict = config_dict["data_mapping_config"]["timeout_signals_dict"]
+    timeout_signals_dict = (config_dict.get("data_mapping_config") or {}).get("timeout_signals_dict", {})
 
     input_dict = {
       "timeout_signals_dict": timeout_signals_dict,

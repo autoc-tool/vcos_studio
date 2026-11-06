@@ -124,10 +124,19 @@ class SemanticSameContainerLinkageRule(BasicRule):
                 # 若满足condition,则判断judgement是否满足
                 judgement_list = ruleset["judgement"]
                 judgement_info = []
+                missing_param_paths = []
                 for judgement in judgement_list:
                     judgement_data_list = SemanticRuleUtil.find_validated_parameter(
                         judgement["mod_path"], container_obj, container_path
                     )
+                    if not judgement_data_list:
+                        # Param omitted entirely (common with AutoC) — do NOT IndexError.
+                        leaf = judgement["mod_path"].rstrip("/").split("/")[-1]
+                        miss_path = f"{container_path}/{leaf}"
+                        missing_param_paths.append(miss_path)
+                        validated_path_list.append(miss_path)
+                        judgement_info.append((False, judgement["logical_operator"]))
+                        continue
                     for judgement_data in judgement_data_list:
                         validated_path_list.append(judgement_data["param_path"])
                     judgement_info.append(
@@ -157,13 +166,34 @@ class SemanticSameContainerLinkageRule(BasicRule):
                     )
                 else:
                     self.semantic_rule_data.auto_solve_list = []
-                    manual_solve = ""
+                    manual_parts = []
+                    if missing_param_paths:
+                        for miss_path in missing_param_paths:
+                            leaf = miss_path.rstrip("/").split("/")[-1]
+                            tip = (
+                                f"{leaf} is missing at {miss_path}. "
+                                f"{self.semantic_rule_data.rule_message} "
+                                f"For COM-bound CanIf PDUs set it to PDUR; otherwise CAN_NM/CAN_TP/CDD/XCP as appropriate."
+                            )
+                            manual_parts.append(tip)
+                            self.semantic_rule_data.auto_solve_list.append({
+                                "solve_info": f"Set {miss_path} to PDUR (typical for COM).",
+                                "solve_type": "SetValue",
+                                "parameter": miss_path,
+                                "value": "PDUR",
+                            })
                     for idx, judgement in enumerate(judgement_list):
+                        if idx >= len(validated_path_list):
+                            break
                         value = judgement["value"]
                         value_operator = judgement["value_operator"]
                         parameter_path = validated_path_list[idx]
-                        manual_solve += f"{parameter_path} {value_operator} '{value}' {judgement['logical_operator']} "
-                        if value_operator == "==" or value_operator == ">=" or value_operator == "<=":
+                        if parameter_path in missing_param_paths:
+                            continue
+                        manual_parts.append(
+                            f"{parameter_path} {value_operator} '{value}' {judgement['logical_operator']}"
+                        )
+                        if value_operator in ("==", ">=", "<="):
                             auto_solve_dict = {
                                 "solve_info": f"Set the value '{value}' for {parameter_path}.",
                                 "solve_type": "SetValue",
@@ -171,13 +201,19 @@ class SemanticSameContainerLinkageRule(BasicRule):
                                 "value": value,
                             }
                             self.semantic_rule_data.auto_solve_list.append(auto_solve_dict)
-                    self.semantic_rule_data.manual_solve_list.append(manual_solve)
+                    # Prefer actionable missing-param text over the generic rule_message alone.
+                    fail_message = self.semantic_rule_data.rule_message
+                    if missing_param_paths:
+                        fail_message = "; ".join(manual_parts) if manual_parts else fail_message
+                    self.semantic_rule_data.manual_solve_list.append(
+                        "; ".join(manual_parts) if manual_parts else fail_message
+                    )
 
                     self.vlog(
                         self.semantic_rule_data.rule_name,
                         self.semantic_rule_data.rule_summary,
-                        self.semantic_rule_data.rule_message,
-                        list(set(validated_path_list)),
+                        fail_message,
+                        list(dict.fromkeys(validated_path_list)),
                         "fail",
                         self.semantic_rule_data.auto_solve_list,
                         self.semantic_rule_data.manual_solve_list,
