@@ -97,7 +97,8 @@ class TaskMappingInfo:
             prefix = "RteBsw" if def_name.startswith("RteBsw") else "Rte"
             for sub_container in instance["SubContainers"]:
                 if sub_container["DefName"].endswith(f"{prefix}EventToTaskMapping"):
-                    event_ref = sub_container[f"{prefix}EventRef"] or ""
+                    # Absent optional refs are not keys of the ecuc cfg dict; treat them as empty slots.
+                    event_ref = sub_container.get(f"{prefix}EventRef", "")
                     event = cls.get_event(asw_autosar, ib_bswmds, pattern, event_ref)
                     if not event:
                         continue
@@ -112,9 +113,9 @@ class TaskMappingInfo:
                         start_ref = get_start_on_event_ref(event) or ""
                     runnable = event.find(start_ref)
                     runnable_name = get_short_name(runnable) or get_symbol(runnable) or ""
-                    task_name = ScheduleTableManager.get_basename(sub_container[f"{prefix}MappedToTaskRef"])
-                    event_name = ScheduleTableManager.get_basename(sub_container[f"{prefix}UsedOsEventRef"])
-                    alarm_ref = sub_container[f"{prefix}UsedOsAlarmRef"] or ""
+                    task_name = ScheduleTableManager.get_basename(sub_container.get(f"{prefix}MappedToTaskRef"))
+                    event_name = ScheduleTableManager.get_basename(sub_container.get(f"{prefix}UsedOsEventRef"))
+                    alarm_ref = sub_container.get(f"{prefix}UsedOsAlarmRef") or ""
                     info["task_name"] = task_name
                     info["position"] = position
                     info["event_name"] = event_name
@@ -123,7 +124,7 @@ class TaskMappingInfo:
 
                     if event_tag.endswith("TIMING-EVENT"):
                         runnable_period = get_period(event) or 0
-                        runnable_offset = float(sub_container[f"{prefix}ActivationOffset"] or 0.0)
+                        runnable_offset = float(sub_container.get(f"{prefix}ActivationOffset") or 0.0)
                         info["runnable_period"] = cls.convert_seconds_to_microseconds(runnable_period)
                         info["runnable_offset"] = runnable_offset
                         if info not in ecuc_cfgs["timing"].setdefault(task_name, []):

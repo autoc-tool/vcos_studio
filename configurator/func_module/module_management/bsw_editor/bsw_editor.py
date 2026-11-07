@@ -594,6 +594,8 @@ class BswEditor:
             search_object_list = []
             if autosar_asw_class:
                 search_object_list.append(autosar_asw_class)
+            if "FlatExtract" in autosar_system_class.keys():
+                search_object_list.append(autosar_system_class["FlatExtract"])
             cls.get_foreign_reference_target_by_ref_type_ib(
                 search_object_list, destination_type, foreign_references_target_dict
             )
