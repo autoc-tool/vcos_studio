@@ -136,7 +136,9 @@ class ScheduleTableManager:
             prefix = "RteBsw" if def_name.startswith("RteBsw") else "Rte"
             for sub_container in instance["SubContainers"]:
                 if sub_container["DefName"].endswith(f"{prefix}EventToTaskMapping"):
-                    event_ref = sub_container[f"{prefix}EventRef"] or ""
+                    # get_container_cfg only has keys for values present in the ARXML; absent optional refs
+                    # (e.g. RteBswUsedOsEventRef [0..1]) mean the same as an empty slot ("").
+                    event_ref = sub_container.get(f"{prefix}EventRef", "")
                     timing_event = cls.get_timing_event(asw_autosar, ib_bswmds, pattern, event_ref)
                     if timing_event:
                         timing_info = {}
@@ -150,9 +152,9 @@ class ScheduleTableManager:
                         runnable = timing_event.find(start_ref)
                         runnable_name = get_symbol(runnable) or get_short_name(runnable) or ""
                         runnable_period = get_period(timing_event) or "0"
-                        runnable_offset = sub_container[f"{prefix}ActivationOffset"] or "0"
-                        task_name = cls.get_basename(sub_container[f"{prefix}MappedToTaskRef"])
-                        event_name = cls.get_basename(sub_container[f"{prefix}UsedOsEventRef"])
+                        runnable_offset = sub_container.get(f"{prefix}ActivationOffset") or "0"
+                        task_name = cls.get_basename(sub_container.get(f"{prefix}MappedToTaskRef"))
+                        event_name = cls.get_basename(sub_container.get(f"{prefix}UsedOsEventRef"))
                         timing_info["task_name"] = task_name
                         timing_info["position"] = position
                         timing_info["event_name"] = event_name

@@ -21,6 +21,7 @@ from func_module.health_monitor.logger import logger
 from func_module.mapping.schedule_table_mapping import ScheduleTableManager
 from basic_func_module.autosar_utils.autosar_util import AutosarUtil
 from basic_func_module.autosar_utils.autosar_utils import AutosarUtils
+from func_module.module_management.arxml_handler.ecuc_arxml_updater import EcucArxmlUpdater
 from basic_func_module.autosar_utils.utils import (
     get_short_name,
     get_period,
@@ -595,15 +596,18 @@ class RteManager:
                 logger.error(f"{get_short_name(sub_container_value)} def_name is None")
             if not def_name.endswith(f"{perfix}EventToTaskMapping"):
                 continue
-            values = []
-            if hasattr(sub_container_value, "PARAMETER_VALUES"):
-                values += sub_container_value.PARAMETER_VALUES.ECUC_NUMERICAL_PARAM_VALUE
-                values += sub_container_value.PARAMETER_VALUES.ECUC_TEXTUAL_PARAM_VALUE
-            if hasattr(sub_container_value, "REFERENCE_VALUES"):
-                values += sub_container_value.REFERENCE_VALUES.ECUC_REFERENCE_VALUE
+            values = cls.get_container_values(sub_container_value)
             mapping_name = get_short_name(sub_container_value)
-            mapping_cfg = {}
-            mapping_cfg[f"{perfix}ActivationOffset"] = 0
+            # Only RteBswEventRef/RteEventRef are mandatory in the Rte BSWMD; a schema-valid mapping may omit the
+            # others entirely, which must read the same as a present-but-empty slot.
+            mapping_cfg = {
+                f"{perfix}ActivationOffset": 0,
+                f"{perfix}PositionInTask": None,
+                f"{perfix}EventRef": None,
+                f"{perfix}MappedToTaskRef": None,
+                f"{perfix}UsedOsAlarmRef": None,
+                f"{perfix}UsedOsEventRef": None,
+            }
             for value in values:
                 value_type = get_definition_ref(value)
                 if value_type.endswith(f"{perfix}ActivationOffset"):
@@ -742,8 +746,35 @@ class RteManager:
         return os_event_name, os_alarm_name
 
     @classmethod
+    def get_container_values(cls, container_value):
+        parameter_values = getattr(container_value, "PARAMETER_VALUES", None)
+        reference_values = getattr(container_value, "REFERENCE_VALUES", None)
+        values = []
+        values += getattr(parameter_values, "ECUC_NUMERICAL_PARAM_VALUE", [])
+        values += getattr(parameter_values, "ECUC_TEXTUAL_PARAM_VALUE", [])
+        values += getattr(reference_values, "ECUC_REFERENCE_VALUE", [])
+        return values
+
+    @classmethod
+    def ensure_value_slots(cls, mod_autosar, container_value, conf_def_path):
+        """Give container_value every parameter/reference slot of its definition before mapping writes into it.
+
+        Optional [0..1] values may be absent in schema-valid ECUC (e.g. written by an external tool and parsed
+        without EcucArxmlUpdater). The mapping only assigns values to existing slots, so without this an absent
+        RteBswUsedOsEventRef would silently drop the OsEvent that the Os side is configured with.
+        """
+        conf_def = mod_autosar.find(conf_def_path)
+        if conf_def is None:
+            logger.error(f"{conf_def_path} not found in Rte module definition")
+            return
+        updater = EcucArxmlUpdater(mod_autosar, None)
+        updater.check_param_instance(container_value, conf_def)
+        updater.check_ref_instance(container_value, conf_def)
+
+    @classmethod
     def add_rte_bsw_instance(cls, rte_autosar, mod_autosar, bsw_module_instance, row, task_info, event_info):
         bsw_module_name = event_info["Component"]
+        cls.ensure_value_slots(mod_autosar, bsw_module_instance, "/AUTOSAR/EcucDefs/Rte/RteBswModuleInstance")
         for reference in bsw_module_instance.REFERENCE_VALUES.ECUC_REFERENCE_VALUE:
             def_ref = get_definition_ref(reference)
             # this parameter is not used and is currently not supported
@@ -758,16 +789,17 @@ class RteManager:
         if event_container is None:
             mapping_conf_def = mod_autosar.find("/AUTOSAR/EcucDefs/Rte/RteBswModuleInstance/RteBswEventToTaskMapping")
             event_container = AutosarUtil.create_sub_container_value(event_name, mapping_conf_def, bsw_module_instance)
+        else:
+            cls.ensure_value_slots(
+                mod_autosar, event_container, "/AUTOSAR/EcucDefs/Rte/RteBswModuleInstance/RteBswEventToTaskMapping"
+            )
 
         task_name = task_info["OsTaskName"]
         if event_info["IsMainFunction"]:
             os_event_name, os_alarm_name = cls.get_bsw_os_info(task_info, event_info)
         else:
             os_event_name, os_alarm_name = cls.get_swc_os_info(task_info, event_info)
-        values = []
-        values += event_container.PARAMETER_VALUES.ECUC_NUMERICAL_PARAM_VALUE
-        values += event_container.PARAMETER_VALUES.ECUC_TEXTUAL_PARAM_VALUE
-        values += event_container.REFERENCE_VALUES.ECUC_REFERENCE_VALUE
+        values = cls.get_container_values(event_container)
         for value in values:
             def_ref = get_definition_ref(value)
             if def_ref.endswith("RteBswImmediateRestart"):
@@ -799,6 +831,10 @@ class RteManager:
         if event_container is None:
             mapping_conf_def = mod_autosar.find("/AUTOSAR/EcucDefs/Rte/RteSwComponentInstance/RteEventToTaskMapping")
             event_container = AutosarUtil.create_sub_container_value(event_name, mapping_conf_def, swc_instance)
+        else:
+            cls.ensure_value_slots(
+                mod_autosar, event_container, "/AUTOSAR/EcucDefs/Rte/RteSwComponentInstance/RteEventToTaskMapping"
+            )
 
         task_name = task_info["OsTaskName"]
         if event_info["IsMainFunction"]:
@@ -806,10 +842,7 @@ class RteManager:
         else:
             os_event_name, os_alarm_name = cls.get_swc_os_info(task_info, event_info)
 
-        values = []
-        values += event_container.PARAMETER_VALUES.ECUC_NUMERICAL_PARAM_VALUE
-        values += event_container.PARAMETER_VALUES.ECUC_TEXTUAL_PARAM_VALUE
-        values += event_container.REFERENCE_VALUES.ECUC_REFERENCE_VALUE
+        values = cls.get_container_values(event_container)
         for value in values:
             def_ref = get_definition_ref(value)
             if def_ref.endswith("RteImmediateRestart"):
@@ -868,10 +901,7 @@ class RteManager:
         if not event_container:
             return value_container
 
-        values = []
-        values += event_container.REFERENCE_VALUES.ECUC_REFERENCE_VALUE
-        values += event_container.PARAMETER_VALUES.ECUC_NUMERICAL_PARAM_VALUE
-        values += event_container.PARAMETER_VALUES.ECUC_TEXTUAL_PARAM_VALUE
+        values = cls.get_container_values(event_container)
         for value in values:
             def_ref = get_definition_ref(value)
             if def_ref.endswith(f"{param_name}"):
