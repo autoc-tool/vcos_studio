@@ -806,6 +806,9 @@ class ValidationRef:
         elif "SW-COMPONENT-PROTOTYPE" == destination_type:
             if autosar_asw_class:
                 search_obj_list.append(autosar_asw_class)
+            # The ECU SwComponentPrototypes live in the flattened composition, not in Asw.arxml.
+            if "FlatExtract" in autosar_system_class:
+                search_obj_list.append(autosar_system_class["FlatExtract"])
         elif "SW-COMPONENT-TYPE" == destination_type:
             destination_type = ["APPLICATION-SW-COMPONENT-TYPE", "SERVICE-SW-COMPONENT-TYPE"]
             if autosar_asw_class:
